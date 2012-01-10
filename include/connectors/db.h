@@ -2,19 +2,20 @@
 
 #include <vector>
 #include "../connector.h"
+#include <soci/soci.h>
 
-
-class Dummy
+class Db
     : public Connector
 {
     public:
-	Dummy(const std::string& name, const Real& real, FdManager& fd_manager)
+	Db(const std::string& name, const JsonNode& config, const Real& real, FdManager& fd_manager)
 	    : Connector(name, real, fd_manager)
-	{}
+	{
+	}
 	
 	int Open(int fd, const std::string& path, int flags)
 	{
-	    return fd;
+	    return 0;
 	}
 	
 	int Write(int fd, const void* data, int size)
@@ -38,13 +39,13 @@ class Dummy
 	}
 };
 
-class DummyFactory
+class DbFactory
     : public ConnectorFactory
 {
     public:
 	Connector* Create(const std::string& name, const JsonNode& node, const Real& real, FdManager& fd_manager)
 	{
-	    return new Dummy(name, real, fd_manager);
+	    return new Db(name, node, real, fd_manager);
 	}
 };
 

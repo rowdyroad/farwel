@@ -2,28 +2,25 @@
 #include <boost/regex.hpp>
 #include "../comparer.h"
 
-class Regexp
+class Always
     : public Comparer
 {
-    private:
-	boost::regex re_;
     public:
-	Regexp(const std::string& pattern)
-	    : re_(pattern, boost::regex_constants::perl)
+	Always(const std::string& pattern)
 	{}
 	
 	bool operator()(const std::string& target)
 	{
-	    return boost::regex_search(target, re_);
-	}
+	    return true;
+	}	
 };
 
 
-class RegexpFactory
+class AlwaysFactory
     : public ComparerFactory
 {
      Comparer* Create(const std::string& name) 
      {
-        return new Regexp(name);
+        return new Always(name);
      }
 };

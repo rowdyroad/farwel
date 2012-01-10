@@ -1,0 +1,5 @@
+#!/bin/sh
+
+curdir=`pwd`
+
+FRWL_CONFIG_FILE=$curdir/config.conf LD_PRELOAD=$curdir/farwel.so /usr/local/bin/bash

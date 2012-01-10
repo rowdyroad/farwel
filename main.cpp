@@ -1,6 +1,7 @@
 #include "include/real.h"
 #include "include/main.h"
 
+#include <assert.h>
 #include "include/debug.h"
 static Real real;
 static std::auto_ptr<Main> main;
@@ -20,69 +21,144 @@ void __attribute__((constructor)) init(void)
 int open(const char *path, int flags, ...)
 {
     Connector* cntr = main->GetPathConnector(path);
-    printf("Open Connector(%p)\n", cntr);
-    if (!cntr) {
-	return main->AddRealFd(real.open(path, flags));
-    }
-    printf("\t\t%s\n", cntr->Name().c_str());
-    int fd = cntr->Open(path, flags);
-    main->AddConnector(fd, cntr);
-    return fd;
+    assert(cntr);
+    printf("Open Connector(%p): %s\n", cntr, cntr->Name().c_str());
+    return cntr->Open(path, flags);
+}
+
+int creat(const char* path, mode_t mode)
+{
+    return open(path, O_CREAT | O_TRUNC | O_WRONLY, mode);
 }
 
 int write(int fd, const void* data, size_t size)
 {
-    Main::Fd* fds = main->GetFd(fd);
-    if (!fds) {
+    Connector* cntr = main->GetConnector(fd);
+    printf("Write Connector(%p): ", cntr);
+    if (!cntr) {
+	//! todo real write or something...think
+	printf("undefined\n");
 	return -1;
     }
-    Connector* cntr = fds->GetConnector();
-    printf("Write Connector(%p)\n", cntr);
-    if (!cntr) {
-	return real.write(fds->GetRealFd(), data, size);
-    }
-    printf("\t\t%s\n", cntr->Name().c_str());
+    printf("%s\n", cntr->Name().c_str());
     return cntr->Write(fd, data, size);
 };
 
 int close(int fd)
 {
-    Main::Fd* fds = main->GetFd(fd);
-    if (!fds) {
+    Connector* cntr = main->GetConnector(fd);
+    printf("Write Connector(%p)\n", cntr);
+    if (!cntr) {
+	//! todo real write or something...think
+	printf("undefined\n");
 	return -1;
     }
-    Connector* cntr = fds->GetConnector();
-    printf("Close Connector(%p)\n", cntr);
-    if (!cntr) {
-	return real.close(fds->GetRealFd());
-    }
-    printf("\t\t%s\n", cntr->Name().c_str());
+    printf("%s\n", cntr->Name().c_str());
     return cntr->Close(fd);
 }
 
 int read(int fd, void* data, size_t size)
 {
-    Main::Fd* fds = main->GetFd(fd);
-    if (!fds) {
-	return -1;
-    }
-    Connector* cntr = fds->GetConnector();
+    Connector* cntr = main->GetConnector(fd);
     printf("Read Connector(%p)\n", cntr);
     if (!cntr) {
-	return real.read(fds->GetRealFd(), data, size);
+	//! todo real write or something...think
+	printf("undefined\n");
+	return -1;
     }
+    printf("%s\n", cntr->Name().c_str());
     return cntr->Read(fd, data, size);
+}
+
+/*
+int stat(const char* file, struct stat* buf)
+{
+    printf("Stat %s\n", file);
+    return -1;
+}
+
+int fstat(int fd, struct stat *buf)
+{
+    printf("Stat %d\n", fd);
+    return -1;
+}
+
+int lstat(const char *file, struct stat *buf)
+{
+    printf("Lstat %s\n", file);
+    return -1;
+}
+
+int link(const char* file, const char* link)
+{
+    printf("link %s -> %s\n", file, link);
+    return -1;
+}
+
+int symlink(const char* file, const char* link)
+{
+    printf("symlink %s -> %s\n", file, link);
+    return -1;
+}
+
+int rename(const char* name, const char* newname)
+{
+    printf("rename %s -> %s\n", name, newname);
+    return -1;
+}*/
+
+int rmdir(const char* dir)
+{
+    printf("rmdir: %s\n", dir);
+    
+    return 0;
+}
+
+int mkdir(const char* dir, mode_t mode)
+{
+    printf("mkdir: %s\n", dir);
+    
+    return 0;
+}
+
+DIR* opendir(const char* dir)
+{
+    Connector* cntr = main->GetPathConnector(dir);
+    printf("OpenDir(%s) Connector(%p)\n",dir, cntr);
+    if (!cntr) {
+	//! todo real write or something...think
+	printf("undefined\n");
+	return NULL;
+    }
+    printf("%s\n", cntr->Name().c_str());
+    return cntr->OpenDir(dir);
+}
+
+struct dirent * readdir(DIR* dd)
+{
+    printf("readdir: %p\n", dd);
+    return NULL;
+
+}
+
+int closedir(DIR* dir)
+{
+    Connector* cntr = main->GetConnector(dir);
+    printf("CloseDir Connector(%p)\n", cntr);
+    if (!cntr) {
+	//! todo real write or something...think
+	printf("undefined\n");
+	return -1;
+    }
+    printf("%s\n", cntr->Name().c_str());
+    return cntr->CloseDir(dir);
 }
 
 int unlink(const char *path)
 {
     Connector* cntr = main->GetPathConnector(path);
-    printf("Unlink Connector(%p)\n", cntr);
-    if (!cntr) {
-	return -1;
-//	return 
-    }
-    printf("\t\t%s\n", cntr->Name().c_str());
+    assert(cntr);
+    printf("Unlink Connector(%p) %s\n", cntr, cntr->Name().c_str());
     return cntr->Unlink(path);
 }
 
