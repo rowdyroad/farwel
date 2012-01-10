@@ -8,8 +8,8 @@ class Dummy
     : public Connector
 {
     public:
-	Dummy(const JSONNode& config, const Real& real, FdManager& fd_manager)
-	    : Connector(config.name(), real, fd_manager)
+	Dummy(const std::string& name, const Real& real, FdManager& fd_manager)
+	    : Connector(name, real, fd_manager)
 	{}
 	
 	int Open(const std::string& path, int flags)

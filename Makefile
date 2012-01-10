@@ -1,5 +1,5 @@
 name = farwel
-LIBS = -ljson -lboost_regex
+LIBS = -lboost_regex
 SRC  = main.cpp
 GCC  = g++
 

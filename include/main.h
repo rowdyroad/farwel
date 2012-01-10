@@ -1,9 +1,10 @@
 #pragma once
 #define NDEBUG
-#include <libjson/libjson.h>
+#include <sstream>
 #include <string>
 #include <set>
 #include <deque>
+#include <boost/foreach.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/unordered_set.hpp>
 #include <boost/shared_ptr.hpp>
@@ -13,7 +14,7 @@
 #include "comparerfactory.h"
 #include "fdmanager.h"
 #include "real.h"
-
+#include "json.h"
 
 #include "debug.h"
 class Main
@@ -48,22 +49,12 @@ class Main
         class Location
         {
     	    private:
-		int sort_;
 		boost::intrusive_ptr<Comparer> comparer_;
 		Connector* connector_;
 	    public:
-		template<typename T>
-		struct Comp
-		{
-		    bool operator()(const T& a, const T& b) 
-		    {
-			return a.sort_ > b.sort_;
-		    }
-		};
-		
-		Location(int sort, const boost::intrusive_ptr<Comparer>& comparer, Connector* connector)
-		    : sort_(sort)
-		    , comparer_(comparer)
+
+		Location(const boost::intrusive_ptr<Comparer>& comparer, Connector* connector)
+		    : comparer_(comparer)
 		    , connector_(connector)
 		{}
 		
@@ -75,12 +66,10 @@ class Main
 		    return NULL;
 		}
 	};
-	
-	;
 
 	typedef boost::unordered_map<std::string, boost::intrusive_ptr<Connector> > Connectors;
 	typedef boost::unordered_map<size_t, Fd> Fds;
-	typedef std::set<Location, Location::Comp<Location> > Locations;
+	typedef std::list<Location> Locations;
 	typedef boost::unordered_set<size_t> IgnoringFds;
 	
 	const Real& real_;
@@ -136,54 +125,50 @@ class Main
 	
 	bool LoadConfig()
 	{
+	    std::stringstream config;
+	    
 	    int fd = real_.open(config_file_.c_str(), O_RDONLY);
 	    if (fd == -1) {
 		fprintf(stderr,"Couldn't open config file: %s %s(%d)\n",config_file_.c_str(), strerror(errno), errno);
 		exit(-1);
-	    }	
-
-	    std::string config;
+	    };
 	    char buf[1024];
 	    do  {
 		size_t len = real_.read(fd, &buf[0], sizeof(buf));
 		if (len == 0) break;
-		config.append(&buf[0], len);
+		config.write(&buf[0], len);
 	    } while (1);
-
 	    real_.close(fd);
 
+	    JsonNode root;
+	    boost::property_tree::read_json(config, root);
 	    try {
-    		JSONNode cfg = libjson::parse(config);
-    		JSONNode& connectors = cfg["connectors"];
-    		for (JSONNode::const_iterator it = connectors.begin(); it != connectors.end(); ++it) {
-    		    Connector* cntr = connector_factory_.Create((*it), real_, fd_manager_);
-    		    printf("Connector %s - %p:\n", (*it).name().c_str(), cntr);
+	    
+		printf("Loading configuration..");
+    		BOOST_FOREACH(const JsonNode::value_type &it, root.get_child("connectors")) {
+    		    Connector* cntr = connector_factory_.Create(it.first, it.second, real_, fd_manager_);
+    		    printf("Connector %s - %p:\n", it.first.c_str(), cntr);
     		    if (cntr) {
-    			connectors_.insert(std::make_pair((*it).name(), boost::intrusive_ptr<Connector>(cntr, true)));
+    			connectors_.insert(std::make_pair(it.first, boost::intrusive_ptr<Connector>(cntr, true)));
     		    }
     		}
     		
-    		JSONNode& locations = cfg["locations"];
-    		for (JSONNode::const_iterator it = locations.begin(); it != locations.end(); ++it) {
-    		    printf("Location:\nconnector:%s\n",(*it)["connector"].as_string().c_str());
-    		    Connectors::iterator cit = connectors_.find((*it)["connector"].as_string());
+    		JsonNode& locations = root.get_child("locations");
+    		size_t sort = 0;
+    		BOOST_FOREACH(const JsonNode::value_type &it, root.get_child("locations")) {
+		    std::string cntr_name = it.second.get<std::string>("connector");
+    		    printf("Location:\nconnector:%s - %s\n",it.first.c_str(), cntr_name.c_str());
+    		    Connectors::iterator cit = connectors_.find(cntr_name);
     		    if (cit != connectors_.end()) {
-    			printf("Connector found: rule:%s\n",(*it)["rule"].as_string().c_str());
-    			Comparer* cmpr = comparer_factory_.Create((*it)["rule"].as_string());
+    			printf("Connector found: rule:%s\n",it.first.c_str());
+    			Comparer* cmpr = comparer_factory_.Create(it.first);
     			if (cmpr) {
     			    printf("Comparer:%p\n", cmpr);
-    			    
-    			    int sort = 0;
-    			    try {
-    				sort = (*it).at("sort").as_int();
-    			    } catch (const std::out_of_range& e) {};
-    			
-    			    locations_.insert(Location(sort, boost::intrusive_ptr<Comparer>(cmpr, true), cit->second.get()));
+    			    locations_.push_back(Location(boost::intrusive_ptr<Comparer>(cmpr, true), cit->second.get()));
     			}
     		    }
     		}
-    		//for (JSON
-	    } catch(const std::invalid_argument& e) {
+	    } catch(const std::exception& e) {
 		fprintf(stderr, "error: %s\n", e.what());
 		return false;
 	    }
