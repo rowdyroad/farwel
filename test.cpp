@@ -7,37 +7,71 @@ extern "C" {
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <time.h>
+}
+#include <string>
+
+inline void clear(const std::string& dirname)
+{
+    DIR* dir = opendir(dirname.c_str());
+    char buf[255];
+    if (dir) {
+	struct dirent* de = readdir(dir);
+	while (de) {
+    	    ::sprintf(&buf[0], "%s/%s", dirname.c_str(), de->d_name);
+	    unlink(&buf[0]);
+	    de = readdir(dir);
+	};
+	closedir(dir);
+	rmdir(dirname.c_str());
+    }
 }
 
-
-int main()
+inline unsigned long long getns(const struct timespec& tv)
 {
+    return (unsigned long long)tv.tv_sec * 1000000000 + tv.tv_nsec;
+}
+
+inline bool dumpdir(const std::string& dirname)
+{
+    DIR* dir = opendir(dirname.c_str());
+    if (dir) {
+	struct dirent* de = readdir(dir);
+        while(de) {
+//    	    printf("%d: %d %d %d %s\n", de->d_fileno, de->d_reclen, de->d_type, de->d_namlen, de->d_name);
+    	    de = readdir(dir);
+	};
+        closedir(dir);
+        return true;
+    }
+    return false;
+}
+
+int main(int argc, char** argv)
+{
+    int count = argc > 1 ? atoi(argv[1]) : 100;
+    std::string dirname = argc > 2 ? argv[2] : "./tmp";
     const char* data = "teteteteteststteststteteststteststteteteststteststteteststtestst";
     char buf[255];
     const char* ext[2] = { "txt\0", "lst\0"};
-    for (int j = 0; j < 2; ++j ) {
-	::sprintf(&buf[0], "./tmp/t%d.txt", j);
+    clear(dirname);
+    
+    struct timespec tb,te;
+    ::memset(&tb, 0, sizeof(struct timespec));
+    ::memset(&te, 0, sizeof(struct timespec));
+    clock_gettime(CLOCK_MONOTONIC,&tb);
+    mkdir(dirname.c_str(), 0777);
+    for (int j = 0; j < count ; ++j ) {
+	::sprintf(&buf[0], "%s/t%d.txt", dirname.c_str(), j);
         int f = open(&buf[0], O_CREAT | O_WRONLY | O_TRUNC, 0666);
 	write(f, data, strlen(data));
         close(f);
     }
     
-    
-    
-    struct _dirdesc *dd = new struct _dirdesc;
-    
-    
-    DIR* dir = opendir("./tmp");
-    if (dir) {
-	printf("opened dir\n");
-        do {
-    	    struct dirent* de = readdir(dir);
-	    if (!de) break;
-	} while(1);
-        closedir(dir);
-    } else {
-    	printf("not opened dir\n");
-    }
+    dumpdir(dirname);
+    clear(dirname);
+    clock_gettime(CLOCK_MONOTONIC,&te);
+    fprintf(stderr, "%d/%s Time used: %.03f\n",count, dirname.c_str(), (double)(getns(te) -  getns(tb)) / 1000000000);
     return 0;
     
 }

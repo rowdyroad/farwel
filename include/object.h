@@ -8,7 +8,7 @@ class Object
 	boost::detail::atomic_count count_;
     protected:
 	Object()
-	    : count_(0)
+	    : count_(1)
 	{}
     public:
 	void AddRef()

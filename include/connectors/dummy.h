@@ -2,14 +2,14 @@
 
 #include <vector>
 #include "../connector.h"
-
+#include "../log.h"
 
 class Dummy
     : public Connector
 {
     public:
-	Dummy(const std::string& name, const Real& real, FdManager& fd_manager)
-	    : Connector(name, real, fd_manager)
+	Dummy(const std::string& name, const JsonNode& config, FdManager& fd_manager, LogIntr log)
+	    : Connector(name, config, fd_manager, log)
 	{}
 	
 	int Open(int fd, const std::string& path, int flags)
@@ -17,12 +17,12 @@ class Dummy
 	    return fd;
 	}
 	
-	int Write(int fd, const void* data, int size)
+	int Write(int fd, const void* data, size_t size)
 	{
 	    return size;
 	}
 	
-	int Read(int fd, void* data, int size)
+	int Read(int fd, void* data, size_t size)
 	{ 
 	    return size;
 	}
@@ -42,9 +42,9 @@ class DummyFactory
     : public ConnectorFactory
 {
     public:
-	Connector* Create(const std::string& name, const JsonNode& node, const Real& real, FdManager& fd_manager)
+	Connector* Create(const std::string& name, const JsonNode& config, FdManager& fd_manager, LogIntr log)
 	{
-	    return new Dummy(name, real, fd_manager);
+	    return new Dummy(name, config, fd_manager, log);
 	}
 };
 

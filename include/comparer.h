@@ -25,12 +25,16 @@ class Comparer
         virtual ~Comparer() {};
 };
 
+typedef boost::intrusive_ptr<Comparer> ComparerIntr;
+
 class ComparerFactory
     : public Object
 {
     public:
 	virtual Comparer* Create(const std::string& str) = 0;
 };
+
+typedef boost::intrusive_ptr<ComparerFactory> ComparerFactoryIntr;
 
 #include "comparers/regexp.h"
 #include "comparers/always.h"
