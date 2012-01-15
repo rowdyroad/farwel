@@ -5,34 +5,33 @@
 class Object
 {
     private:
-	boost::detail::atomic_count count_;
+        boost::detail::atomic_count count_;
     protected:
-	Object()
-	    : count_(1)
-	{}
+        Object()
+            : count_(1)
+        {}
     public:
-	void AddRef()
-	{
-	    ++count_;
-	}
-	
-	void Release()
-	{
-	    if (--count_ <= 0) {
-		delete this;
-	    }
-	}
+        void AddRef()
+        {
+            ++count_;
+        }
+
+        void Release()
+        {
+            if (--count_ <= 0) {
+                delete this;
+            }
+        }
 };
 
 namespace boost {
-    void intrusive_ptr_add_ref(::Object* obj)
+    void intrusive_ptr_add_ref(::Object *obj)
     {
-	obj->AddRef();
+        obj->AddRef();
     }
-    
-    void intrusive_ptr_release(::Object* obj)
+
+    void intrusive_ptr_release(::Object *obj)
     {
-	obj->Release();
+        obj->Release();
     }
 };
-

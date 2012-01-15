@@ -13,4 +13,4 @@ debug:
 
 utest:
 	${GCC} -O2 test.cpp -o test -g
-	${GCC} soci_test.cpp -o soci_test ${INCLUDES} ${LINKS} -lsoci_core -lsoci_mysql
+	${GCC} soci_test.cpp -O2 -o soci_test ${INCLUDES} ${LINKS} -lsoci_core -lsoci_mysql -lboost_filesystem

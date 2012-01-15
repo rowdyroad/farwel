@@ -1,5 +1,4 @@
 #pragma once
 #ifndef DEBUG
-#define printf(fmt, ...) 
+#define printf(fmt, ...)
 #endif
-

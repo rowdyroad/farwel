@@ -6,21 +6,21 @@ class Always
     : public Comparer
 {
     public:
-	Always(const std::string& pattern)
-	{}
-	
-	bool operator()(const std::string& target)
-	{
-	    return true;
-	}	
+        Always(const std::string& pattern)
+        {}
+
+        bool operator()(const std::string& target)
+        {
+            return(true);
+        }
 };
 
 
 class AlwaysFactory
     : public ComparerFactory
 {
-     Comparer* Create(const std::string& name) 
-     {
-        return new Always(name);
-     }
+    Comparer *Create(const std::string& name)
+    {
+        return(new Always(name));
+    }
 };

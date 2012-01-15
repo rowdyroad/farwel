@@ -13,65 +13,67 @@ extern "C" {
 
 inline void clear(const std::string& dirname)
 {
-    DIR* dir = opendir(dirname.c_str());
+    DIR  *dir = opendir(dirname.c_str());
     char buf[255];
+
     if (dir) {
-	struct dirent* de = readdir(dir);
-	while (de) {
-    	    ::sprintf(&buf[0], "%s/%s", dirname.c_str(), de->d_name);
-	    unlink(&buf[0]);
-	    de = readdir(dir);
-	};
-	closedir(dir);
-	rmdir(dirname.c_str());
+        struct dirent *de = readdir(dir);
+        while (de) {
+            ::sprintf(&buf[0], "%s/%s", dirname.c_str(), de->d_name);
+            unlink(&buf[0]);
+            de = readdir(dir);
+        }
+        closedir(dir);
+        rmdir(dirname.c_str());
     }
 }
 
 inline unsigned long long getns(const struct timespec& tv)
 {
-    return (unsigned long long)tv.tv_sec * 1000000000 + tv.tv_nsec;
+    return((unsigned long long)tv.tv_sec * 1000000000 + tv.tv_nsec);
 }
 
 inline bool dumpdir(const std::string& dirname)
 {
-    DIR* dir = opendir(dirname.c_str());
+    DIR *dir = opendir(dirname.c_str());
+
     if (dir) {
-	struct dirent* de = readdir(dir);
-        while(de) {
-//    	    printf("%d: %d %d %d %s\n", de->d_fileno, de->d_reclen, de->d_type, de->d_namlen, de->d_name);
-    	    de = readdir(dir);
-	};
+        struct dirent *de = readdir(dir);
+        while (de) {
+//          printf("%d: %d %d %d %s\n", de->d_fileno, de->d_reclen, de->d_type, de->d_namlen, de->d_name);
+            de = readdir(dir);
+        }
         closedir(dir);
-        return true;
+        return(true);
     }
-    return false;
+    return(false);
 }
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
-    int count = argc > 1 ? atoi(argv[1]) : 100;
+    int         count   = argc > 1 ? atoi(argv[1]) : 100;
     std::string dirname = argc > 2 ? argv[2] : "./tmp";
-    const char* data = "teteteteteststteststteteststteststteteteststteststteteststtestst";
-    char buf[255];
-    const char* ext[2] = { "txt\0", "lst\0"};
+    const char  *data   = "teteteteteststteststteteststteststteteteststteststteteststtestst";
+    char        buf[255];
+    const char  *ext[2] = { "txt\0", "lst\0" };
+
     clear(dirname);
-    
-    struct timespec tb,te;
+
+    struct timespec tb, te;
     ::memset(&tb, 0, sizeof(struct timespec));
     ::memset(&te, 0, sizeof(struct timespec));
-    clock_gettime(CLOCK_MONOTONIC,&tb);
+    clock_gettime(CLOCK_MONOTONIC, &tb);
     mkdir(dirname.c_str(), 0777);
-    for (int j = 0; j < count ; ++j ) {
-	::sprintf(&buf[0], "%s/t%d.txt", dirname.c_str(), j);
+    for (int j = 0; j < count; ++j) {
+        ::sprintf(&buf[0], "%s/t%d.txt", dirname.c_str(), j);
         int f = open(&buf[0], O_CREAT | O_WRONLY | O_TRUNC, 0666);
-	write(f, data, strlen(data));
+        write(f, data, strlen(data));
         close(f);
     }
-    
+
     dumpdir(dirname);
     clear(dirname);
-    clock_gettime(CLOCK_MONOTONIC,&te);
-    fprintf(stderr, "%d/%s Time used: %.03f\n",count, dirname.c_str(), (double)(getns(te) -  getns(tb)) / 1000000000);
-    return 0;
-    
+    clock_gettime(CLOCK_MONOTONIC, &te);
+    fprintf(stderr, "%d/%s Time used: %.03f\n", count, dirname.c_str(), (double)(getns(te) - getns(tb)) / 1000000000);
+    return(0);
 }

@@ -1,6 +1,6 @@
 /*! @file   TestMemCacheClient.cpp
-    @brief  Test program for MemCacheClient
-*/
+ *  @brief  Test program for MemCacheClient
+ */
 
 #ifdef WIN32
 # include <windows.h>
@@ -11,19 +11,22 @@
 
 #include "MemCacheClient.h"
 
-#define VERIFY(x)   if (!(x)) throw std::exception();
+#define VERIFY(x)         if (!(x)) { throw std::exception(); }
 
 #ifdef WIN32
-# define GetTimer()     GetTickCount()
-# define MilliSleep(x)  Sleep(x)
+# define GetTimer()       GetTickCount()
+# define MilliSleep(x)    Sleep(x)
 #else
-inline static u_long GetTimer() {
-    struct timeval tv;
+inline static u_long GetTimer()
+{
+    struct timeval  tv;
     struct timezone tz;
+
     gettimeofday(&tv, &tz);
-    return (u_long) (tv.tv_sec * 1000 + tv.tv_usec / 1000);
+    return((u_long)(tv.tv_sec * 1000 + tv.tv_usec / 1000));
 }
-# define MilliSleep(x)  usleep((x) * 1000)
+
+# define MilliSleep(x)    usleep((x) * 1000)
 #endif
 
 static int TestServerParsing()
@@ -47,17 +50,17 @@ static int TestServerParsing()
         VERIFY(pClient->AddServer("1.2.3.4:12345"));
 
         printf("PASSED: TestServerParsing\n");
-        return 0;
-    }
-    catch (const std::exception &) {
+        return(0);
+    }catch (const std::exception&) {
         printf("FAILED: TestServerParsing\n");
-        return 1;
+        return(1);
     }
 }
 
-static int TestSet(MemCacheClient * pClient)
+static int TestSet(MemCacheClient *pClient)
 {
     MemCacheClient::MemRequest oItem;
+
     try {
         VERIFY(pClient->FlushAll() > 0);
 
@@ -71,17 +74,17 @@ static int TestSet(MemCacheClient * pClient)
         VERIFY(oItem.mResult == MCERR_OK);
 
         printf("PASSED: TestSet\n");
-        return 0;
-    }
-    catch (const std::exception &) {
+        return(0);
+    }catch (const std::exception&) {
         printf("FAILED: TestSet\n");
-        return 1;
+        return(1);
     }
 }
 
-static int TestReplace(MemCacheClient * pClient)
+static int TestReplace(MemCacheClient *pClient)
 {
     MemCacheClient::MemRequest oItem;
+
     try {
         VERIFY(pClient->FlushAll() > 0);
 
@@ -98,17 +101,17 @@ static int TestReplace(MemCacheClient * pClient)
         VERIFY(oItem.mResult == MCERR_OK);
 
         printf("PASSED: TestReplace\n");
-        return 0;
-    }
-    catch (const std::exception &) {
+        return(0);
+    }catch (const std::exception&) {
         printf("FAILED: TestReplace\n");
-        return 1;
+        return(1);
     }
 }
 
-static int TestAdd(MemCacheClient * pClient)
+static int TestAdd(MemCacheClient *pClient)
 {
     MemCacheClient::MemRequest oItem;
+
     try {
         VERIFY(pClient->FlushAll() > 0);
 
@@ -122,17 +125,17 @@ static int TestAdd(MemCacheClient * pClient)
         VERIFY(oItem.mResult == MCERR_NOTSTORED);
 
         printf("PASSED: TestAdd\n");
-        return 0;
-    }
-    catch (const std::exception &) {
+        return(0);
+    }catch (const std::exception&) {
         printf("FAILED: TestAdd\n");
-        return 1;
+        return(1);
     }
 }
 
-static int TestDel(MemCacheClient * pClient)
+static int TestDel(MemCacheClient *pClient)
 {
     MemCacheClient::MemRequest oItem;
+
     try {
         VERIFY(pClient->FlushAll() > 0);
 
@@ -149,18 +152,18 @@ static int TestDel(MemCacheClient * pClient)
         VERIFY(oItem.mResult == MCERR_OK);
 
         printf("PASSED: TestDel\n");
-        return 0;
-    }
-    catch (const std::exception &) {
+        return(0);
+    }catch (const std::exception&) {
         printf("FAILED: TestDel\n");
-        return 1;
+        return(1);
     }
 }
 
-static int TestIncrement(MemCacheClient * pClient)
+static int TestIncrement(MemCacheClient *pClient)
 {
     MemCacheClient::MemRequest oItem;
-    MemCacheClient::uint64_t nValue = 999;
+    MemCacheClient::uint64_t   nValue = 999;
+
     try {
         VERIFY(pClient->FlushAll() > 0);
 
@@ -182,7 +185,7 @@ static int TestIncrement(MemCacheClient * pClient)
         VERIFY(nValue == 1100); // not updated as a_bWantReply is false
 
         VERIFY(pClient->Increment("TestIncrement", &nValue, 25, true) == MCERR_OK);
-        VERIFY(nValue == 1175); 
+        VERIFY(nValue == 1175);
 
         VERIFY(pClient->Increment("TestIncrement", NULL, 10, true) == MCERR_OK);
         VERIFY(nValue == 1175); // not updated
@@ -191,18 +194,18 @@ static int TestIncrement(MemCacheClient * pClient)
         VERIFY(nValue == 1190);
 
         printf("PASSED: TestIncrement\n");
-        return 0;
-    }
-    catch (const std::exception &) {
+        return(0);
+    }catch (const std::exception&) {
         printf("FAILED: TestIncrement\n");
-        return 1;
+        return(1);
     }
 }
 
-static int TestDecrement(MemCacheClient * pClient)
+static int TestDecrement(MemCacheClient *pClient)
 {
     MemCacheClient::MemRequest oItem;
-    MemCacheClient::uint64_t nValue = 999;
+    MemCacheClient::uint64_t   nValue = 999;
+
     try {
         VERIFY(pClient->FlushAll() > 0);
 
@@ -224,7 +227,7 @@ static int TestDecrement(MemCacheClient * pClient)
         VERIFY(nValue == 898); // not updated as a_bWantReply is false
 
         VERIFY(pClient->Decrement("TestDecrement", &nValue, 25, true) == MCERR_OK);
-        VERIFY(nValue == 823); 
+        VERIFY(nValue == 823);
 
         VERIFY(pClient->Decrement("TestDecrement", NULL, 10, true) == MCERR_OK);
         VERIFY(nValue == 823); // not updated
@@ -236,17 +239,17 @@ static int TestDecrement(MemCacheClient * pClient)
         VERIFY(nValue == 0);
 
         printf("PASSED: TestDecrement\n");
-        return 0;
-    }
-    catch (const std::exception &) {
+        return(0);
+    }catch (const std::exception&) {
         printf("FAILED: TestDecrement\n");
-        return 1;
+        return(1);
     }
 }
 
-static int TestDelTimeout(MemCacheClient * pClient)
+static int TestDelTimeout(MemCacheClient *pClient)
 {
     MemCacheClient::MemRequest oItem;
+
     try {
         VERIFY(pClient->FlushAll() > 0);
 
@@ -261,7 +264,7 @@ static int TestDelTimeout(MemCacheClient * pClient)
         oItem.mExpiry = 5; // 5 seconds from now
         VERIFY(pClient->Del(oItem) == 1);
         VERIFY(oItem.mResult == MCERR_OK);
-        
+
         oItem.mExpiry = 0;
         VERIFY(pClient->Add(oItem) == 1);
         VERIFY(oItem.mResult == MCERR_NOTSTORED);
@@ -279,26 +282,25 @@ static int TestDelTimeout(MemCacheClient * pClient)
         VERIFY(nPeriod >= 4500); // took 5 seconds (+-10%)
 
         printf("PASSED: TestDelTimeout\n");
-        return 0;
-    }
-    catch (const std::exception &) {
+        return(0);
+    }catch (const std::exception&) {
         printf("FAILED: TestDelTimeout\n");
-        return 1;
+        return(1);
     }
 }
 
-int main(int argc, char ** argv)
+int main(int argc, char **argv)
 {
 #ifdef WIN32
     WSADATA wsaData;
-    int rc = WSAStartup(MAKEWORD(2,0), &wsaData);
+    int     rc = WSAStartup(MAKEWORD(2, 0), &wsaData);
     if (rc != 0) {
         printf("Failed to start winsock\n");
-        return 1;
+        return(1);
     }
 #endif
 
-    MemCacheClient * pClient = new MemCacheClient;
+    MemCacheClient *pClient = new MemCacheClient;
     for (int n = 1; n < argc; ++n) {
         if (!pClient->AddServer(argv[n])) {
             printf("Failed to add server: %s\n", argv[n]);
@@ -317,7 +319,7 @@ int main(int argc, char ** argv)
     printf("\n");
 
     int nFails = 0;
-    
+
     nFails += TestServerParsing();
     nFails += TestAdd(pClient);
     nFails += TestSet(pClient);
@@ -332,8 +334,7 @@ int main(int argc, char ** argv)
     printf("\n");
     if (nFails == 0) {
         printf("All tests passed.\n");
-    }
-    else {
+    }else {
         printf("%d tests failed\n", nFails);
         nFails = 1;
     }
@@ -341,5 +342,5 @@ int main(int argc, char ** argv)
 #ifdef WIN32
     WSACleanup();
 #endif
-    return nFails;
+    return(nFails);
 }
