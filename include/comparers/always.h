@@ -11,7 +11,7 @@ class Always
 
         bool operator()(const std::string& target)
         {
-            return(true);
+            return true;
         }
 };
 
@@ -21,6 +21,6 @@ class AlwaysFactory
 {
     Comparer *Create(const std::string& name)
     {
-        return(new Always(name));
+        return new Always(name);
     }
 };

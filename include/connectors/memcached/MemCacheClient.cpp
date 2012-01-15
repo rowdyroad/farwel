@@ -79,12 +79,12 @@ class ServerSocket
                 {}
                 const char *what() const throw()
                 {
-                    return(msg_.c_str());
+                    return msg_.c_str();
                 }
 
                 const int code() const
                 {
-                    return(rc_);
+                    return rc_;
                 }
         };
         const static int MAXBUF = 1024; //!< size of internal data buffer
@@ -137,7 +137,7 @@ class ServerSocket
         bool Connect(unsigned long a_nIpAddress, int a_nPort, int a_nTimeout);
 
         /*! @brief Determine if we are currently connected to a server */
-        inline bool IsConnected() const { return(mSocket != INVALID_SOCKET); }
+        inline bool IsConnected() const { return mSocket != INVALID_SOCKET;  }
 
         /*! @brief Disconnect from the server */
         void Disconnect();
@@ -177,7 +177,7 @@ class ServerSocket
                 mIdx    = 0;
                 mBufLen = ReceiveBytes(mBuf, MAXBUF);
             }
-            return(mBuf[mIdx++]);
+            return mBuf[mIdx++];
         }
 };
 
@@ -233,7 +233,7 @@ bool ServerSocket::Connect(
     server.sin_addr.s_addr = a_nIpAddress;
 
     SOCKET s = socket(AF_INET, SOCK_STREAM, 0);
-    if (s == INVALID_SOCKET) { return(false); }
+    if (s == INVALID_SOCKET) { return false;  }
 
     try {
         // non-blocking for connect
@@ -273,10 +273,10 @@ bool ServerSocket::Connect(
         //    if (rc != 0) throw ServerSocket::ConnectException(rc, "setsockopt SNDIME");
 
         mSocket = s;
-        return(true);
+        return true;
     }catch (const ServerSocket::ConnectException& e) {
         closesocket(s);
-        return(false);
+        return false;
     }
 }
 
@@ -303,7 +303,7 @@ int ServerSocket::ReceiveBytes(
 {
     int n = recv(mSocket, a_pszBuf, a_nBufSiz, 0);
 
-    if (n > 0) { return(n); }
+    if (n > 0) { return n;  }
 
     // on error disconnect and throw SocketException
     Disconnect();
@@ -321,9 +321,9 @@ int ServerSocket::GetBytes(
         memcpy(a_pszBuf, mBuf + mIdx, nLen);
         mIdx += nLen;
         if (mIdx == mBufLen) { mIdx = mBufLen = 0; }
-        return(nLen);
+        return nLen;
     }
-    return(ReceiveBytes(a_pszBuf, a_nBufSiz));
+    return ReceiveBytes(a_pszBuf, a_nBufSiz);
 }
 
 void ServerSocket::DiscardBytes(
@@ -384,7 +384,7 @@ class MemCacheClient::Server
          *  @param rhs server to compare to
          *  @return true when servers are not using the same listen address
          */
-        inline bool operator!=(const Server& rhs) const { return(!operator==(rhs)); }
+        inline bool operator!=(const Server& rhs) const { return !operator==(rhs);  }
 
         /*! @brief Set the listen address for this server
          *  @param a_pszServer Listen address in IP:PORT format
@@ -405,7 +405,7 @@ class MemCacheClient::Server
          *
          *  @return Server listen address as IP:PORT
          */
-        inline const char *GetAddress() const { return(mAddress); }
+        inline const char *GetAddress() const { return mAddress;  }
 
     private:
         char          mAddress[ADDRLEN]; //!< server IP:PORT as string
@@ -422,24 +422,24 @@ MemCacheClient::Server& MemCacheClient::Server::operator=(
     mIp          = rhs.mIp;
     mPort        = rhs.mPort;
     mLastConnect = 0;
-    return(*this);
+    return *this;
 }
 
 bool MemCacheClient::Server::operator==(
     const Server& rhs
 ) const
 {
-    return(mIp == rhs.mIp && mPort == rhs.mPort);
+    return mIp == rhs.mIp && mPort == rhs.mPort;
 }
 
 bool MemCacheClient::Server::Set(
     const char *a_pszServer
 )
 {
-    if (!a_pszServer || !*a_pszServer) { return(false); }
+    if (!a_pszServer || !*a_pszServer) { return false;  }
 
     size_t nLen = strlen(a_pszServer);
-    if (nLen >= ADDRLEN) { return(false); }
+    if (nLen >= ADDRLEN) { return false;  }
     strcpy(mAddress, a_pszServer);
 
     mPort = 11211;
@@ -450,13 +450,13 @@ bool MemCacheClient::Server::Set(
     }
 
     mIp = inet_addr(mAddress);
-    if (mIp == INADDR_NONE) { return(false); }
+    if (mIp == INADDR_NONE) { return false;  }
 
     struct in_addr addr;
     addr.s_addr = mIp;
     snprintf(mAddress, ADDRLEN, "%s:%d", inet_ntoa(addr), mPort);
 
-    return(true);
+    return true;
 }
 
 bool MemCacheClient::Server::Connect(
@@ -465,21 +465,21 @@ bool MemCacheClient::Server::Connect(
 {
     // already connected? do nothing
     if (IsConnected()) {
-        return(true);
+        return true;
     }
 
     // only try to re-connect to a broken server occasionally
     time_t nNow;
 #ifdef WIN32
     nNow = GetTickCount();
-    if (nNow - mLastConnect < MEMCACHECLIENT_RECONNECT_SEC * 1000) { return(false); }
+    if (nNow - mLastConnect < MEMCACHECLIENT_RECONNECT_SEC * 1000) { return false;  }
 #else
     time(&nNow);
-    if (nNow - mLastConnect < MEMCACHECLIENT_RECONNECT_SEC) { return(false); }
+    if (nNow - mLastConnect < MEMCACHECLIENT_RECONNECT_SEC) { return false;  }
 #endif
     mLastConnect = nNow;
 
-    return(ServerSocket::Connect(mIp, mPort, a_nTimeout));
+    return ServerSocket::Connect(mIp, mPort, a_nTimeout);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -507,7 +507,7 @@ MemCacheClient& MemCacheClient::operator=(
         m_rgpServer[n] = new Server(*rhs.m_rgpServer[n]);
         if (!m_rgpServer[n]) { throw std::bad_alloc(); }
     }
-    return(*this);
+    return *this;
 }
 
 MemCacheClient::~MemCacheClient()
@@ -535,11 +535,11 @@ bool MemCacheClient::AddServer(
 
     if (!pServer->Set(a_pszServer)) {
         delete pServer;
-        return(false);
+        return false;
     }
     for (size_t n = 0; n < m_rgpServer.size(); ++n) {
         if (*pServer == *m_rgpServer[n]) {
-            return(true);                             // already have it
+            return true;                              // already have it
         }
     }
     m_rgpServer.push_back(pServer);
@@ -577,7 +577,7 @@ bool MemCacheClient::AddServer(
     }
 #endif
 
-    return(true);
+    return true;
 }
 
 /*! Match a server by comparing pointers */
@@ -595,7 +595,7 @@ struct MemCacheClient::ConsistentHash::MatchServer
     /*! compare current entry against search entry
      *  @param rhs  entry to compare
      */
-    bool operator()(const ConsistentHash& rhs) const { return(rhs.mServer == mServer); }
+    bool operator()(const ConsistentHash& rhs) const { return rhs.mServer == mServer;  }
 };
 
 bool MemCacheClient::DelServer(
@@ -617,12 +617,12 @@ bool MemCacheClient::DelServer(
                 std::partition(m_rgServerHash.begin(), m_rgServerHash.end(), server),
                 m_rgServerHash.end());
             std::sort(m_rgServerHash.begin(), m_rgServerHash.end());
-            return(true);
+            return true;
         }
     }
 
     // not found
-    return(false);
+    return false;
 }
 
 void MemCacheClient::GetServers(
@@ -658,7 +658,7 @@ unsigned long MemCacheClient::CreateKeyHash(
     assert(sizeof(output.as_long) == SHA1_DIGEST_LENGTH);
 
     SHA1(output.as_char, (const sha1_byte *)a_pszKey, (unsigned int)strlen(a_pszKey));
-    return(output.as_long[LONG_COUNT - 1]);
+    return output.as_long[LONG_COUNT - 1];
 }
 
 MemCacheClient::Server *MemCacheClient::FindServer(
@@ -667,7 +667,7 @@ MemCacheClient::Server *MemCacheClient::FindServer(
 {
     // probably need some servers for this
     if (m_rgServerHash.empty()) {
-        return(NULL);
+        return NULL;
     }
 
     // find the next largest consistent hash value above this key hash
@@ -681,9 +681,9 @@ MemCacheClient::Server *MemCacheClient::FindServer(
     // ensure that this server is connected
     Server *pServer = iServer->mServer;
     if (!pServer->Connect(m_nTimeoutMs)) {
-        return(NULL);
+        return NULL;
     }
-    return(pServer);
+    return pServer;
 }
 
 /*! @brief Sort the requests into server order */
@@ -696,7 +696,7 @@ struct MemCacheClient::MemRequest::Sort
      */
     bool operator()(const MemRequest *pl, const MemRequest *pr) const
     {
-        return(pl->mServer < pr->mServer); // any order is fine
+        return pl->mServer < pr->mServer;  // any order is fine
     }
 };
 
@@ -706,11 +706,11 @@ int MemCacheClient::Combine(
     int        a_nCount
 )
 {
-    if (a_nCount < 1) { return(0); }
+    if (a_nCount < 1) { return 0;  }
 
     MemRequest *rgpItem[MAX_REQUESTS] = { NULL };
     if (a_nCount > MAX_REQUESTS) {
-        return(-1);                         // invalid args
+        return -1;                          // invalid args
     }
     // initialize and find all of the servers for these items
     int nItemCount = 0;
@@ -724,7 +724,7 @@ int MemCacheClient::Combine(
             a_rgItem[n].mResult = MCERR_NOSERVER;
         }
     }
-    if (nItemCount == 0) { return(0); }
+    if (nItemCount == 0) { return 0;  }
 
     // sort all requests into server order
     const static MemRequest::Sort sortOnServer = MemRequest::Sort();
@@ -809,7 +809,7 @@ int MemCacheClient::Combine(
         }
     }
 
-    return(nResponses);
+    return nResponses;
 }
 
 void MemCacheClient::ReceiveLine(
@@ -894,7 +894,7 @@ int MemCacheClient::HandleGetResponse(
         ++nFound;
     }
 
-    return(nFound);
+    return nFound;
 }
 
 int MemCacheClient::HandleDelResponse(
@@ -933,7 +933,7 @@ int MemCacheClient::HandleDelResponse(
         throw ServerSocket::Exception("bad response");
     }
 
-    return(nResponses);
+    return nResponses;
 }
 
 MCResult MemCacheClient::IncDec(
@@ -946,7 +946,7 @@ MCResult MemCacheClient::IncDec(
 {
     Server *pServer = FindServer(a_pszKey);
 
-    if (!pServer) { return(MCERR_NOSERVER); }
+    if (!pServer) { return MCERR_NOSERVER;  }
 
     char     szBuf[50];
     string_t sRequest(a_pszType);
@@ -963,7 +963,7 @@ MCResult MemCacheClient::IncDec(
         pServer->SendBytes(sRequest.data(), sRequest.length());
 
         if (!a_bWantReply) {
-            return(MCERR_NOREPLY);
+            return MCERR_NOREPLY;
         }
 
         string_t sValue;
@@ -973,16 +973,16 @@ MCResult MemCacheClient::IncDec(
         }
 
         if (sValue == "NOT_FOUND\r\n") {
-            return(MCERR_NOTFOUND);
+            return MCERR_NOTFOUND;
         }
 
         if (a_pnNewValue) {
             *a_pnNewValue = STRTOUL64(sValue.data(), NULL, 10);
         }
-        return(MCERR_OK);
+        return MCERR_OK;
     }catch (const ServerSocket::Exception&) {
         pServer->Disconnect();
-        return(MCERR_NOSERVER);
+        return MCERR_NOSERVER;
     }
 }
 
@@ -992,7 +992,7 @@ int MemCacheClient::Store(
     int        a_nCount
 )
 {
-    if (a_nCount < 1) { return(0); }
+    if (a_nCount < 1) { return 0;  }
 
     // initialize and find all of the servers for these items
     for (int n = 0; n < a_nCount; ++n) {
@@ -1059,7 +1059,7 @@ int MemCacheClient::Store(
         }
     }
 
-    return(nResponses);
+    return nResponses;
 }
 
 void MemCacheClient::HandleStoreResponse(
@@ -1103,7 +1103,7 @@ int MemCacheClient::FlushAll(
              "flush_all %u\r\n", a_nExpiry);
 
     Server test;
-    if (a_pszServer && !test.Set(a_pszServer)) { return(false); }
+    if (a_pszServer && !test.Set(a_pszServer)) { return false;  }
 
     int nSuccess = 0;
     for (size_t n = 0; n < m_rgpServer.size(); ++n) {
@@ -1137,5 +1137,5 @@ int MemCacheClient::FlushAll(
         }
     }
 
-    return(nSuccess);
+    return nSuccess;
 }

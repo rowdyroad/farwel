@@ -38,9 +38,9 @@ class Main
             Connector *operator()(const std::string& str) const
             {
                 if ((*comparer_)(str)) {
-                    return(connector_);
+                    return connector_;
                 }
-                return(NULL);
+                return NULL;
             }
     };
 
@@ -63,7 +63,7 @@ class Main
 
         Log& Logger() const
         {
-            return(*log_);
+            return *log_;
         }
 
         Main(const std::string& config_file)
@@ -82,12 +82,12 @@ class Main
 
         Connector *GetConnector(size_t fd)
         {
-            return(fd_manager_.GetConnector(fd));
+            return fd_manager_.GetConnector(fd);
         }
 
         Connector *GetConnector(void *dd)
         {
-            return(fd_manager_.GetConnector(reinterpret_cast<struct _dirdesc *>(dd)->dd_fd));
+            return fd_manager_.GetConnector(reinterpret_cast<struct _dirdesc *>(dd)->dd_fd);
         }
 
         Connector *GetPathConnector(const std::string& str)
@@ -97,10 +97,10 @@ class Main
             for (Locations::iterator it = locations_.begin(); it != locations_.end(); ++it) {
                 Connector *cntr = (*it)(path);
                 if (cntr) {
-                    return(cntr);
+                    return cntr;
                 }
             }
-            return(NULL);
+            return NULL;
         }
 
         bool LoadConfig()
@@ -174,9 +174,9 @@ class Main
                 }
             } catch (const std::exception& e) {
                 log_->Err(e.what());
-                return(false);
+                return false;
             }
 
-            return(true);
+            return true;
         }
 };

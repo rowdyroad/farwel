@@ -45,7 +45,7 @@ ReadWriteBuffer& ReadWriteBuffer::operator=(
         mBufIdx = rhs.mBufIdx;
         mBufLen = rhs.mBufLen;
     }
-    return(*this);
+    return *this;
 }
 
 ReadWriteBuffer::~ReadWriteBuffer()
@@ -103,7 +103,7 @@ static inline size_t roundup(size_t nValue, size_t nBlock)
     if ((nValue % nBlock) != 0) {
         nValue = (nValue / nBlock) * nBlock + nBlock;
     }
-    return(nValue);
+    return nValue;
 }
 
 void ReadWriteBuffer::SetInternalBuffer(
@@ -148,7 +148,7 @@ char *ReadWriteBuffer::GetWriteBuffer(
             mBufSiz = nNewSiz;
         }
     }
-    return(mBuf + mBufLen);
+    return mBuf + mBufLen;
 }
 
 void ReadWriteBuffer::CommitWriteBytes(
@@ -161,7 +161,7 @@ void ReadWriteBuffer::CommitWriteBytes(
 
 size_t ReadWriteBuffer::GetWriteSize() const
 {
-    return(mBufSiz - mBufLen);
+    return mBufSiz - mBufLen;
 }
 
 void ReadWriteBuffer::WriteBytes(
@@ -177,7 +177,7 @@ void ReadWriteBuffer::WriteBytes(
 
 const char *ReadWriteBuffer::GetReadBuffer() const
 {
-    return(mBuf + mBufIdx);
+    return mBuf + mBufIdx;
 }
 
 void ReadWriteBuffer::CommitReadBytes(
@@ -190,7 +190,7 @@ void ReadWriteBuffer::CommitReadBytes(
 
 size_t ReadWriteBuffer::GetReadSize() const
 {
-    return(mBufLen - mBufIdx);
+    return mBufLen - mBufIdx;
 }
 
 void ReadWriteBuffer::ReadBytes(
@@ -222,7 +222,7 @@ bool ReadWriteBuffer::operator==(
 ) const
 {
     if (GetReadSize() != rhs.GetReadSize()) {
-        return(false);
+        return false;
     }
-    return(0 == memcmp(GetReadBuffer(), rhs.GetReadBuffer(), GetReadSize()));
+    return 0 == memcmp(GetReadBuffer(), rhs.GetReadBuffer(), GetReadSize());
 }

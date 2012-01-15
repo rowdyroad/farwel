@@ -289,7 +289,7 @@ class MemCacheClient
          *  @param a_oItem  Item to be added
          *  @return Number of items with a success result.
          */
-        inline int Add(MemRequest& a_oItem) { return(Store("add", &a_oItem, 1)); }
+        inline int Add(MemRequest& a_oItem) { return Store("add", &a_oItem, 1);  }
 
         /*! @brief Set an item to the cache.
          *
@@ -299,7 +299,7 @@ class MemCacheClient
          *  @param a_oItem  Item to be updated
          *  @return Number of items with a success result.
          */
-        inline int Set(MemRequest& a_oItem) { return(Store("set", &a_oItem, 1)); }
+        inline int Set(MemRequest& a_oItem) { return Store("set", &a_oItem, 1);  }
 
         /*! @brief Replace an item in the cache.
          *
@@ -308,21 +308,21 @@ class MemCacheClient
          *  @param a_oItem  Item to be updated
          *  @return Number of items with a success result.
          */
-        inline int Replace(MemRequest& a_oItem) { return(Store("replace", &a_oItem, 1)); }
+        inline int Replace(MemRequest& a_oItem) { return Store("replace", &a_oItem, 1);  }
 
         /*! @brief Append data to an existing item in the cache.
          *
          *  @param a_oItem  Item to be updated
          *  @return Number of items with a success result.
          */
-        inline int Append(MemRequest& a_oItem) { return(Store("append", &a_oItem, 1)); }
+        inline int Append(MemRequest& a_oItem) { return Store("append", &a_oItem, 1);  }
 
         /*! @brief Prepend data to an existing item in the cache.
          *
          *  @param a_oItem  Item to be updated
          *  @return Number of items with a success result.
          */
-        inline int Prepend(MemRequest& a_oItem) { return(Store("prepend", &a_oItem, 1)); }
+        inline int Prepend(MemRequest& a_oItem) { return Store("prepend", &a_oItem, 1);  }
 
         /*! @brief Set the data to an existing item in the cache only if it has not been
          *  modified since it was last retrieved.
@@ -333,28 +333,28 @@ class MemCacheClient
          *  @param a_oItem  Item to be updated
          *  @return Number of items with a success result.
          */
-        inline int CheckSet(MemRequest& a_oItem) { return(Store("cas", &a_oItem, 1)); }
+        inline int CheckSet(MemRequest& a_oItem) { return Store("cas", &a_oItem, 1);  }
 
         /*! @brief Get an item from the cache.
          *
          *  @param a_oItem  Item to be retrieved
          *  @return Number of items with a success result.
          */
-        inline int Get(MemRequest& a_oItem) { return(Combine("get", &a_oItem, 1)); }
+        inline int Get(MemRequest& a_oItem) { return Combine("get", &a_oItem, 1);  }
 
         /*! @brief Get an item from the cache including the CAS data.
          *
          *  @param a_oItem  Item to be retrieved
          *  @return Number of items with a success result.
          */
-        inline int Gets(MemRequest& a_oItem) { return(Combine("gets", &a_oItem, 1)); }
+        inline int Gets(MemRequest& a_oItem) { return Combine("gets", &a_oItem, 1);  }
 
         /*! @brief Delete an item from the cache.
          *
          *  @param a_oItem  Item to be removed.
          *  @return Number of items with a success result.
          */
-        inline int Del(MemRequest& a_oItem) { return(Combine("del", &a_oItem, 1)); }
+        inline int Del(MemRequest& a_oItem) { return Combine("del", &a_oItem, 1);  }
 
 
         /*! @brief Increment a value at the server.
@@ -372,7 +372,7 @@ class MemCacheClient
          */
         inline MCResult Increment(const char *a_pszKey, uint64_t *a_pnNewValue = NULL, uint64_t a_nDiff = 1, bool a_bWantReply = true)
         {
-            return(IncDec("incr", a_pszKey, a_pnNewValue, a_nDiff, a_bWantReply));
+            return IncDec("incr", a_pszKey, a_pnNewValue, a_nDiff, a_bWantReply);
         }
 
         /*! @brief Decrement a value at the server.
@@ -390,7 +390,7 @@ class MemCacheClient
          */
         inline MCResult Decrement(const char *a_pszKey, uint64_t *a_pnNewValue = NULL, uint64_t a_nDiff = 1, bool a_bWantReply = true)
         {
-            return(IncDec("decr", a_pszKey, a_pnNewValue, a_nDiff, a_bWantReply));
+            return IncDec("decr", a_pszKey, a_pnNewValue, a_nDiff, a_bWantReply);
         }
 
         /*-----------------------------------------------------------------------*/
@@ -408,7 +408,7 @@ class MemCacheClient
          *  @param a_nCount     Number of items in the array
          *  @return Number of items with a success result
          */
-        inline int Add(MemRequest *a_rgItem, int a_nCount) { return(Store("add", a_rgItem, a_nCount)); }
+        inline int Add(MemRequest *a_rgItem, int a_nCount) { return Store("add", a_rgItem, a_nCount);  }
 
         /*! @brief Set multiple items to the cache.
          *
@@ -421,7 +421,7 @@ class MemCacheClient
          *  @param a_nCount     Number of items in the array
          *  @return Number of items with a success result
          */
-        inline int Set(MemRequest *a_rgItem, int a_nCount) { return(Store("set", a_rgItem, a_nCount)); }
+        inline int Set(MemRequest *a_rgItem, int a_nCount) { return Store("set", a_rgItem, a_nCount);  }
 
         /*! @brief Replace multiple items in the cache.
          *
@@ -434,7 +434,7 @@ class MemCacheClient
          *  @param a_nCount     Number of items in the array
          *  @return Number of items with a success result
          */
-        inline int Replace(MemRequest *a_rgItem, int a_nCount) { return(Store("replace", a_rgItem, a_nCount)); }
+        inline int Replace(MemRequest *a_rgItem, int a_nCount) { return Store("replace", a_rgItem, a_nCount);  }
 
         /*! @brief Append data to multiple existing items in the cache.
          *
@@ -445,7 +445,7 @@ class MemCacheClient
          *  @param a_nCount     Number of items in the array
          *  @return Number of items with a success result
          */
-        inline int Append(MemRequest *a_rgItem, int a_nCount) { return(Store("append", a_rgItem, a_nCount)); }
+        inline int Append(MemRequest *a_rgItem, int a_nCount) { return Store("append", a_rgItem, a_nCount);  }
 
         /*! @brief Prepend data to multiple existing items in the cache.
          *
@@ -456,7 +456,7 @@ class MemCacheClient
          *  @param a_nCount     Number of items in the array
          *  @return Number of items with a success result
          */
-        inline int Prepend(MemRequest *a_rgItem, int a_nCount) { return(Store("prepend", a_rgItem, a_nCount)); }
+        inline int Prepend(MemRequest *a_rgItem, int a_nCount) { return Store("prepend", a_rgItem, a_nCount);  }
 
         /*! @brief Set the data to multiple existing items in the cache only if it has not been
          *  modified since it was last retrieved.
@@ -471,7 +471,7 @@ class MemCacheClient
          *  @param a_nCount     Number of items in the array
          *  @return Number of items with a success result
          */
-        inline int CheckSet(MemRequest *a_rgItem, int a_nCount) { return(Store("cas", a_rgItem, a_nCount)); }
+        inline int CheckSet(MemRequest *a_rgItem, int a_nCount) { return Store("cas", a_rgItem, a_nCount);  }
 
         /*! @brief Get an item from the cache.
          *
@@ -482,7 +482,7 @@ class MemCacheClient
          *  @param a_nCount     Number of items in the array
          *  @return Number of items with a success result
          */
-        inline int Get(MemRequest *a_rgItem, int a_nCount) { return(Combine("get", a_rgItem, a_nCount)); }
+        inline int Get(MemRequest *a_rgItem, int a_nCount) { return Combine("get", a_rgItem, a_nCount);  }
 
         /*! @brief Get multiple items from the cache including the CAS data.
          *
@@ -493,7 +493,7 @@ class MemCacheClient
          *  @param a_nCount     Number of items in the array
          *  @return Number of items with a success result
          */
-        inline int Gets(MemRequest *a_rgItem, int a_nCount) { return(Combine("gets", a_rgItem, a_nCount)); }
+        inline int Gets(MemRequest *a_rgItem, int a_nCount) { return Combine("gets", a_rgItem, a_nCount);  }
 
         /*! @brief Delete multiple items from the cache.
          *
@@ -504,7 +504,7 @@ class MemCacheClient
          *  @param a_nCount     Number of items in the array
          *  @return Number of items with a success result
          */
-        inline int Del(MemRequest *a_rgItem, int a_nCount) { return(Combine("del", a_rgItem, a_nCount)); }
+        inline int Del(MemRequest *a_rgItem, int a_nCount) { return Combine("del", a_rgItem, a_nCount);  }
 
         /*! @brief Send a flush_all command to a specific server or all servers.
          *
@@ -554,13 +554,13 @@ class MemCacheClient
             {
                 mHash   = rhs.mHash;
                 mServer = rhs.mServer;
-                return(*this);
+                return *this;
             }
 
             /*! comparison on hash value */
-            bool operator<(const ConsistentHash& rhs) const { return(mHash < rhs.mHash); }
+            bool operator<(const ConsistentHash& rhs) const { return mHash < rhs.mHash;  }
             /*! equality on hash value */
-            bool operator==(const ConsistentHash& rhs) const { return(mHash == rhs.mHash); }
+            bool operator==(const ConsistentHash& rhs) const { return mHash == rhs.mHash;  }
             /*! match on server pointer */
             struct MatchServer;
         };

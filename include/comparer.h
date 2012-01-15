@@ -11,15 +11,15 @@ class Comparer
             boost::match_results<std::string::const_iterator> what;
 
             if (!boost::regex_match(str, what, re_) || (what.size() < 3)) {
-                return(false);
+                return false;
             }
 
             if (!what[1].matched && !what[2].matched) {
-                return(false);
+                return false;
             }
             ret.first  = std::string(what[1].first, what[1].second);
             ret.second = std::string(what[2].first, what[2].second);
-            return(true);
+            return true;
         }
 
         virtual bool operator()(const std::string& target) = 0;

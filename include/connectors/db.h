@@ -22,7 +22,7 @@ class Db
                 Logger().Dbg("ConnStr: %s\n", conn_str_.c_str());
                 session_.reset(new soci::session(conn_str_));
             }
-            return(*session_);
+            return *session_;
         }
 
         bool exists(const std::string& key)
@@ -32,7 +32,7 @@ class Db
             Logger().Dbg("Query:%s\n", query.c_str());
             soci::row row;
             Session() << query, soci::use(key), soci::into(row);
-            return(row.get<size_t>(0));
+            return row.get<size_t>(0);
         }
 
         bool create(const std::string& key)
@@ -42,7 +42,7 @@ class Db
             Logger().Dbg("Query:%s\n", query.c_str());
             soci::statement st((Session().prepare << query, soci::use(key)));
             st.execute();
-            return(st.get_affected_rows());
+            return st.get_affected_rows();
         }
 
         bool update(const std::string& key)
@@ -52,7 +52,7 @@ class Db
             Logger().Dbg("Query:%s\n", query.c_str());
             soci::statement st((Session().prepare << query, soci::use(key)));
             st.execute();
-            return(st.get_affected_rows());
+            return st.get_affected_rows();
         }
 
         bool update(const std::string& key, const std::string& value)
@@ -61,7 +61,7 @@ class Db
 
             Logger().Dbg("Query:%s\n", query.c_str());
             soci::statement st((Session().prepare << query, soci::use(key, "key"), soci::use(value, "value")));
-            return(st.get_affected_rows());
+            return st.get_affected_rows();
         }
 
         bool append(const std::string& key, const std::string& value)
@@ -71,7 +71,7 @@ class Db
             Logger().Dbg("Query:%s\n", query.c_str());
             soci::statement st((Session().prepare << query, soci::use(key, "key"), soci::use(value, "value")));
             st.execute();
-            return(st.get_affected_rows());
+            return st.get_affected_rows();
         }
 
         bool remove(const std::string& key)
@@ -81,7 +81,7 @@ class Db
             Logger().Dbg("Query:%s\n", query.c_str());
             soci::statement st((Session().prepare << query, soci::use(key)));
             st.execute();
-            return(st.get_affected_rows());
+            return st.get_affected_rows();
         }
 
         bool read(const std::string& key, std::string& data)
@@ -90,7 +90,7 @@ class Db
 
             Logger().Dbg("Query:%s\n", query.c_str());
             Session() << query, soci::into(data);
-            return(true);
+            return true;
         }
 
     public:
@@ -114,21 +114,21 @@ class Db
         {
             Logger().Dbg("%d %d - %d\n", fd, (flags & O_CREAT), exists(path));
             if ((bool)(flags & O_CREAT) == exists(path)) {
-                return(-1);
+                return -1;
             }
             if (flags & O_CREAT) {
                 Logger().Dbg("need to create\n");
                 if (!create(path)) {
-                    return(-1);
+                    return -1;
                 }
             } else if (flags & O_TRUNC) {
                 Logger().Dbg("need trunc\n");
                 if (!update(path)) {
-                    return(-1);
+                    return -1;
                 }
             }
             keys_.insert(std::make_pair(fd, path));
-            return(fd);
+            return fd;
         }
 
         int Write(int fd, const void *data, size_t size)
@@ -136,12 +136,12 @@ class Db
             Logger().Dbg("Write: %d\n", fd);
             Keys::const_iterator it = keys_.find(fd);
             if (it == keys_.end()) {
-                return(-1);
+                return -1;
             }
             if (!append(it->second, std::string((const char *)data, size))) {
-                return(-1);
+                return -1;
             }
-            return(size);
+            return size;
         }
 
         int Read(int fd, void *data, size_t size)
@@ -149,27 +149,27 @@ class Db
             Keys::const_iterator it = keys_.find(fd);
 
             if (it == keys_.end()) {
-                return(-1);
+                return -1;
             }
 
             std::string str;
             if (!read(it->second, str)) {
-                return(-1);
+                return -1;
             }
             size_t msize = std::min(size, str.size());
             ::memcpy(data, str.data(), msize);
-            return(msize);
+            return msize;
         }
 
         int CloseFd(int fd)
         {
             keys_.erase(fd);
-            return(0);
+            return 0;
         }
 
         int Unlink(const std::string& path)
         {
-            return(remove(path));
+            return remove(path);
         }
 };
 
@@ -180,6 +180,6 @@ class DbFactory
     public:
         Connector *Create(const std::string& name, const JsonNode& config, FdManager& fd_manager, LogIntr log)
         {
-            return(new Db(name, config, fd_manager, log));
+            return new Db(name, config, fd_manager, log);
         }
 };

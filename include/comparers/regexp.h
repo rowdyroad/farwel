@@ -14,7 +14,7 @@ class Regexp
 
         bool operator()(const std::string& target)
         {
-            return(boost::regex_search(target, re_));
+            return boost::regex_search(target, re_);
         }
 };
 
@@ -24,6 +24,6 @@ class RegexpFactory
 {
     Comparer *Create(const std::string& name)
     {
-        return(new Regexp(name));
+        return new Regexp(name);
     }
 };

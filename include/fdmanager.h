@@ -19,13 +19,13 @@ class FdManager
         Connector *GetConnector(int fd)
         {
             if (fd < begin_) {
-                return(NULL);
+                return NULL;
             }
             Connectors::const_iterator it = connectors_.find(fd);
             if (it != connectors_.end()) {
-                return(it->second);
+                return it->second;
             }
-            return(NULL);
+            return NULL;
         }
 
         int getBeginFd()
@@ -35,7 +35,7 @@ class FdManager
             size_t len    = sizeof(data);
 
             ::sysctl(name, 2, &data, &len, NULL, 0);
-            return(data);
+            return data;
         }
 
         friend class Main;
@@ -51,7 +51,7 @@ class FdManager
             int fd = ++fd_;
 
             connectors_.insert(std::make_pair(fd, connector));
-            return(fd);
+            return fd;
         }
 
         bool Release(int fd, Connector *connector)
@@ -61,9 +61,9 @@ class FdManager
             if (it != connectors_.end()) {
                 if (it->second == connector) {
                     connectors_.erase(it);
-                    return(true);
+                    return true;
                 }
             }
-            return(false);
+            return false;
         }
 };

@@ -30,7 +30,7 @@ class Path
         std::string Absolute(const std::string& file)
         {
             if (file[0] == '/') {
-                return(file);
+                return file;
             }
             std::string res;
             const char  *cc = file.c_str();
@@ -57,6 +57,6 @@ class Path
                 res.resize(current_path_.size() + file.size() + 1);
                 ::sprintf((char *)res.data(), "%s/%s", current_path_.c_str(), cc);
             }
-            return(res);
+            return res;
         }
 };

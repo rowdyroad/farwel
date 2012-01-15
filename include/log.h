@@ -34,11 +34,11 @@ class Log
             time_t t = ::time(NULL);
 
             if (last_time_ == t) {
-                return(&time_[0]);
+                return &time_[0];
             }
             struct tm *lt = ::localtime(&t);
             ::strftime(&time_[0], sizeof(time_), "%Y-%m-%d %H:%M:%S", lt);
-            return(&time_[0]);
+            return &time_[0];
         }
 
         std::string record(const std::string& sev, const std::string& format, va_list args)
@@ -48,7 +48,7 @@ class Log
             std::string res(size + sizeof(time_) + sev.size() + 5, 0);
 
             ::sprintf((char *)res.data(), "[%s] %s: %s\n", makeTime(), sev.c_str(), &buf[0]);
-            return(res);
+            return res;
         }
 
         void print(const std::string& sev, const std::string& format, va_list args)
@@ -72,7 +72,7 @@ class Log
 
         Level GetLevel() const
         {
-            return(level_);
+            return level_;
         }
 
         Log(const Log& log)
@@ -126,10 +126,10 @@ class Log
             SinkList::const_iterator it = registered_sinks_.find(name);
 
             if (it == registered_sinks_.end()) {
-                return(false);
+                return false;
             }
             sinks_.push_back(it->second);
-            return(true);
+            return true;
         }
 
         ~Log()

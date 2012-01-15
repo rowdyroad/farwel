@@ -23,7 +23,7 @@ inline static u_long GetTimer()
     struct timezone tz;
 
     gettimeofday(&tv, &tz);
-    return((u_long)(tv.tv_sec * 1000 + tv.tv_usec / 1000));
+    return (u_long)(tv.tv_sec * 1000 + tv.tv_usec / 1000);
 }
 
 # define MilliSleep(x)    usleep((x) * 1000)
@@ -50,10 +50,10 @@ static int TestServerParsing()
         VERIFY(pClient->AddServer("1.2.3.4:12345"));
 
         printf("PASSED: TestServerParsing\n");
-        return(0);
+        return 0;
     }catch (const std::exception&) {
         printf("FAILED: TestServerParsing\n");
-        return(1);
+        return 1;
     }
 }
 
@@ -74,10 +74,10 @@ static int TestSet(MemCacheClient *pClient)
         VERIFY(oItem.mResult == MCERR_OK);
 
         printf("PASSED: TestSet\n");
-        return(0);
+        return 0;
     }catch (const std::exception&) {
         printf("FAILED: TestSet\n");
-        return(1);
+        return 1;
     }
 }
 
@@ -101,10 +101,10 @@ static int TestReplace(MemCacheClient *pClient)
         VERIFY(oItem.mResult == MCERR_OK);
 
         printf("PASSED: TestReplace\n");
-        return(0);
+        return 0;
     }catch (const std::exception&) {
         printf("FAILED: TestReplace\n");
-        return(1);
+        return 1;
     }
 }
 
@@ -125,10 +125,10 @@ static int TestAdd(MemCacheClient *pClient)
         VERIFY(oItem.mResult == MCERR_NOTSTORED);
 
         printf("PASSED: TestAdd\n");
-        return(0);
+        return 0;
     }catch (const std::exception&) {
         printf("FAILED: TestAdd\n");
-        return(1);
+        return 1;
     }
 }
 
@@ -152,10 +152,10 @@ static int TestDel(MemCacheClient *pClient)
         VERIFY(oItem.mResult == MCERR_OK);
 
         printf("PASSED: TestDel\n");
-        return(0);
+        return 0;
     }catch (const std::exception&) {
         printf("FAILED: TestDel\n");
-        return(1);
+        return 1;
     }
 }
 
@@ -194,10 +194,10 @@ static int TestIncrement(MemCacheClient *pClient)
         VERIFY(nValue == 1190);
 
         printf("PASSED: TestIncrement\n");
-        return(0);
+        return 0;
     }catch (const std::exception&) {
         printf("FAILED: TestIncrement\n");
-        return(1);
+        return 1;
     }
 }
 
@@ -239,10 +239,10 @@ static int TestDecrement(MemCacheClient *pClient)
         VERIFY(nValue == 0);
 
         printf("PASSED: TestDecrement\n");
-        return(0);
+        return 0;
     }catch (const std::exception&) {
         printf("FAILED: TestDecrement\n");
-        return(1);
+        return 1;
     }
 }
 
@@ -282,10 +282,10 @@ static int TestDelTimeout(MemCacheClient *pClient)
         VERIFY(nPeriod >= 4500); // took 5 seconds (+-10%)
 
         printf("PASSED: TestDelTimeout\n");
-        return(0);
+        return 0;
     }catch (const std::exception&) {
         printf("FAILED: TestDelTimeout\n");
-        return(1);
+        return 1;
     }
 }
 
@@ -296,7 +296,7 @@ int main(int argc, char **argv)
     int     rc = WSAStartup(MAKEWORD(2, 0), &wsaData);
     if (rc != 0) {
         printf("Failed to start winsock\n");
-        return(1);
+        return 1;
     }
 #endif
 
@@ -342,5 +342,5 @@ int main(int argc, char **argv)
 #ifdef WIN32
     WSACleanup();
 #endif
-    return(nFails);
+    return nFails;
 }

@@ -30,7 +30,7 @@ inline void clear(const std::string& dirname)
 
 inline unsigned long long getns(const struct timespec& tv)
 {
-    return((unsigned long long)tv.tv_sec * 1000000000 + tv.tv_nsec);
+    return (unsigned long long)tv.tv_sec * 1000000000 + tv.tv_nsec;
 }
 
 inline bool dumpdir(const std::string& dirname)
@@ -44,9 +44,9 @@ inline bool dumpdir(const std::string& dirname)
             de = readdir(dir);
         }
         closedir(dir);
-        return(true);
+        return true;
     }
-    return(false);
+    return false;
 }
 
 int main(int argc, char **argv)
@@ -75,5 +75,5 @@ int main(int argc, char **argv)
     clear(dirname);
     clock_gettime(CLOCK_MONOTONIC, &te);
     fprintf(stderr, "%d/%s Time used: %.03f\n", count, dirname.c_str(), (double)(getns(te) - getns(tb)) / 1000000000);
-    return(0);
+    return 0;
 }

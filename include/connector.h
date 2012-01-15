@@ -38,12 +38,12 @@ class Connector
 
                 const std::string& Name() const
                 {
-                    return(name_);
+                    return name_;
                 }
 
                 FileType Type() const
                 {
-                    return(type_);
+                    return type_;
                 }
         };
         typedef std::vector<DirFile>   DirFiles;
@@ -66,13 +66,13 @@ class Connector
 
                 DirFiles& Files()
                 {
-                    return(files_);
+                    return files_;
                 }
 
                 struct dirent *Read()
                 {
                     if (++index_ >= files_.size()) {
-                        return(NULL);
+                        return NULL;
                     }
 
                     DirFile& df = files_[index_];
@@ -80,12 +80,12 @@ class Connector
                     dirent_.d_type   = df.Type();
                     dirent_.d_namlen = df.Name().size();
                     ::memmove(&(dirent_.d_name), df.Name().data(), df.Name().size());
-                    return(&dirent_);
+                    return &dirent_;
                 }
 
                 struct _dirdesc *Dir()
                 {
-                    return(&dir_);
+                    return &dir_;
                 }
         };
 
@@ -105,19 +105,19 @@ class Connector
             Keys::const_iterator it = keys_.find(fd);
 
             if (it == keys_.end()) {
-                return(empty_key_);
+                return empty_key_;
             }
-            return(it->second);
+            return it->second;
         }
 
         const JsonNode& Config() const
         {
-            return(config_);
+            return config_;
         }
 
         Log& Logger()
         {
-            return(*log_);
+            return *log_;
         }
 
     public:
@@ -151,7 +151,7 @@ class Connector
 
         const std::string& Name() const
         {
-            return(name_);
+            return name_;
         }
 
         int Open(const std::string& path, int flags)
@@ -163,7 +163,7 @@ class Connector
                 fd_manager_.Release(fd, this);
             }
             keys_.insert(std::make_pair(fd, path));
-            return(ret);
+            return ret;
         }
 
         int Close(int fd)
@@ -171,28 +171,28 @@ class Connector
             int r = CloseFd(fd);
 
             if (r < 0) {
-                return(-1);
+                return -1;
             }
             fd_manager_.Release(fd, this);
             keys_.erase(fd);
-            return(r);
+            return r;
         }
 
         virtual int Write(int fd, const void *data, size_t size) = 0;
         virtual int Read(int fd, void *data, size_t size)        = 0;
         virtual int Unlink(const std::string& path) = 0;
-        virtual int Rename(const std::string& name, const std::string& path)  { return(-1); }
-        virtual int MkDir(const std::string& dir, int flags)  { return(-1); }
-        virtual int RmDir(const std::string& str) { return(-1); }
+        virtual int Rename(const std::string& name, const std::string& path)  { return -1;  }
+        virtual int MkDir(const std::string& dir, int flags)  { return -1;  }
+        virtual int RmDir(const std::string& str) { return -1;  }
 
         virtual struct dirent *ReadDir(DIR *dd)
         {
             Dirs::iterator it = dirs_.find(dd->dd_fd);
 
             if (it == dirs_.end()) {
-                return(NULL);
+                return NULL;
             }
-            return(it->second->Read());
+            return it->second->Read();
         }
 
         DIR *OpenDir(const std::string& name)
@@ -201,9 +201,9 @@ class Connector
 
             if (!OpenDir(fd->Dir()->dd_fd, name, fd->Files())) {
                 fd_manager_.Release(fd->Dir()->dd_fd, this);
-                return(NULL);
+                return NULL;
             }
-            return(dirs_.insert(std::make_pair(fd->Dir()->dd_fd, boost::intrusive_ptr<DirFd>(fd.release(), false))).first->second->Dir());
+            return dirs_.insert(std::make_pair(fd->Dir()->dd_fd, boost::intrusive_ptr<DirFd>(fd.release(), false))).first->second->Dir();
         }
 
         int CloseDir(DIR *fd)
@@ -211,22 +211,22 @@ class Connector
             Dirs::const_iterator it = dirs_.find(fd->dd_fd);
 
             if ((it == dirs_.end()) || (it->second->Dir() != fd)) {
-                return(-1);
+                return -1;
             }
             if (CloseDir(fd->dd_fd)) {
                 fd_manager_.Release(fd->dd_fd, this);
                 dirs_.erase(fd->dd_fd);
-                return(0);
+                return 0;
             }
-            return(-1);
+            return -1;
         }
 
     protected:
         virtual int Open(int fd, const std::string& path, int flags) = 0;
         virtual int CloseFd(int fd) = 0;
 
-        virtual bool OpenDir(int dd, const std::string& path, DirFiles& files)  { return(false); }
-        virtual bool CloseDir(int dd)  { return(-1); }
+        virtual bool OpenDir(int dd, const std::string& path, DirFiles& files)  { return false;  }
+        virtual bool CloseDir(int dd)  { return -1;  }
 };
 
 typedef boost::intrusive_ptr<Connector>   ConnectorIntr;
