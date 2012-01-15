@@ -197,13 +197,13 @@ class Connector
 
         DIR *OpenDir(const std::string& name)
         {
-            std::auto_ptr<DirFd> fd(new DirFd(fd_manager_.Get(this)));
+            boost::intrusive_ptr<DirFd> fd(new DirFd(fd_manager_.Get(this)), false);
 
             if (!OpenDir(fd->Dir()->dd_fd, name, fd->Files())) {
                 fd_manager_.Release(fd->Dir()->dd_fd, this);
                 return NULL;
             }
-            return dirs_.insert(std::make_pair(fd->Dir()->dd_fd, boost::intrusive_ptr<DirFd>(fd.release(), false))).first->second->Dir();
+            return dirs_.insert(std::make_pair(fd->Dir()->dd_fd, fd)).first->second->Dir();
         }
 
         int CloseDir(DIR *fd)

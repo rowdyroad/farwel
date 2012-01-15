@@ -4,14 +4,13 @@
 #include <boost/format.hpp>
 #include <soci/soci.h>
 #include "../connector.h"
+#include "../path.h"
 
 class Db
     : public Connector
 {
     private:
         std::auto_ptr<soci::session> session_;
-        typedef boost::unordered_map<int, std::string>   Keys;
-        Keys        keys_;
         std::string conn_str_;
         std::string table_name_;
         std::string key_column_;
@@ -37,10 +36,10 @@ class Db
 
         bool create(const std::string& key)
         {
-            static const std::string query = (boost::format("insert into `%1%` (`%2%`,`%3%`) value(:key, '')") % table_name_ % key_column_ % value_column_).str();
+            static const std::string query = (boost::format("insert into `%1%` (`%2%`,`%3%`, `parent`) value(:key, '', :parent)") % table_name_ % key_column_ % value_column_).str();
 
             Logger().Dbg("Query:%s\n", query.c_str());
-            soci::statement st((Session().prepare << query, soci::use(key)));
+            soci::statement st((Session().prepare << query, soci::use(key, "key"), soci::use(Path::Directory(key), "parent")));
             st.execute();
             return st.get_affected_rows();
         }
@@ -93,6 +92,18 @@ class Db
             return true;
         }
 
+        bool readdir(const std::string& key, DirFiles& files)
+        {
+            static const std::string  query = (boost::format("select `%2%` from `%1%` where `parent` = :parent ") % table_name_ % key_column_).str();
+            soci::rowset<std::string> rs    = (Session().prepare << query, soci::use(key));
+
+            files.clear();
+            for (soci::rowset<std::string>::const_iterator it = rs.begin(); it != rs.end(); ++it) {
+                files.push_back(DirFile(*it));
+            }
+            return true;
+        }
+
     public:
         Db(const std::string& name, const JsonNode& config, FdManager& fd_manager, LogIntr log)
             : Connector(name, config, fd_manager, log)
@@ -100,15 +111,7 @@ class Db
             , table_name_(config.get<std::string>("table_name"))
             , key_column_(config.get<std::string>("key_column"))
             , value_column_(config.get<std::string>("value_column"))
-        {
-            /*const JsonNode::value_type& log_node = config.get_child("log");
-             * if (log_node) {
-             *  log_.reset(new Log(log_node.et<Log::LogLevel>("level")));
-             *  log_->AddSinks(log);
-             *  BOOST_FOREACH(const JsonNode::value_type &n, config.get_child("sinks")) {
-             *  };
-             * }*/
-        }
+        {}
 
         int Open(int fd, const std::string& path, int flags)
         {
@@ -127,18 +130,18 @@ class Db
                     return -1;
                 }
             }
-            keys_.insert(std::make_pair(fd, path));
             return fd;
         }
 
         int Write(int fd, const void *data, size_t size)
         {
             Logger().Dbg("Write: %d\n", fd);
-            Keys::const_iterator it = keys_.find(fd);
-            if (it == keys_.end()) {
+            const std::string& key = GetKey(fd);
+            if (key.empty()) {
                 return -1;
             }
-            if (!append(it->second, std::string((const char *)data, size))) {
+
+            if (!append(key, std::string((const char *)data, size))) {
                 return -1;
             }
             return size;
@@ -146,14 +149,13 @@ class Db
 
         int Read(int fd, void *data, size_t size)
         {
-            Keys::const_iterator it = keys_.find(fd);
+            const std::string& key = GetKey(fd);
 
-            if (it == keys_.end()) {
+            if (key.empty()) {
                 return -1;
             }
-
             std::string str;
-            if (!read(it->second, str)) {
+            if (!read(key, str)) {
                 return -1;
             }
             size_t msize = std::min(size, str.size());
@@ -161,9 +163,13 @@ class Db
             return msize;
         }
 
+        bool OpenDir(int fd, const std::string& path, DirFiles& files)
+        {
+            return readdir(path, files);
+        }
+
         int CloseFd(int fd)
         {
-            keys_.erase(fd);
             return 0;
         }
 

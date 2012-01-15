@@ -59,4 +59,14 @@ class Path
             }
             return res;
         }
+
+        static std::string Directory(const std::string& file)
+        {
+            size_t pos = file.rfind("/");
+
+            if (pos == std::string::npos) {
+                return std::string();
+            }
+            return file.substr(0, pos);
+        }
 };
