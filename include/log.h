@@ -57,6 +57,7 @@ class Log
 
             for (Sinks::iterator it = sinks_.begin(); it != sinks_.end(); ++it) {
                 ::fprintf(*it, rec.c_str());
+                ::fflush(*it);
             }
         }
 

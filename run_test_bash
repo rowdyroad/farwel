@@ -2,4 +2,4 @@
 
 curdir=`pwd`
 
-FRWL_CONFIG_FILE=$curdir/config.conf LD_PRELOAD=$curdir/farwel.so /usr/local/bin/mc
+FRWL_CONFIG_FILE=/usr/home/user/farwel/config.conf LD_PRELOAD=/usr/home/user/farwel/farwel.so /usr/local/bin/mc

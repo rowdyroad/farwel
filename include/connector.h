@@ -79,7 +79,7 @@ class Connector
                     dirent_.d_fileno = index_;
                     dirent_.d_type   = df.Type();
                     dirent_.d_namlen = df.Name().size();
-                    ::memmove(&(dirent_.d_name), df.Name().data(), df.Name().size());
+                    ::memmove(&(dirent_.d_name), df.Name().c_str(), df.Name().size() + 1);
                     return &dirent_;
                 }
 
@@ -127,23 +127,24 @@ class Connector
             , config_(config)
             , log_(log)
         {
-            JsonNodeConstOp node = config.get_child_optional("log");
+            JsonNodeConstOp log_node = config.get_child_optional("log");
 
-            if (node) {
+            if (log_node) {
                 std::auto_ptr<Log> nl(new Log(*log_));
-                JsonNodeConstOp    level = config.get_child_optional("level");
+                JsonNodeConstOp    level = log_node->get_child_optional("level");
                 if (level) {
                     nl->SetLogLevel(level->get_value<std::string>());
                 }
 
-                JsonNodeConstOp sinks = config.get_child_optional("sinks");
-                if (sinks || !sinks->empty()) {
+                JsonNodeConstOp sinks = log_node->get_child_optional("sinks");
+                if (sinks && !sinks->empty()) {
                     nl->ClearSinks();
                     BOOST_FOREACH(const JsonNode::value_type & it, *sinks)
                     {
                         nl->UseSink(it.second.get_value<std::string>());
                     }
                 }
+                log_.reset(nl.release());
             }
         }
 

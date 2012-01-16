@@ -13,7 +13,7 @@ extern "C" {
 }
 
 
-typedef int (*open_t)(const char *path, int flags);
+typedef int (*open_t)(const char *path, int flags, ...);
 typedef int (*read_t)(int fd, void *data, size_t size);
 typedef int (*write_t)(int fd, const void *data, size_t size);
 typedef int (*close_t)(int fd);
@@ -22,6 +22,7 @@ typedef int (*named_t)(const char *name);
 typedef DIR * (*opendir_t)(const char *name);
 typedef struct dirent * (*readdir_t)(DIR *dd);
 typedef int (*closedir_t)(DIR *dd);
+typedef int (*fcntl_t)(int fd, int cmd, ...);
 
 struct Real
 {
@@ -35,6 +36,7 @@ struct Real
     const opendir_t   opendir;
     const readdir_t   readdir;
     const closedir_t  closedir;
+    const fcntl_t     fcntl;
 
     Real()
         : open((open_t) dlsym(RTLD_NEXT, "open"))
@@ -47,5 +49,6 @@ struct Real
         , opendir((opendir_t) dlsym(RTLD_NEXT, "opendir"))
         , readdir((readdir_t) dlsym(RTLD_NEXT, "readdir"))
         , closedir((closedir_t) dlsym(RTLD_NEXT, "closedir"))
+        , fcntl((fcntl_t) dlsym(RTLD_NEXT, "fcntl"))
     {}
 };

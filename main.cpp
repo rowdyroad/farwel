@@ -8,6 +8,28 @@ static Real                real;
 static std::auto_ptr<Main> main;
 static Path                path_master;
 
+#ifdef DEBUG
+typedef boost::unordered_map<int, std::string>   Files;
+static Files      files;
+static const char *not_found = "not found";
+const char *File(int id)
+{
+    Files::const_iterator it = files.find(id);
+
+    if (it == files.end()) {
+        return not_found;
+    }
+    return it->second.c_str();
+}
+#else
+static const char *indebug_mode = "(filename shown in debug mode only)";
+const char *File(int id)
+{
+    return indebug_mode;
+}
+#endif
+
+
 extern "C" {
     void __attribute__((constructor)) init(void)
     {
@@ -23,14 +45,38 @@ extern "C" {
     int open(const char *path, int flags, ...)
     {
         if (!main.get()) {
-            return real.open(path, flags);
+            va_list vl;
+            va_start(vl, flags);
+            mode_t mode = va_arg(vl, int);
+            va_end(vl);
+#ifdef DEBUG
+            int i = (mode) ? real.open(path, flags, mode) : real.open(path, flags);
+            if (i != -1) {
+                files.insert(std::make_pair(i, path));
+            }
+            return i;
+#else
+            return (mode) ? real.open(path, flags, mode) : real.open(path, flags);
+#endif
         }
         std::string realpath = path_master.Absolute(path);
         Connector   *cntr    = main->GetPathConnector(realpath);
         main->Logger().Inf("Open Connector(%p): %s", cntr, realpath.c_str());
         if (!cntr) {
             main->Logger().Inf("Call real function\n");
-            return real.open(path, flags);
+            va_list vl;
+            va_start(vl, flags);
+            mode_t mode = va_arg(vl, int);
+            va_end(vl);
+#ifdef DEBUG
+            int i = (mode) ? real.open(path, flags, mode) : real.open(path, flags);
+            if (i != -1) {
+                files.insert(std::make_pair(i, path));
+            }
+            return i;
+#else
+            return (mode) ? real.open(path, flags, mode) : real.open(path, flags);
+#endif
         }
         main->Logger().Inf("%s\n", cntr->Name().c_str());
         return cntr->Open(realpath, flags);
@@ -63,7 +109,7 @@ extern "C" {
             return real.close(fd);
         }
         Connector *cntr = main->GetConnector(fd);
-        main->Logger().Inf("Write Connector(%p) %d: ", cntr, fd);
+        main->Logger().Inf("Write Connector(%p) %d - %s: ", cntr, fd, File(fd));
         if (!cntr) {
             //! todo real write or something...think
             main->Logger().Inf("Call real function\n");
@@ -79,7 +125,7 @@ extern "C" {
             return real.read(fd, data, size);
         }
         Connector *cntr = main->GetConnector(fd);
-        main->Logger().Inf("Read Connector(%p) %d: ", cntr, fd);
+        main->Logger().Inf("Read Connector(%p) %d - %s: ", cntr, fd, File(fd));
         if (!cntr) {
             //! todo real write or something...think
             main->Logger().Inf("Call real function\n");
@@ -222,5 +268,29 @@ extern "C" {
         }
         main->Logger().Inf("%s\n", cntr->Name().c_str());
         return cntr->Unlink(realpath);
+    }
+
+    int fcntl(int fd, int cmd, ...)
+    {
+        if (!main.get()) {
+            va_list vl;
+            va_start(vl, cmd);
+            unsigned p2 = va_arg(vl, unsigned);
+            va_end(vl);
+            return (p2) ? real.fcntl(fd, cmd, p2) : real.fcntl(fd, cmd);
+        }
+        Connector *cntr = main->GetConnector(fd);
+        main->Logger().Inf("Fcntl Connector(%p) %d - %s: ", cntr, fd, File(fd));
+        if (!cntr) {
+            //! todo real write or something...think
+            main->Logger().Inf("Call real function\n");
+            va_list vl;
+            va_start(vl, cmd);
+            unsigned p2 = va_arg(vl, unsigned);
+            va_end(vl);
+            return (p2) ? real.fcntl(fd, cmd, p2) : real.fcntl(fd, cmd);
+        }
+        main->Logger().Inf("%s\n", cntr->Name().c_str());
+        return 0;
     }
 }

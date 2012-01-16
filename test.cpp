@@ -1,4 +1,5 @@
 extern "C" {
+#include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <string.h>
@@ -40,7 +41,7 @@ inline bool dumpdir(const std::string& dirname)
     if (dir) {
         struct dirent *de = readdir(dir);
         while (de) {
-//          printf("%d: %d %d %d %s\n", de->d_fileno, de->d_reclen, de->d_type, de->d_namlen, de->d_name);
+            printf("%d: %d %d %d %s\n", de->d_fileno, de->d_reclen, de->d_type, de->d_namlen, de->d_name);
             de = readdir(dir);
         }
         closedir(dir);
@@ -51,13 +52,14 @@ inline bool dumpdir(const std::string& dirname)
 
 int main(int argc, char **argv)
 {
+    printf("LD_PRELOAD:%s\n", getenv("LD_PRELOAD"));
     int         count   = argc > 1 ? atoi(argv[1]) : 100;
     std::string dirname = argc > 2 ? argv[2] : "./tmp";
     const char  *data   = "teteteteteststteststteteststteststteteteststteststteteststtestst";
     char        buf[255];
     const char  *ext[2] = { "txt\0", "lst\0" };
 
-    clear(dirname);
+//    clear(dirname);
 
     struct timespec tb, te;
     ::memset(&tb, 0, sizeof(struct timespec));
@@ -72,7 +74,7 @@ int main(int argc, char **argv)
     }
 
     dumpdir(dirname);
-    clear(dirname);
+//    clear(dirname);
     clock_gettime(CLOCK_MONOTONIC, &te);
     fprintf(stderr, "%d/%s Time used: %.03f\n", count, dirname.c_str(), (double)(getns(te) - getns(tb)) / 1000000000);
     return 0;

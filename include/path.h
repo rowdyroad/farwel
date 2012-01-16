@@ -27,6 +27,11 @@ class Path
             }
         }
 
+        const std::string& CurrentPath() const
+        {
+            return current_path_;
+        }
+
         std::string Absolute(const std::string& file)
         {
             if (file[0] == '/') {
@@ -37,7 +42,7 @@ class Path
             if (file[0] == '.') {
                 if (file[1] != '.') {
                     res.resize(current_path_.size() + file.size() - 1);
-                    ::sprintf((char *)res.data(), "%s%s", current_path_.c_str(), cc + 1);
+                    ::sprintf((char *)res.data(), "%s/%s", current_path_.c_str(), cc + 1);
                 } else {
                     int    k   = slashes_.size();
                     size_t pos = 0;
@@ -55,6 +60,7 @@ class Path
                 }
             } else {
                 res.resize(current_path_.size() + file.size() + 1);
+
                 ::sprintf((char *)res.data(), "%s/%s", current_path_.c_str(), cc);
             }
             return res;
@@ -68,5 +74,15 @@ class Path
                 return std::string();
             }
             return file.substr(0, pos);
+        }
+
+        static std::string File(const std::string& file)
+        {
+            size_t pos = file.rfind("/");
+
+            if (pos == std::string::npos) {
+                return std::string();
+            }
+            return std::string(file.begin() + pos + 1, file.end());
         }
 };
