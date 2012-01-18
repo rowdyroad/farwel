@@ -1,5 +1,4 @@
 #pragma once
-#define NDEBUG
 #define BOOST_FILESYSTEM_VERSION    3
 #include <sstream>
 #include <string>
@@ -20,7 +19,6 @@
 #include "json.h"
 #include "log.h"
 
-#include "debug.h"
 class Main
 {
     class Location

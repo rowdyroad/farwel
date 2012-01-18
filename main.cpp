@@ -1,14 +1,18 @@
+extern  "C" {
+#include <assert.h>
+#include <stdarg.h>
+}
 #include "include/real.h"
 #include "include/main.h"
 #include "include/path.h"
 
-#include <assert.h>
-#include "include/debug.h"
 static Real                real;
 static std::auto_ptr<Main> main;
 static Path                path_master;
 
-#ifdef DEBUG
+#define VA_ARG(type, var, arg)  va_list list; va_start(list,arg); type var = va_arg(list, type); va_end(list);
+
+#ifndef NDEBUG
 typedef boost::unordered_map<int, std::string>   Files;
 static Files      files;
 static const char *not_found = "not found";
@@ -45,11 +49,8 @@ extern "C" {
     int open(const char *path, int flags, ...)
     {
         if (!main.get()) {
-            va_list vl;
-            va_start(vl, flags);
-            mode_t mode = va_arg(vl, int);
-            va_end(vl);
-#ifdef DEBUG
+            VA_ARG(int, mode, flags);
+#ifndef NDEBUG
             int i = (mode) ? real.open(path, flags, mode) : real.open(path, flags);
             if (i != -1) {
                 files.insert(std::make_pair(i, path));
@@ -64,11 +65,8 @@ extern "C" {
         main->Logger().Inf("Open Connector(%p): %s", cntr, realpath.c_str());
         if (!cntr) {
             main->Logger().Inf("Call real function\n");
-            va_list vl;
-            va_start(vl, flags);
-            mode_t mode = va_arg(vl, int);
-            va_end(vl);
-#ifdef DEBUG
+            VA_ARG(int, mode, flags);
+#ifndef NDEBUG
             int i = (mode) ? real.open(path, flags, mode) : real.open(path, flags);
             if (i != -1) {
                 files.insert(std::make_pair(i, path));
@@ -273,10 +271,7 @@ extern "C" {
     int fcntl(int fd, int cmd, ...)
     {
         if (!main.get()) {
-            va_list vl;
-            va_start(vl, cmd);
-            unsigned p2 = va_arg(vl, unsigned);
-            va_end(vl);
+    	    VA_ARG(unsigned, p2, cmd);
             return (p2) ? real.fcntl(fd, cmd, p2) : real.fcntl(fd, cmd);
         }
         Connector *cntr = main->GetConnector(fd);
@@ -284,10 +279,7 @@ extern "C" {
         if (!cntr) {
             //! todo real write or something...think
             main->Logger().Inf("Call real function\n");
-            va_list vl;
-            va_start(vl, cmd);
-            unsigned p2 = va_arg(vl, unsigned);
-            va_end(vl);
+            VA_ARG(unsigned, p2, cmd);
             return (p2) ? real.fcntl(fd, cmd, p2) : real.fcntl(fd, cmd);
         }
         main->Logger().Inf("%s\n", cntr->Name().c_str());

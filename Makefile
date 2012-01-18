@@ -6,10 +6,10 @@ INCLUDES = -I/usr/local/include
 LINKS = -L/usr/local/lib
 
 all:
-	${GCC} -I/usr/local/include -O2 -fPIC -shared -o ${name}.so ${SRC} -L/usr/local/lib ${LIBS}
+	${GCC} -I/usr/local/include -O2 -fPIC -shared -o ${name}.so ${SRC} -L/usr/local/lib ${LIBS} -DNDEBUG
 	${GCC} -O2 test.cpp -o test
 debug:
-	${GCC} -I/usr/local/include -fPIC -g -shared -o ${name}.so ${SRC} -L/usr/local/lib ${LIBS} -DDEBUG
+	${GCC} -I/usr/local/include -fPIC -g -shared -o ${name}.so ${SRC} -L/usr/local/lib ${LIBS}
 
 utest:
 	${GCC} -O2 test.cpp -o test -g

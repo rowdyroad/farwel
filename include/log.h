@@ -2,8 +2,14 @@
 extern "C" {
 #include <time.h>
 #include <stdio.h>
+#include <stdarg.h>
 }
 #include <string>
+
+#define PRINT(lev, lev_txt) 	if (level_ < lev) { return; }\
+        			va_list args;\
+        			va_start(args, format);\
+        			print(lev_txt, format, args);
 
 class Log;
 typedef boost::intrusive_ptr<Log>   LogIntr;
@@ -142,33 +148,21 @@ class Log
 
         void Inf(const std::string& format, ...)
         {
-            if (level_ < Info) { return; }
-            va_list args;
-            va_start(args, format);
-            print("INF", format, args);
+    	    PRINT(Info, "INF");
         }
 
         void Dbg(const std::string& format, ...)
         {
-            if (level_ < Debug) { return; }
-            va_list args;
-            va_start(args, format);
-            print("DEB", format, args);
+    	    PRINT(Debug, "DBG");
         }
 
         void Wrn(const std::string& format, ...)
         {
-            if (level_ < Warn) { return; }
-            va_list args;
-            va_start(args, format);
-            print("WRN", format, args);
+    	    PRINT(Warn, "WRN");
         }
 
         void Err(const std::string& format, ...)
         {
-            if (level_ < Error) { return; }
-            va_list args;
-            va_start(args, format);
-            print("ERR", format, args);
+    	    PRINT(Error, "ERR");
         }
 };
