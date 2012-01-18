@@ -10,7 +10,6 @@ all:
 	${GCC} -O2 test.cpp -o test
 debug:
 	${GCC} -I/usr/local/include -fPIC -g -shared -o ${name}.so ${SRC} -L/usr/local/lib ${LIBS}
-
 utest:
 	${GCC} -O2 test.cpp -o test -g
 	${GCC} -O2 fork.cpp -o fork -g

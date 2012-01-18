@@ -1,10 +1,14 @@
 #pragma once
+#include <boost/intrusive_ptr.hpp>
+#include <boost/unordered_map.hpp>
+#include <list>
+#include <string>
 extern "C" {
 #include <time.h>
 #include <stdio.h>
 #include <stdarg.h>
 }
-#include <string>
+#include "object.h"
 
 #define PRINT(lev, lev_txt)       \
     if (level_ < lev) { return; } \

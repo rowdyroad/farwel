@@ -49,7 +49,6 @@ class FdManager
         int Get(Connector *connector)
         {
             int fd = ++fd_;
-
             connectors_.insert(std::make_pair(fd, connector));
             return fd;
         }
