@@ -146,6 +146,18 @@ class Db
             }
         }
 
+        bool length(const std::string& key, size_t& size)
+        {
+            static const std::string query = (boost::format("select length(`%3%`) from `%2%` where `%2%` = :key") % table_name_ % key_column_ % value_column_).str();
+
+            try {
+                Session() << query, soci::use(key), soci::into(size);
+            } catch (const soci::soci_error& e) {
+                Logger().Err("length: %s", e.what());
+                return false;
+            }
+        }
+
     public:
         Db(const std::string& name, const JsonNode& config, FdManager& fd_manager, LogIntr log)
             : Connector(name, config, fd_manager, log)
@@ -242,6 +254,11 @@ class Db
         int CloseFd(int fd)
         {
             return 0;
+        }
+
+        bool GetFileSize(const std::string& path, size_t& size)
+        {
+            return length(path, size);
         }
 
         int Unlink(const std::string& path)

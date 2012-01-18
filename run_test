@@ -2,4 +2,4 @@
 
 curdir=`pwd`
 
-FRWL_CONFIG_FILE=$curdir/config.conf LD_PRELOAD=$curdir/farwel.so cat  /usr/local/etc/nginx/html/phpmyadmin/libraries/dbi/mysqli.dbi.lib.php > l.php
+FRWL_CONFIG_FILE=$curdir/config.conf LD_PRELOAD=$curdir/farwel.so ./test $1 $2

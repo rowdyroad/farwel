@@ -6,10 +6,11 @@ extern "C" {
 }
 #include <string>
 
-#define PRINT(lev, lev_txt) 	if (level_ < lev) { return; }\
-        			va_list args;\
-        			va_start(args, format);\
-        			print(lev_txt, format, args);
+#define PRINT(lev, lev_txt)       \
+    if (level_ < lev) { return; } \
+    va_list args;                 \
+    va_start(args, format);       \
+    print(lev_txt, format, args);
 
 class Log;
 typedef boost::intrusive_ptr<Log>   LogIntr;
@@ -148,21 +149,21 @@ class Log
 
         void Inf(const std::string& format, ...)
         {
-    	    PRINT(Info, "INF");
+            PRINT(Info, "INF");
         }
 
         void Dbg(const std::string& format, ...)
         {
-    	    PRINT(Debug, "DBG");
+            PRINT(Debug, "DBG");
         }
 
         void Wrn(const std::string& format, ...)
         {
-    	    PRINT(Warn, "WRN");
+            PRINT(Warn, "WRN");
         }
 
         void Err(const std::string& format, ...)
         {
-    	    PRINT(Error, "ERR");
+            PRINT(Error, "ERR");
         }
 };

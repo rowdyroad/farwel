@@ -88,7 +88,7 @@ class Main
             return fd_manager_.GetConnector(reinterpret_cast<struct _dirdesc *>(dd)->dd_fd);
         }
 
-        Connector *GetPathConnector(const std::string& str)
+        Connector *GetConnector(const std::string& str)
         {
             std::string path = boost::filesystem::absolute(str).string();
 

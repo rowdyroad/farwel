@@ -25,6 +25,8 @@ typedef DIR * (*opendir_t)(const char *name);
 typedef struct dirent * (*readdir_t)(DIR *dd);
 typedef int (*closedir_t)(DIR *dd);
 typedef int (*fcntl_t)(int fd, int cmd, ...);
+typedef int (*stat_t)(const char *name, struct stat *buf);
+typedef int (*fstat_t)(int fd, struct stat *buf);
 
 struct Real
 {
@@ -39,6 +41,8 @@ struct Real
     const readdir_t   readdir;
     const closedir_t  closedir;
     const fcntl_t     fcntl;
+    const stat_t      stat;
+    const fstat_t     fstat;
 
     Real()
         : open((open_t) dlsym(RTLD_NEXT, "open"))
@@ -52,5 +56,7 @@ struct Real
         , readdir((readdir_t) dlsym(RTLD_NEXT, "readdir"))
         , closedir((closedir_t) dlsym(RTLD_NEXT, "closedir"))
         , fcntl((fcntl_t) dlsym(RTLD_NEXT, "fcntl"))
+        , stat((stat_t) dlsym(RTLD_NEXT, "stat"))
+        , fstat((fstat_t) dlsym(RTLD_NEXT, "fstat"))
     {}
 };

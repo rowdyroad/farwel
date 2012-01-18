@@ -222,6 +222,23 @@ class Connector
             return -1;
         }
 
+        virtual bool GetFileSize(const std::string& name, size_t& size) { return false; }
+
+        bool GetFileSize(int fd, size_t& size)
+        {
+            Keys::const_iterator it = keys_.find(fd);
+
+            if (it == keys_.end()) {
+                return false;
+            }
+            return GetFileSize(it->second, size);
+        }
+        
+        virtual blksize_t GetBlockSize() const
+        {
+    	    return 0xFFFF;
+        }
+
     protected:
         virtual int Open(int fd, const std::string& path, int flags) = 0;
         virtual int CloseFd(int fd) = 0;
