@@ -1,20 +1,29 @@
 #pragma once
-#include <boost/regex.hpp>
+extern "C" {
+#include <sys/types.h> 
+#include <regex.h>
+}
 #include "../comparer.h"
 
 class Regexp
     : public Comparer
 {
     private:
-        boost::regex re_;
+        regex_t re_;
     public:
         Regexp(const std::string& pattern)
-            : re_(pattern, boost::regex_constants::perl)
-        {}
+        {
+    	    ::rexcomp(&re_, parrent.c_str(), REG_NOSUB);
+        }
 
         bool operator()(const std::string& target)
         {
-            return boost::regex_search(target, re_);
+            return ::regexec(&re_, target_.c_str(), 0, NULL, 0);
+        }
+        
+        ~Regexp()
+        {
+    	    ::regfree(&re_);
         }
 };
 
