@@ -115,8 +115,7 @@ class Connector
 
         virtual struct dirent *ReadDir(DIR *dd)
         {
-            Dirs::iterator it = dirs_.find(dd->dd_fd);
-
+            Directories::iterator it = dirs_.find(*(int*)dd);
             if (it == dirs_.end()) {
                 return NULL;
             }
@@ -125,24 +124,24 @@ class Connector
 
         void* OpenDir(const std::string& name)
         {
-    	    Directory dir(fd_manager_.Get(this),name);
+            Directory dir(fd_manager_.Get(this),name);
             if (!OpenDir(dir)) {
                 fd_manager_.Release(dir.Fd(), this);
                 return NULL;
             }
-            return dirs_.insert(std::make_pair(dir.Fd(),dir)).first->first;
+            return (void*)&(dirs_.insert(std::make_pair(dir.Fd(),dir)).first->first);
         }
 
-        int CloseDir(DIR *fd)
+        int CloseDir(DIR *dd)
         {
-            Dirs::const_iterator it = dirs_.find(fd->dd_fd);
-
-            if ((it == dirs_.end()) || (it->second->Dir() != fd)) {
+            Directories::const_iterator it = dirs_.find(*(int*)dd);
+            if (it == dirs_.end()) {
                 return -1;
             }
-            if (CloseDir(fd->dd_fd)) {
-                fd_manager_.Release(fd->dd_fd, this);
-                dirs_.erase(fd->dd_fd);
+
+            if (CloseDir(*it->second.get())) {
+                fd_manager_.Release(it->first, this);
+                dirs_.erase(it);
                 return 0;
             }
             return -1;

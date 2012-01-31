@@ -128,7 +128,7 @@ class Db
             }
         }
 
-        bool readdir(const std::string& key, DirFiles& files)
+        bool readdir(const std::string& key, std::vector<std::string>& files)
         {
             static const std::string query = (boost::format("select `%2%` from `%1%` where `parent` = :parent ") % table_name_ % key_column_).str();
 
@@ -137,7 +137,7 @@ class Db
 
                 files.clear();
                 for (soci::rowset<std::string>::const_iterator it = rs.begin(); it != rs.end(); ++it) {
-                    files.push_back(DirFile(Path::File(*it)));
+                    files.push_back(Path::File(*it));
                 }
                 return true;
             } catch (const soci::soci_error& e) {
@@ -246,12 +246,12 @@ class Db
             return msize;
         }
 
-        bool OpenDir(int fd, const std::string& path, DirFiles& files)
+        bool OpenDir(Directory& dir)
         {
-            return readdir(path, files);
+            return readdir(dir.Name(), dir.Files());
         }
 
-        int CloseFd(int fd)
+        int CloseFd(Directory& dir)
         {
             return 0;
         }

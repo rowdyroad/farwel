@@ -10,7 +10,7 @@ class Path
 {
     private:
         std::string         current_path_;
-        std::vector<size_t> slashes_;
+        std::vector<int> slashes_;
     public:
         Path()
         {
