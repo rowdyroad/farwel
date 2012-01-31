@@ -67,7 +67,7 @@ class Log
             std::string rec(record(sev, format, args));
 
             for (Sinks::iterator it = sinks_.begin(); it != sinks_.end(); ++it) {
-                ::fprintf(*it, rec.c_str());
+                ::fprintf(*it, "%s", rec.c_str());
                 ::fflush(*it);
             }
         }

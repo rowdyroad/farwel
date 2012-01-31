@@ -35,7 +35,11 @@ class FdManager
 
         int getBeginFd()
         {
+            #ifdef __linux__
+            int    name[] = { CTL_FS, FS_MAXFILE };
+            #else
             int    name[] = { CTL_KERN, KERN_MAXFILES };
+            #endif
             int    data   = 0;
             size_t len    = sizeof(data);
 

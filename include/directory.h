@@ -13,8 +13,8 @@ extern "C" {
                 int fd_;
                 int index_;
                 std::string name_;
-                typedef std::vector<std::string> Files;
-                Files files_;
+                typedef std::vector<std::string> FileList;
+                FileList files_;
                 struct dirent dirent_;
             public:
                 Directory(int fd, const std::string& name)
@@ -23,7 +23,7 @@ extern "C" {
                     , name_(name)
                 {}
 
-                const Files& Files() const
+                const FileList& Files() const
                 {
                     return files_;
                 }
