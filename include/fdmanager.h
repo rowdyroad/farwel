@@ -27,21 +27,21 @@ class FdManager
             }
             return NULL;
         }
-        
-        Connector* GetDirConnector(int* d)
+
+        Connector *GetDirConnector(int *d)
         {
-    	    return GetConnector(*d);
+            return GetConnector(*d);
         }
 
         int getBeginFd()
         {
-            #ifdef __linux__
-            int    name[] = { CTL_FS, FS_MAXFILE };
-            #else
-            int    name[] = { CTL_KERN, KERN_MAXFILES };
-            #endif
-            int    data   = 0;
-            size_t len    = sizeof(data);
+#ifdef __linux__
+            int name[] = { CTL_FS, FS_MAXFILE };
+#else
+            int name[] = { CTL_KERN, KERN_MAXFILES };
+#endif
+            int    data = 0;
+            size_t len  = sizeof(data);
 
             ::sysctl(name, 2, &data, &len, NULL, 0);
             return data;
@@ -58,6 +58,7 @@ class FdManager
         int Get(Connector *connector)
         {
             int fd = ++fd_;
+
             connectors_.insert(std::make_pair(fd, connector));
             return fd;
         }

@@ -12,44 +12,35 @@
 // boost
 #include <boost/optional.hpp>
 
-namespace soci
-{
-
+namespace soci {
 // simple fall-back for boost::optional
-template <typename T>
-struct type_conversion<boost::optional<T> >
-{
-    typedef typename type_conversion<T>::base_type base_type;
-
-    static void from_base(base_type const & in, indicator ind,
-        boost::optional<T> & out)
+    template<typename T>
+    struct type_conversion<boost::optional<T> >
     {
-        if (ind == i_null)
-        {
-            out.reset();
-        }
-        else
-        {
-            T tmp;
-            type_conversion<T>::from_base(in, ind, tmp);
-            out = tmp;
-        }
-    }
+        typedef typename type_conversion<T>::base_type   base_type;
 
-    static void to_base(boost::optional<T> const & in,
-        base_type & out, indicator & ind)
-    {
-        if (in.is_initialized())
+        static void from_base(base_type const& in, indicator ind,
+                              boost::optional<T>& out)
         {
-            type_conversion<T>::to_base(in.get(), out, ind);
+            if (ind == i_null) {
+                out.reset();
+            }else  {
+                T tmp;
+                type_conversion<T>::from_base(in, ind, tmp);
+                out = tmp;
+            }
         }
-        else
-        {
-            ind = i_null;
-        }
-    }
-};
 
+        static void to_base(boost::optional<T> const& in,
+                            base_type& out, indicator& ind)
+        {
+            if (in.is_initialized()) {
+                type_conversion<T>::to_base(in.get(), out, ind);
+            }else  {
+                ind = i_null;
+            }
+        }
+    };
 } // namespace soci
 
 #endif // SOCI_BOOST_OPTIONAL_H_INCLUDED

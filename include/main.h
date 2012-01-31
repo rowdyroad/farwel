@@ -78,14 +78,14 @@ class Main
             LoadConfig();
         }
 
-        Connector *GetConnector(size_t fd)
+        Connector *GetConnector(int fd)
         {
             return fd_manager_.GetConnector(fd);
         }
 
-        Connector *GetConnector(void *dd)
+        Connector *GetDirConnector(void *dd)
         {
-            return fd_manager_.GetConnector(dd);
+            return fd_manager_.GetDirConnector((int *)dd);
         }
 
         Connector *GetConnector(const std::string& path)

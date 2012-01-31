@@ -15,33 +15,29 @@
 // std
 #include <ctime>
 
-namespace soci
-{
-
-template<>
-struct type_conversion<boost::gregorian::date>
-{
-    typedef std::tm base_type;
-
-    static void from_base(
-        base_type const & in, indicator ind, boost::gregorian::date & out)
+namespace soci {
+    template<>
+    struct type_conversion<boost::gregorian::date>
     {
-        if (ind == i_null)
+        typedef std::tm   base_type;
+
+        static void from_base(
+            base_type const& in, indicator ind, boost::gregorian::date& out)
         {
-            throw soci_error("Null value not allowed for this type");
+            if (ind == i_null) {
+                throw soci_error("Null value not allowed for this type");
+            }
+
+            out = boost::gregorian::date_from_tm(in);
         }
 
-        out = boost::gregorian::date_from_tm(in);
-    }
-
-    static void to_base(
-        boost::gregorian::date const & in, base_type & out, indicator & ind)
-    {
-        out = boost::gregorian::to_tm(in);
-        ind = i_ok;
-    }
-};
-
+        static void to_base(
+            boost::gregorian::date const& in, base_type& out, indicator& ind)
+        {
+            out = boost::gregorian::to_tm(in);
+            ind = i_ok;
+        }
+    };
 } // namespace soci
 
 #endif // SOCI_BOOST_GREGORIAN_DATE_H_INCLUDED

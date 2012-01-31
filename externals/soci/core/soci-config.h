@@ -19,12 +19,12 @@
 #ifdef _WIN32
 # ifdef SOCI_DLL
 #  ifdef SOCI_SOURCE
-#   define SOCI_DECL __declspec(dllexport)
+#   define SOCI_DECL    __declspec(dllexport)
 #  else
-#   define SOCI_DECL __declspec(dllimport)
+#   define SOCI_DECL    __declspec(dllimport)
 #  endif // SOCI_SOURCE
-# endif // SOCI_DLL
-#endif // _WIN32
+# endif  // SOCI_DLL
+#endif   // _WIN32
 //
 // If SOCI_DECL isn't defined yet define it now
 #ifndef SOCI_DECL

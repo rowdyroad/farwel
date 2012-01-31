@@ -22,11 +22,10 @@ using namespace soci;
 using namespace soci::details;
 
 
-odbc_statement_backend::odbc_statement_backend(odbc_session_backend &session)
+odbc_statement_backend::odbc_statement_backend(odbc_session_backend& session)
     : session_(session), hstmt_(0), numRowsFetched_(0),
-      hasVectorUseElements_(false), boundByName_(false), boundByPos_(false)
-{
-}
+    hasVectorUseElements_(false), boundByName_(false), boundByPos_(false)
+{}
 
 void odbc_statement_backend::alloc()
 {
@@ -34,10 +33,9 @@ void odbc_statement_backend::alloc()
 
     // Allocate environment handle
     rc = SQLAllocHandle(SQL_HANDLE_STMT, session_.hdbc_, &hstmt_);
-    if (is_odbc_error(rc))
-    {
+    if (is_odbc_error(rc)) {
         throw odbc_soci_error(SQL_HANDLE_DBC, session_.hdbc_,
-            "Allocating statement");
+                              "Allocating statement");
     }
 }
 
@@ -46,9 +44,8 @@ void odbc_statement_backend::clean_up()
     SQLFreeHandle(SQL_HANDLE_STMT, hstmt_);
 }
 
-
-void odbc_statement_backend::prepare(std::string const & query,
-    statement_type /* eType */)
+void odbc_statement_backend::prepare(std::string const& query,
+                                     statement_type /* eType */)
 {
     // rewrite the query by transforming all named parameters into
     // the ODBC numbers ones (:abc -> $1, etc.)
@@ -58,97 +55,78 @@ void odbc_statement_backend::prepare(std::string const & query,
     std::string name;
 
     for (std::string::const_iterator it = query.begin(), end = query.end();
-         it != end; ++it)
-    {
-        switch (state)
-        {
+         it != end; ++it) {
+        switch (state) {
         case eNormal:
-            if (*it == '\'')
-            {
+            if (*it == '\'') {
                 query_ += *it;
-                state = eInQuotes;
-            }
-            else if (*it == '#')
-            {
+                state   = eInQuotes;
+            }else if (*it == '#')  {
                 query_ += *it;
-                state = eInAccessDate;
-            }
-            else if (*it == ':')
-            {
+                state   = eInAccessDate;
+            }else if (*it == ':')  {
                 state = eInName;
-            }
-            else // regular character, stay in the same state
-            {
+            }else  { // regular character, stay in the same state
                 query_ += *it;
             }
             break;
+
         case eInQuotes:
-            if (*it == '\'')
-            {
+            if (*it == '\'') {
                 query_ += *it;
-                state = eNormal;
-            }
-            else // regular quoted character
-            {
+                state   = eNormal;
+            }else  { // regular quoted character
                 query_ += *it;
             }
             break;
+
         case eInName:
-            if (std::isalnum(*it) || *it == '_')
-            {
+            if (std::isalnum(*it) || (*it == '_')) {
                 name += *it;
-            }
-            else // end of name
-            {
+            }else  { // end of name
                 names_.push_back(name);
                 name.clear();
                 std::ostringstream ss;
                 ss << '?';
                 query_ += ss.str();
                 query_ += *it;
-                state = eNormal;
+                state   = eNormal;
             }
             break;
+
         case eInAccessDate:
-            if (*it == '#')
-            {
+            if (*it == '#') {
                 query_ += *it;
-                state = eNormal;
-            }
-            else // regular quoted character
-            {
+                state   = eNormal;
+            }else  { // regular quoted character
                 query_ += *it;
             }
             break;
         }
     }
 
-    if (state == eInName)
-    {
+    if (state == eInName) {
         names_.push_back(name);
         std::ostringstream ss;
         ss << '?';
         query_ += ss.str();
     }
 
-    SQLRETURN rc = SQLPrepare(hstmt_, (SQLCHAR*)query_.c_str(), (SQLINTEGER)query_.size());
-    if (is_odbc_error(rc))
-    {
+    SQLRETURN rc = SQLPrepare(hstmt_, (SQLCHAR *)query_.c_str(), (SQLINTEGER)query_.size());
+    if (is_odbc_error(rc)) {
         throw odbc_soci_error(SQL_HANDLE_STMT, hstmt_,
-                         query_.c_str());
+                              query_.c_str());
     }
 }
 
-statement_backend::exec_fetch_result
-odbc_statement_backend::execute(int number)
+statement_backend::exec_fetch_result odbc_statement_backend::execute(int number)
 {
     // made this static because MSVC debugger was reporting
     // that there was an attempt to use rows_processed after the stack
     // was destroyed.  Some ODBC clean_up ?
     static SQLUSMALLINT rows_processed = 0;
 
-    if (hasVectorUseElements_)
-    {
+    if (hasVectorUseElements_) {
         SQLSetStmtAttr(hstmt_, SQL_ATTR_PARAMS_PROCESSED_PTR, &rows_processed, 0);
     }
 
@@ -157,25 +135,22 @@ odbc_statement_backend::execute(int number)
     SQLCloseCursor(hstmt_);
 
     SQLRETURN rc = SQLExecute(hstmt_);
-    if (is_odbc_error(rc))
-    {
+    if (is_odbc_error(rc)) {
         throw odbc_soci_error(SQL_HANDLE_STMT, hstmt_,
-                         "Statement Execute");
+                              "Statement Execute");
     }
 
     SQLSMALLINT colCount;
     SQLNumResultCols(hstmt_, &colCount);
 
-    if (number > 0 && colCount > 0)
-    {
+    if ((number > 0) && (colCount > 0)) {
         return fetch(number);
     }
 
     return ef_success;
 }
 
-statement_backend::exec_fetch_result
-odbc_statement_backend::fetch(int number)
+statement_backend::exec_fetch_result odbc_statement_backend::fetch(int number)
 {
     numRowsFetched_ = 0;
 
@@ -185,15 +160,13 @@ odbc_statement_backend::fetch(int number)
 
     SQLRETURN rc = SQLFetch(hstmt_);
 
-    if (SQL_NO_DATA == rc)
-    {
+    if (SQL_NO_DATA == rc) {
         return ef_no_data;
     }
 
-    if (is_odbc_error(rc))
-    {
+    if (is_odbc_error(rc)) {
         throw odbc_soci_error(SQL_HANDLE_STMT, hstmt_,
-                         "Statement Fetch");
+                              "Statement Fetch");
     }
 
     return ef_success;
@@ -211,7 +184,7 @@ int odbc_statement_backend::get_number_of_rows()
 }
 
 std::string odbc_statement_backend::rewrite_for_procedure_call(
-    std::string const &query)
+    std::string const& query)
 {
     return query;
 }
@@ -219,17 +192,18 @@ std::string odbc_statement_backend::rewrite_for_procedure_call(
 int odbc_statement_backend::prepare_for_describe()
 {
     SQLSMALLINT numCols;
+
     SQLNumResultCols(hstmt_, &numCols);
     return numCols;
 }
 
-void odbc_statement_backend::describe_column(int colNum, data_type & type,
-                                          std::string & columnName)
+void odbc_statement_backend::describe_column(int colNum, data_type& type,
+                                             std::string& columnName)
 {
-    SQLCHAR colNameBuffer[2048];
+    SQLCHAR     colNameBuffer[2048];
     SQLSMALLINT colNameBufferOverflow;
     SQLSMALLINT dataType;
-    SQLULEN colSize;
+    SQLULEN     colSize;
     SQLSMALLINT decDigits;
     SQLSMALLINT isNullable;
 
@@ -238,22 +212,21 @@ void odbc_statement_backend::describe_column(int colNum, data_type & type,
                                   &colNameBufferOverflow, &dataType,
                                   &colSize, &decDigits, &isNullable);
 
-    if (is_odbc_error(rc))
-    {
+    if (is_odbc_error(rc)) {
         throw odbc_soci_error(SQL_HANDLE_STMT, hstmt_,
-                         "describe Column");
+                              "describe Column");
     }
 
     char const *name = reinterpret_cast<char const *>(colNameBuffer);
     columnName.assign(name, std::strlen(name));
 
-    switch (dataType)
-    {
+    switch (dataType) {
     case SQL_TYPE_DATE:
     case SQL_TYPE_TIME:
     case SQL_TYPE_TIMESTAMP:
         type = dt_date;
         break;
+
     case SQL_DOUBLE:
     case SQL_DECIMAL:
     case SQL_REAL:
@@ -261,12 +234,14 @@ void odbc_statement_backend::describe_column(int colNum, data_type & type,
     case SQL_NUMERIC:
         type = dt_double;
         break;
+
     case SQL_TINYINT:
     case SQL_SMALLINT:
     case SQL_INTEGER:
     case SQL_BIGINT:
         type = dt_integer;
         break;
+
     case SQL_CHAR:
     case SQL_VARCHAR:
     case SQL_LONGVARCHAR:
@@ -278,10 +253,10 @@ void odbc_statement_backend::describe_column(int colNum, data_type & type,
 
 std::size_t odbc_statement_backend::column_size(int colNum)
 {
-    SQLCHAR colNameBuffer[2048];
+    SQLCHAR     colNameBuffer[2048];
     SQLSMALLINT colNameBufferOverflow;
     SQLSMALLINT dataType;
-    SQLULEN colSize;
+    SQLULEN     colSize;
     SQLSMALLINT decDigits;
     SQLSMALLINT isNullable;
 
@@ -290,32 +265,30 @@ std::size_t odbc_statement_backend::column_size(int colNum)
                                   &colNameBufferOverflow, &dataType,
                                   &colSize, &decDigits, &isNullable);
 
-    if (is_odbc_error(rc))
-    {
+    if (is_odbc_error(rc)) {
         throw odbc_soci_error(SQL_HANDLE_STMT, hstmt_,
-                         "column size");
+                              "column size");
     }
 
     return colSize;
 }
 
-odbc_standard_into_type_backend * odbc_statement_backend::make_into_type_backend()
+odbc_standard_into_type_backend *odbc_statement_backend::make_into_type_backend()
 {
     return new odbc_standard_into_type_backend(*this);
 }
 
-odbc_standard_use_type_backend * odbc_statement_backend::make_use_type_backend()
+odbc_standard_use_type_backend *odbc_statement_backend::make_use_type_backend()
 {
     return new odbc_standard_use_type_backend(*this);
 }
 
-odbc_vector_into_type_backend *
-odbc_statement_backend::make_vector_into_type_backend()
+odbc_vector_into_type_backend *odbc_statement_backend::make_vector_into_type_backend()
 {
     return new odbc_vector_into_type_backend(*this);
 }
 
-odbc_vector_use_type_backend * odbc_statement_backend::make_vector_use_type_backend()
+odbc_vector_use_type_backend *odbc_statement_backend::make_vector_use_type_backend()
 {
     hasVectorUseElements_ = true;
     return new odbc_vector_use_type_backend(*this);

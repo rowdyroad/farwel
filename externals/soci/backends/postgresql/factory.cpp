@@ -22,26 +22,24 @@ using namespace soci;
 using namespace soci::details;
 
 // concrete factory for Empty concrete strategies
-postgresql_session_backend * postgresql_backend_factory::make_session(
-     std::string const & connectString) const
+postgresql_session_backend *postgresql_backend_factory::make_session(
+    std::string const& connectString) const
 {
-     return new postgresql_session_backend(connectString);
+    return new postgresql_session_backend(connectString);
 }
 
 postgresql_backend_factory const soci::postgresql;
 
 extern "C"
 {
-
 // for dynamic backend loading
-SOCI_POSTGRESQL_DECL backend_factory const * factory_postgresql()
-{
-    return &soci::postgresql;
-}
+    SOCI_POSTGRESQL_DECL backend_factory const *factory_postgresql()
+    {
+        return &soci::postgresql;
+    }
 
-SOCI_POSTGRESQL_DECL void register_factory_postgresql()
-{
-    soci::dynamic_backends::register_backend("postgresql", soci::postgresql);
-}
-
+    SOCI_POSTGRESQL_DECL void register_factory_postgresql()
+    {
+        soci::dynamic_backends::register_backend("postgresql", soci::postgresql);
+    }
 } // extern "C"

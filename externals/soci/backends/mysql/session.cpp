@@ -26,234 +26,186 @@ using namespace soci::details;
 using std::string;
 
 
-namespace
-{ // anonymous
-
-void skip_white(std::string::const_iterator *i,
-    std::string::const_iterator const & end, bool endok)
-{
-    for (;;)
+namespace { // anonymous
+    void skip_white(std::string::const_iterator *i,
+                    std::string::const_iterator const& end, bool endok)
     {
-        if (*i == end)
-        {
-            if (endok)
-            {
+        for ( ; ; ) {
+            if (*i == end) {
+                if (endok) {
+                    return;
+                }else  {
+                    throw soci_error("Unexpected end of connection string.");
+                }
+            }
+            if (std::isspace(**i)) {
+                ++*i;
+            }else  {
                 return;
             }
-            else
-            {
-                throw soci_error("Unexpected end of connection string.");
-            }
-        }
-        if (std::isspace(**i))
-        {
-            ++*i;
-        }
-        else
-        {
-            return;
         }
     }
-}
 
-std::string param_name(std::string::const_iterator *i,
-    std::string::const_iterator const & end)
-{
-    std::string val("");
-    for (;;)
+    std::string param_name(std::string::const_iterator        *i,
+                           std::string::const_iterator const& end)
     {
-        if (*i == end or (not std::isalpha(**i) and **i != '_'))
-        {
-            break;
-        }
-        val += **i;
-        ++*i;
-    }
-    return val;
-}
+        std::string val("");
 
-string param_value(string::const_iterator *i,
-    string::const_iterator const & end)
-{
-    string err = "Malformed connection string.";
-    bool quot;
-    if (**i == '\'')
-    {
-        quot = true;
-        ++*i;
-    }
-    else
-    {
-        quot = false;
-    }
-    string val("");
-    for (;;)
-    {
-        if (*i == end)
-        {
-            if (quot)
-            {
-                throw soci_error(err);
-            }
-            else
-            {
+        for ( ; ; ) {
+            if (*i == end or(not std::isalpha(**i) and * *i != '_')) {
                 break;
             }
+            val += **i;
+            ++*i;
         }
-        if (**i == '\'')
-        {
-            if (quot)
-            {
+        return val;
+    }
+
+    string param_value(string::const_iterator        *i,
+                       string::const_iterator const& end)
+    {
+        string err = "Malformed connection string.";
+        bool   quot;
+
+        if (**i == '\'') {
+            quot = true;
+            ++*i;
+        }else  {
+            quot = false;
+        }
+        string val("");
+        for ( ; ; ) {
+            if (*i == end) {
+                if (quot) {
+                    throw soci_error(err);
+                }else  {
+                    break;
+                }
+            }
+            if (**i == '\'') {
+                if (quot) {
+                    ++*i;
+                    break;
+                }else  {
+                    throw soci_error(err);
+                }
+            }
+            if (not quot and std::isspace(**i)) {
+                break;
+            }
+            if (**i == '\\') {
                 ++*i;
-                break;
+                if (*i == end) {
+                    throw soci_error(err);
+                }
             }
-            else
-            {
-                throw soci_error(err);
-            }
-        }
-        if (not quot and std::isspace(**i))
-        {
-            break;
-        }
-        if (**i == '\\')
-        {
+            val += **i;
             ++*i;
-            if (*i == end)
-            {
+        }
+        return val;
+    }
+
+    bool valid_int(const string& s)
+    {
+        char       *tail;
+        const char *cstr = s.c_str();
+
+        errno = 0;
+        long n = std::strtol(cstr, &tail, 10);
+        if (errno != 0 or n > INT_MAX or n < INT_MIN) {
+            return false;
+        }
+        if (*tail != '\0') {
+            return false;
+        }
+        return true;
+    }
+
+    void parse_connect_string(const string& connectString,
+                              string *host, bool *host_p,
+                              string *user, bool *user_p,
+                              string *password, bool *password_p,
+                              string *db, bool *db_p,
+                              string *unix_socket, bool *unix_socket_p,
+                              int *port, bool *port_p)
+    {
+        *host_p        = false;
+        *user_p        = false;
+        *password_p    = false;
+        *db_p          = false;
+        *unix_socket_p = false;
+        *port_p        = false;
+        string                 err = "Malformed connection string.";
+        string::const_iterator i   = connectString.begin(),
+                               end = connectString.end();
+        while (i != end) {
+            skip_white(&i, end, true);
+            if (i == end) {
+                return;
+            }
+            string par = param_name(&i, end);
+            skip_white(&i, end, false);
+            if (*i == '=') {
+                ++i;
+            }else  {
+                throw soci_error(err);
+            }
+            skip_white(&i, end, false);
+            string val = param_value(&i, end);
+            if (par == "port" and not * port_p) {
+                if (not valid_int(val)) {
+                    throw soci_error(err);
+                }
+                *port = std::atoi(val.c_str());
+                if (port < 0) {
+                    throw soci_error(err);
+                }
+                *port_p = true;
+            }else if (par == "host" and not * host_p)   {
+                *host   = val;
+                *host_p = true;
+            }else if (par == "user" and not * user_p)   {
+                *user   = val;
+                *user_p = true;
+            }else if ((par == "pass" or par == "password")and not * password_p)  {
+                *password   = val;
+                *password_p = true;
+            }else if ((par == "db" or par == "dbname")and not * db_p)  {
+                *db   = val;
+                *db_p = true;
+            }else if (par == "unix_socket" and not * unix_socket_p)   {
+                *unix_socket   = val;
+                *unix_socket_p = true;
+            }else  {
                 throw soci_error(err);
             }
         }
-        val += **i;
-        ++*i;
     }
-    return val;
-}
-
-bool valid_int(const string & s)
-{
-    char *tail;
-    const char *cstr = s.c_str();
-    errno = 0;
-    long n = std::strtol(cstr, &tail, 10);
-    if (errno != 0 or n > INT_MAX or n < INT_MIN)
-    {
-        return false;
-    }
-    if (*tail != '\0')
-    {
-        return false;
-    }
-    return true;
-}
-
-void parse_connect_string(const string & connectString,
-    string *host, bool *host_p,
-    string *user, bool *user_p,
-    string *password, bool *password_p,
-    string *db, bool *db_p,
-    string *unix_socket, bool *unix_socket_p,
-    int *port, bool *port_p)
-{
-    *host_p = false;
-    *user_p = false;
-    *password_p = false;
-    *db_p = false;
-    *unix_socket_p = false;
-    *port_p = false;
-    string err = "Malformed connection string.";
-    string::const_iterator i = connectString.begin(),
-        end = connectString.end();
-    while (i != end)
-    {
-        skip_white(&i, end, true);
-        if (i == end)
-        {
-            return;
-        }
-        string par = param_name(&i, end);
-        skip_white(&i, end, false);
-        if (*i == '=')
-        {
-            ++i;
-        }
-        else
-        {
-            throw soci_error(err);
-        }
-        skip_white(&i, end, false);
-        string val = param_value(&i, end);
-        if (par == "port" and not *port_p)
-        {
-            if (not valid_int(val))
-            {
-                throw soci_error(err);
-            }
-            *port = std::atoi(val.c_str());
-            if (port < 0)
-            {
-                throw soci_error(err);
-            }
-            *port_p = true;
-        }
-        else if (par == "host" and not *host_p)
-        {
-            *host = val;
-            *host_p = true;
-        }
-        else if (par == "user" and not *user_p)
-        {
-            *user = val;
-            *user_p = true;
-        }
-        else if ((par == "pass" or par == "password") and not *password_p)
-        {
-            *password = val;
-            *password_p = true;
-        }
-        else if ((par == "db" or par == "dbname") and not *db_p)
-        {
-            *db = val;
-            *db_p = true;
-        }
-        else if (par == "unix_socket" and not *unix_socket_p)
-        {
-            *unix_socket = val;
-            *unix_socket_p = true;
-        }
-        else
-        {
-            throw soci_error(err);
-        }
-    }
-}
-
 } // namespace anonymous
 
 mysql_session_backend::mysql_session_backend(
-    std::string const & connectString)
+    std::string const& connectString)
 {
     string host, user, password, db, unix_socket;
-    int port;
-    bool host_p, user_p, password_p, db_p, unix_socket_p, port_p;
+    int    port;
+    bool   host_p, user_p, password_p, db_p, unix_socket_p, port_p;
+
     parse_connect_string(connectString, &host, &host_p, &user, &user_p,
-        &password, &password_p, &db, &db_p,
-        &unix_socket, &unix_socket_p, &port, &port_p);
+                         &password, &password_p, &db, &db_p,
+                         &unix_socket, &unix_socket_p, &port, &port_p);
     conn_ = mysql_init(NULL);
-    if (conn_ == NULL)
-    {
+    if (conn_ == NULL) {
         throw soci_error("mysql_init() failed.");
     }
     if (mysql_real_connect(conn_,
-            host_p ? host.c_str() : NULL,
-            user_p ? user.c_str() : NULL,
-            password_p ? password.c_str() : NULL,
-            db_p ? db.c_str() : NULL,
-            port_p ? port : 0,
-            unix_socket_p ? unix_socket.c_str() : NULL,
-            CLIENT_FOUND_ROWS | CLIENT_MULTI_RESULTS) == NULL)
-    {
-        string errMsg = mysql_error(conn_);
+                           host_p ? host.c_str() : NULL,
+                           user_p ? user.c_str() : NULL,
+                           password_p ? password.c_str() : NULL,
+                           db_p ? db.c_str() : NULL,
+                           port_p ? port : 0,
+                           unix_socket_p ? unix_socket.c_str() : NULL,
+                           CLIENT_FOUND_ROWS | CLIENT_MULTI_RESULTS) == NULL) {
+        string       errMsg = mysql_error(conn_);
         unsigned int errNum = mysql_errno(conn_);
         clean_up();
         throw mysql_soci_error(errMsg, errNum);
@@ -267,17 +219,14 @@ mysql_session_backend::~mysql_session_backend()
 
 namespace // unnamed
 {
-
 // helper function for hardcoded queries
-void hard_exec(MYSQL *conn, const string & query)
-{
-    if (0 != mysql_real_query(conn, query.c_str(),
-            static_cast<unsigned long>(query.size())))
+    void hard_exec(MYSQL *conn, const string& query)
     {
-        throw soci_error(mysql_error(conn));
+        if (0 != mysql_real_query(conn, query.c_str(),
+                                  static_cast<unsigned long>(query.size()))) {
+            throw soci_error(mysql_error(conn));
+        }
     }
-}
-
 } // namespace unnamed
 
 void mysql_session_backend::begin()
@@ -297,24 +246,23 @@ void mysql_session_backend::rollback()
 
 void mysql_session_backend::clean_up()
 {
-    if (conn_ != NULL)
-    {
+    if (conn_ != NULL) {
         mysql_close(conn_);
         conn_ = NULL;
     }
 }
 
-mysql_statement_backend * mysql_session_backend::make_statement_backend()
+mysql_statement_backend *mysql_session_backend::make_statement_backend()
 {
     return new mysql_statement_backend(*this);
 }
 
-mysql_rowid_backend * mysql_session_backend::make_rowid_backend()
+mysql_rowid_backend *mysql_session_backend::make_rowid_backend()
 {
     return new mysql_rowid_backend(*this);
 }
 
-mysql_blob_backend * mysql_session_backend::make_blob_backend()
+mysql_blob_backend *mysql_session_backend::make_blob_backend()
 {
     return new mysql_blob_backend(*this);
 }

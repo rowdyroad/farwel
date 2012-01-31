@@ -19,27 +19,20 @@ using namespace soci::details;
 
 indicator values::get_indicator(std::size_t pos) const
 {
-    if (row_)
-    {
+    if (row_) {
         return row_->get_indicator(pos);
-    }
-    else
-    {
+    }else  {
         return *indicators_[pos];
     }
 }
 
 indicator values::get_indicator(std::string const& name) const
 {
-    if (row_)
-    {
+    if (row_) {
         return row_->get_indicator(name);
-    }
-    else
-    {
+    }else  {
         std::map<std::string, std::size_t>::const_iterator it = index_.find(name);
-        if (it == index_.end())
-        {
+        if (it == index_.end()) {
             std::ostringstream msg;
             msg << "Column '" << name << "' not found";
             throw soci_error(msg.str());
@@ -50,8 +43,7 @@ indicator values::get_indicator(std::string const& name) const
 
 column_properties const& values::get_properties(std::size_t pos) const
 {
-    if (row_)
-    {
+    if (row_) {
         return row_->get_properties(pos);
     }
 
@@ -60,8 +52,7 @@ column_properties const& values::get_properties(std::size_t pos) const
 
 column_properties const& values::get_properties(std::string const& name) const
 {
-    if (row_)
-    {
+    if (row_) {
         return row_->get_properties(name);
     }
 

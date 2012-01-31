@@ -17,26 +17,24 @@ using namespace soci;
 using namespace soci::details;
 
 // concrete factory for Empty concrete strategies
-sqlite3_session_backend * sqlite3_backend_factory::make_session(
-     std::string const &connectString) const
+sqlite3_session_backend *sqlite3_backend_factory::make_session(
+    std::string const& connectString) const
 {
-     return new sqlite3_session_backend(connectString);
+    return new sqlite3_session_backend(connectString);
 }
 
 sqlite3_backend_factory const soci::sqlite3;
 
 extern "C"
 {
-
 // for dynamic backend loading
-SOCI_SQLITE3_DECL backend_factory const * factory_sqlite3()
-{
-    return &soci::sqlite3;
-}
+    SOCI_SQLITE3_DECL backend_factory const *factory_sqlite3()
+    {
+        return &soci::sqlite3;
+    }
 
-SOCI_SQLITE3_DECL void register_factory_sqlite3()
-{
-    soci::dynamic_backends::register_backend("sqlite3", soci::sqlite3);
-}
-
+    SOCI_SQLITE3_DECL void register_factory_sqlite3()
+    {
+        soci::dynamic_backends::register_backend("sqlite3", soci::sqlite3);
+    }
 } // extern "C"

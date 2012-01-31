@@ -16,7 +16,7 @@ using namespace soci::details;
 using namespace soci::details::postgresql;
 
 postgresql_soci_error::postgresql_soci_error(
-    std::string const & msg, char const *sqlst)
+    std::string const& msg, char const *sqlst)
     : soci_error(msg)
 {
     assert(std::strlen(sqlst) == 5);
@@ -29,13 +29,13 @@ std::string postgresql_soci_error::sqlstate() const
 }
 
 void soci::details::postgresql::get_error_details(PGresult *res,
-    std::string &msg, std::string &sqlstate)
+                                                  std::string& msg, std::string& sqlstate)
 {
-   msg = PQresultErrorMessage(res);
-   const char *sqlst = PQresultErrorField(res, PG_DIAG_SQLSTATE);
-   assert(sqlst);
-   assert(std::strlen(sqlst) == 5);
-   sqlstate.assign(sqlst, 5);
+    msg = PQresultErrorMessage(res);
+    const char *sqlst = PQresultErrorField(res, PG_DIAG_SQLSTATE);
+    assert(sqlst);
+    assert(std::strlen(sqlst) == 5);
+    sqlstate.assign(sqlst, 5);
 }
 
 void soci::details::postgresql::throw_postgresql_soci_error(PGresult *res)

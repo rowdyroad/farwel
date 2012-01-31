@@ -17,7 +17,7 @@ using namespace soci::details;
 
 
 empty_session_backend::empty_session_backend(
-    std::string const & /* connectString */)
+    std::string const& /* connectString */)
 {
     // ...
 }
@@ -47,17 +47,17 @@ void empty_session_backend::clean_up()
     // ...
 }
 
-empty_statement_backend * empty_session_backend::make_statement_backend()
+empty_statement_backend *empty_session_backend::make_statement_backend()
 {
     return new empty_statement_backend(*this);
 }
 
-empty_rowid_backend * empty_session_backend::make_rowid_backend()
+empty_rowid_backend *empty_session_backend::make_rowid_backend()
 {
     return new empty_rowid_backend(*this);
 }
 
-empty_blob_backend * empty_session_backend::make_blob_backend()
+empty_blob_backend *empty_session_backend::make_blob_backend()
 {
     return new empty_blob_backend(*this);
 }

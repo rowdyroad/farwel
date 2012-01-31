@@ -85,7 +85,7 @@ extern "C" {
             return (mode) ? real.open(path, flags, mode) : real.open(path, flags);
 #endif
         }
-        main->Logger().Inf("%s\n", cntr->Name().c_str());
+        main->Logger().Inf("%s", cntr->Name().c_str());
         return cntr->Open(realpath, flags);
     }
 
@@ -139,7 +139,7 @@ extern "C" {
         return cntr->Read(fd, data, size);
     }
 
-    void __setStat(Connector* cntr, struct stat *buf, size_t size)
+    void __setStat(Connector *cntr, struct stat *buf, size_t size)
     {
         ::memset(buf, 0, sizeof(struct stat));
         buf->st_mode    = S_IFREG | S_IFDIR | S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
@@ -242,7 +242,7 @@ extern "C" {
             return real.opendir(dir);
         }
         main->Logger().Inf("%s\n", cntr->Name().c_str());
-        return cntr->OpenDir(realpath);
+        return (DIR *)cntr->OpenDir(realpath);
     }
 
     struct dirent *readdir(DIR *dir)

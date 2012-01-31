@@ -9,7 +9,7 @@ extern "C" {
 class Path
 {
     private:
-        std::string         current_path_;
+        std::string      current_path_;
         std::vector<int> slashes_;
     public:
         Path()

@@ -16,10 +16,9 @@ using namespace soci;
 using namespace soci::details;
 
 
-empty_statement_backend::empty_statement_backend(empty_session_backend &session)
+empty_statement_backend::empty_statement_backend(empty_session_backend& session)
     : session_(session)
-{
-}
+{}
 
 void empty_statement_backend::alloc()
 {
@@ -31,21 +30,19 @@ void empty_statement_backend::clean_up()
     // ...
 }
 
-void empty_statement_backend::prepare(std::string const & /* query */,
-    statement_type /* eType */)
+void empty_statement_backend::prepare(std::string const& /* query */,
+                                      statement_type /* eType */)
 {
     // ...
 }
 
-statement_backend::exec_fetch_result
-empty_statement_backend::execute(int /* number */)
+statement_backend::exec_fetch_result empty_statement_backend::execute(int /* number */)
 {
     // ...
     return ef_success;
 }
 
-statement_backend::exec_fetch_result
-empty_statement_backend::fetch(int /* number */)
+statement_backend::exec_fetch_result empty_statement_backend::fetch(int /* number */)
 {
     // ...
     return ef_success;
@@ -64,7 +61,7 @@ int empty_statement_backend::get_number_of_rows()
 }
 
 std::string empty_statement_backend::rewrite_for_procedure_call(
-    std::string const &query)
+    std::string const& query)
 {
     return query;
 }
@@ -76,28 +73,27 @@ int empty_statement_backend::prepare_for_describe()
 }
 
 void empty_statement_backend::describe_column(int /* colNum */,
-    data_type & /* type */, std::string & /* columnName */)
+                                              data_type& /* type */, std::string& /* columnName */)
 {
     // ...
 }
 
-empty_standard_into_type_backend * empty_statement_backend::make_into_type_backend()
+empty_standard_into_type_backend *empty_statement_backend::make_into_type_backend()
 {
     return new empty_standard_into_type_backend(*this);
 }
 
-empty_standard_use_type_backend * empty_statement_backend::make_use_type_backend()
+empty_standard_use_type_backend *empty_statement_backend::make_use_type_backend()
 {
     return new empty_standard_use_type_backend(*this);
 }
 
-empty_vector_into_type_backend *
-empty_statement_backend::make_vector_into_type_backend()
+empty_vector_into_type_backend *empty_statement_backend::make_vector_into_type_backend()
 {
     return new empty_vector_into_type_backend(*this);
 }
 
-empty_vector_use_type_backend * empty_statement_backend::make_vector_use_type_backend()
+empty_vector_use_type_backend *empty_statement_backend::make_vector_use_type_backend()
 {
     return new empty_vector_use_type_backend(*this);
 }

@@ -18,130 +18,126 @@
 #include <string>
 #include <vector>
 
-namespace soci
-{
-
-class SOCI_DECL column_properties
-{
-    // use getters/setters in case we want to make some
-    // of the getters lazy in the future
-public:
-
-    std::string get_name() const { return name_; }
-    data_type get_data_type() const { return dataType_; }
-
-    void set_name(std::string const& name) { name_ = name; }
-    void set_data_type(data_type dataType)  { dataType_ = dataType; }
-
-private:
-    std::string name_;
-    data_type dataType_;
-};
-
-class SOCI_DECL row
-{
-public:    
-    row();
-    ~row();
-
-    void uppercase_column_names(bool forceToUpper);
-    void add_properties(column_properties const& cp);
-    std::size_t size() const;
-    void clean_up();
-
-    indicator get_indicator(std::size_t pos) const;
-    indicator get_indicator(std::string const& name) const;
-
-    template <typename T>
-    inline void add_holder(T* t, indicator* ind)
+namespace soci {
+    class SOCI_DECL column_properties
     {
-        holders_.push_back(new details::type_holder<T>(t));
-        indicators_.push_back(ind);
-    }
+        // use getters/setters in case we want to make some
+        // of the getters lazy in the future
+        public:
 
-    column_properties const& get_properties(std::size_t pos) const;
-    column_properties const& get_properties(std::string const& name) const;
+            std::string get_name() const { return name_; }
+            data_type get_data_type() const { return dataType_; }
 
-    template <typename T>
-    T get(std::size_t pos) const
+            void set_name(std::string const& name) { name_ = name; }
+            void set_data_type(data_type dataType)  { dataType_ = dataType; }
+
+        private:
+            std::string name_;
+            data_type   dataType_;
+    };
+
+    class SOCI_DECL row
     {
-        assert(holders_.size() >= pos + 1);
+        public:
+            row();
+            ~row();
 
-        typedef typename type_conversion<T>::base_type base_type;
-        base_type const& baseVal = holders_[pos]->get<base_type>();
+            void uppercase_column_names(bool forceToUpper);
+            void add_properties(column_properties const& cp);
+            std::size_t size() const;
+            void clean_up();
 
-        T ret;
-        type_conversion<T>::from_base(baseVal, *indicators_[pos], ret);
-        return ret;
-    }
+            indicator get_indicator(std::size_t pos) const;
+            indicator get_indicator(std::string const& name) const;
 
-    template <typename T>
-    T get(std::size_t pos, T const &nullValue) const
-    {
-        assert(holders_.size() >= pos + 1);
+            template<typename T>
+            inline void add_holder(T *t, indicator *ind)
+            {
+                holders_.push_back(new details::type_holder<T>(t));
+                indicators_.push_back(ind);
+            }
 
-        if (i_null == *indicators_[pos])
-        {
-            return nullValue;
-        }
+            column_properties const& get_properties(std::size_t pos) const;
+            column_properties const& get_properties(std::string const& name) const;
 
-        return get<T>(pos);
-    }
+            template<typename T>
+            T get(std::size_t pos) const
+            {
+                assert(holders_.size() >= pos + 1);
 
-    template <typename T>
-    T get(std::string const &name) const
-    {
-        std::size_t const pos = find_column(name);
-        return get<T>(pos);
-    }
+                typedef typename type_conversion<T>::base_type   base_type;
+                base_type const& baseVal = holders_[pos]->get<base_type>();
 
-    template <typename T>
-    T get(std::string const &name, T const &nullValue) const
-    {
-        std::size_t const pos = find_column(name);
+                T ret;
+                type_conversion<T>::from_base(baseVal, *indicators_[pos], ret);
+                return ret;
+            }
 
-        if (i_null == *indicators_[pos])
-        {
-            return nullValue;
-        }
+            template<typename T>
+            T get(std::size_t pos, T const& nullValue) const
+            {
+                assert(holders_.size() >= pos + 1);
 
-        return get<T>(pos);
-    }
+                if (i_null == *indicators_[pos]) {
+                    return nullValue;
+                }
 
-    template <typename T>
-    row const& operator>>(T& value) const
-    {
-        value = get<T>(currentPos_);
-        ++currentPos_;
-        return *this;
-    }
+                return get<T>(pos);
+            }
 
-    void skip(std::size_t num = 1) const
-    {
-        currentPos_ += num;
-    }
+            template<typename T>
+            T get(std::string const& name) const
+            {
+                std::size_t const pos = find_column(name);
 
-    void reset_get_counter() const
-    {
-        currentPos_ = 0;
-    }
+                return get<T>(pos);
+            }
 
-private:
-    // copy not supported
-    row(row const &);
-    void operator=(row const &);
+            template<typename T>
+            T get(std::string const& name, T const& nullValue) const
+            {
+                std::size_t const pos = find_column(name);
 
-    std::size_t find_column(std::string const& name) const;
+                if (i_null == *indicators_[pos]) {
+                    return nullValue;
+                }
 
-    std::vector<column_properties> columns_;
-    std::vector<details::holder*> holders_;
-    std::vector<indicator*> indicators_;
-    std::map<std::string, std::size_t> index_;
+                return get<T>(pos);
+            }
 
-    bool uppercaseColumnNames_;
-    mutable std::size_t currentPos_;
-};
+            template<typename T>
+            row const& operator>>(T& value) const
+            {
+                value = get<T>(currentPos_);
+                ++currentPos_;
+                return *this;
+            }
 
+            void skip(std::size_t num = 1) const
+            {
+                currentPos_ += num;
+            }
+
+            void reset_get_counter() const
+            {
+                currentPos_ = 0;
+            }
+
+        private:
+            // copy not supported
+            row(row const&);
+            void operator=(row const&);
+
+            std::size_t find_column(std::string const& name) const;
+
+            std::vector<column_properties>     columns_;
+            std::vector<details::holder *>     holders_;
+            std::vector<indicator *>           indicators_;
+            std::map<std::string, std::size_t> index_;
+
+            bool                uppercaseColumnNames_;
+            mutable std::size_t currentPos_;
+    };
 } // namespace soci
 
 #endif // SOCI_ROW_H_INCLUDED

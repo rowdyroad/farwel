@@ -17,26 +17,24 @@ using namespace soci;
 using namespace soci::details;
 
 // concrete factory for Empty concrete strategies
-empty_session_backend* empty_backend_factory::make_session(
-     std::string const& connectString) const
+empty_session_backend *empty_backend_factory::make_session(
+    std::string const& connectString) const
 {
-     return new empty_session_backend(connectString);
+    return new empty_session_backend(connectString);
 }
 
 empty_backend_factory const soci::empty;
 
 extern "C"
 {
-
 // for dynamic backend loading
-SOCI_EMPTY_DECL backend_factory const* factory_empty()
-{
-    return &soci::empty;
-}
+    SOCI_EMPTY_DECL backend_factory const *factory_empty()
+    {
+        return &soci::empty;
+    }
 
-SOCI_EMPTY_DECL void register_factory_empty()
-{
-    soci::dynamic_backends::register_backend("empty", soci::empty);
-}
-
+    SOCI_EMPTY_DECL void register_factory_empty()
+    {
+        soci::dynamic_backends::register_backend("empty", soci::empty);
+    }
 } // extern "C"

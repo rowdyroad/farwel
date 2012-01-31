@@ -15,8 +15,8 @@
 
 using namespace soci;
 
-std::string connectString;
-backend_factory const &backEnd = *soci::factory_empty();
+std::string            connectString;
+backend_factory const& backEnd = *soci::factory_empty();
 
 
 // NOTE:
@@ -35,20 +35,19 @@ backend_factory const &backEnd = *soci::factory_empty();
 
 struct Person
 {
-    int id;
+    int         id;
     std::string firstName;
     std::string lastName;
 };
 
-namespace soci
-{
-    template<> struct type_conversion<Person>
+namespace soci {
+    template<>
+    struct type_conversion<Person>
     {
-        typedef values base_type;
-        static void from_base(values & /* r */, indicator /* ind */,
-            Person & /* p */)
-        {
-        }
+        typedef values   base_type;
+        static void from_base(values& /* r */, indicator /* ind */,
+                              Person& /* p */)
+        {}
     };
 }
 
@@ -67,7 +66,7 @@ void test1()
         sql << "insert", use(i);
         sql << "select", into(i);
 
-#if defined (__LP64__) || ( __WORDSIZE == 64 )
+#if defined (__LP64__) || (__WORDSIZE == 64)
         long int li = 9;
         sql << "insert", use(li);
         sql << "select", into(li);
@@ -119,16 +118,13 @@ void test1()
             Person p;
             sql << "select person", into(p);
         }
-
     }
 
     std::cout << "test 1 passed" << std::endl;
 }
 
-
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
-
 #ifdef _MSC_VER
     // Redirect errors, unrecoverable problems, and assert() failures to STDERR,
     // instead of debug message window.
@@ -138,21 +134,17 @@ int main(int argc, char** argv)
     _CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDERR);
 #endif //_MSC_VER
 
-    if (argc == 2)
-    {
+    if (argc == 2) {
         connectString = argv[1];
-    }
-    else
-    {
+    }else  {
         std::cout << "usage: " << argv[0]
-            << " connectstring\n"
-            << "example: " << argv[0]
-            << " \'connect_string_for_empty_backend\'\n";
+                  << " connectstring\n"
+                  << "example: " << argv[0]
+                  << " \'connect_string_for_empty_backend\'\n";
         std::exit(1);
     }
 
-    try
-    {
+    try{
         test1();
         // test2();
         // ...
@@ -160,9 +152,7 @@ int main(int argc, char** argv)
         std::cout << "\nOK, all tests passed.\n\n";
 
         return EXIT_SUCCESS;
-    }
-    catch (std::exception const & e)
-    {
+    }catch (std::exception const& e)  {
         std::cout << e.what() << '\n';
     }
 

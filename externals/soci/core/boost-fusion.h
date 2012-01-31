@@ -9,7 +9,7 @@
 #define SOCI_BOOST_FUSION_H_INCLUDED
 
 #ifndef SOCI_MAX_FUSION_SEQUENCE_LENGTH
-#define SOCI_MAX_FUSION_SEQUENCE_LENGTH 10
+#define SOCI_MAX_FUSION_SEQUENCE_LENGTH    10
 #endif
 
 #include "values.h"
@@ -24,13 +24,10 @@
 #include <boost/preprocessor/repetition/repeat_from_to.hpp>
 #include <boost/utility/enable_if.hpp>
 
-namespace soci
-{
-namespace detail
-{
-
-template <typename Seq, int size>
-struct type_conversion;
+namespace soci {
+    namespace detail {
+        template<typename Seq, int size>
+        struct type_conversion;
 
 #define SOCI_READ_FROM_BASE(z, k, data) \
     >> boost::fusion::at_c<k>(out)
@@ -40,60 +37,58 @@ struct type_conversion;
     << boost::fusion::at_c<k>(in)
 /**/
 
-#define SOCI_TYPE_CONVERSION_FUSION(z, k, data) \
-    template <typename Seq> \
-    struct type_conversion<Seq, k> \
-    { \
-        typedef values base_type; \
-     \
+#define SOCI_TYPE_CONVERSION_FUSION(z, k, data)                                   \
+    template<typename Seq>                                                        \
+    struct type_conversion<Seq, k>                                                \
+    {                                                                             \
+        typedef values   base_type;                                               \
+                                                                                  \
         static void from_base(base_type const & in, indicator /*ind*/, Seq & out) \
-        { \
-            in \
-                BOOST_PP_REPEAT(k, SOCI_READ_FROM_BASE, BOOST_PP_EMPTY) \
-            ; \
-        } \
-     \
-        static void to_base(Seq & in, base_type & out, indicator & /*ind*/) \
-        { \
-            out \
-                BOOST_PP_REPEAT(k, SOCI_READ_TO_BASE, BOOST_PP_EMPTY) \
-            ; \
-        } \
+        {                                                                         \
+            in                                                                    \
+            BOOST_PP_REPEAT(k, SOCI_READ_FROM_BASE, BOOST_PP_EMPTY)               \
+            ;                                                                     \
+        }                                                                         \
+                                                                                  \
+        static void to_base(Seq & in, base_type & out, indicator & /*ind*/)       \
+        {                                                                         \
+            out                                                                   \
+            BOOST_PP_REPEAT(k, SOCI_READ_TO_BASE, BOOST_PP_EMPTY)                 \
+            ;                                                                     \
+        }                                                                         \
     };
 /**/
 
-BOOST_PP_REPEAT_FROM_TO(1, BOOST_PP_ADD(SOCI_MAX_FUSION_SEQUENCE_LENGTH, 1), SOCI_TYPE_CONVERSION_FUSION, BOOST_PP_EMPTY)
+        BOOST_PP_REPEAT_FROM_TO(1, BOOST_PP_ADD(SOCI_MAX_FUSION_SEQUENCE_LENGTH, 1), SOCI_TYPE_CONVERSION_FUSION, BOOST_PP_EMPTY)
 
 #undef SOCI_TYPE_CONVERSION_FUSION
 #undef SOCI_READ_FROM_BASE
 #undef SOCI_READ_TO_BASE
+    } // namespace detail
 
-} // namespace detail
-
-template <typename T>
-struct type_conversion<T, 
-    typename boost::enable_if<
-        boost::fusion::traits::is_sequence<T>
-    >::type >
-{
-    typedef values base_type;
-
-private:
-    typedef typename boost::fusion::result_of::size<T>::type size;
-    typedef detail::type_conversion<T, size::value> converter;
-
-public:
-    static void from_base(base_type const & in, indicator ind, T& out)
+    template<typename T>
+    struct type_conversion<T,
+                           typename boost::enable_if<
+                               boost::fusion::traits::is_sequence<T>
+                           >::type>
     {
-        converter::from_base( in, ind, out );
-    }
+        typedef values                                                 base_type;
 
-    static void to_base(T& in, base_type & out, indicator & ind)
-    {
-        converter::to_base( in, out, ind );
-    }
-};
+        private:
+            typedef typename boost::fusion::result_of::size<T>::type   size;
+            typedef detail::type_conversion<T, size::value>            converter;
 
+        public:
+            static void from_base(base_type const& in, indicator ind, T& out)
+            {
+                converter::from_base(in, ind, out);
+            }
+
+            static void to_base(T& in, base_type& out, indicator& ind)
+            {
+                converter::to_base(in, out, ind);
+            }
+    };
 } // namespace soci
 
 #endif // SOCI_BOOST_FUSION_H_INCLUDED

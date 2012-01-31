@@ -18,8 +18,8 @@ class Connector
     private:
         std::string name_;
         FdManager&  fd_manager_;
-        typedef boost::unordered_map<int, std::string>                    Keys;
-        typedef boost::unordered_map<int, boost::intrusive_ptr<Directory> >   Directories;
+        typedef boost::unordered_map<int, std::string>   Keys;
+        typedef boost::unordered_map<int, Directory>     Directories;
         Keys            keys_;
         Directories     dirs_;
         std::string     empty_key_;
@@ -115,31 +115,34 @@ class Connector
 
         virtual struct dirent *ReadDir(DIR *dd)
         {
-            Directories::iterator it = dirs_.find(*(int*)dd);
+            Directories::iterator it = dirs_.find(*(int *)dd);
+
             if (it == dirs_.end()) {
                 return NULL;
             }
-            return it->second->Read();
+            return it->second.Read();
         }
 
-        void* OpenDir(const std::string& name)
+        void *OpenDir(const std::string& name)
         {
-            Directory dir(fd_manager_.Get(this),name);
+            Directory dir(fd_manager_.Get(this), name);
+
             if (!OpenDir(dir)) {
                 fd_manager_.Release(dir.Fd(), this);
                 return NULL;
             }
-            return (void*)&(dirs_.insert(std::make_pair(dir.Fd(),dir)).first->first);
+            return (void *)&(dirs_.insert(std::make_pair(dir.Fd(), dir)).first->first);
         }
 
         int CloseDir(DIR *dd)
         {
-            Directories::const_iterator it = dirs_.find(*(int*)dd);
+            Directories::iterator it = dirs_.find(*(int *)dd);
+
             if (it == dirs_.end()) {
                 return -1;
             }
 
-            if (CloseDir(*it->second.get())) {
+            if (CloseDir(it->second)) {
                 fd_manager_.Release(it->first, this);
                 dirs_.erase(it);
                 return 0;
@@ -158,10 +161,10 @@ class Connector
             }
             return GetFileSize(it->second, size);
         }
-        
+
         virtual blksize_t GetBlockSize() const
         {
-    	    return 0xFFFF;
+            return 0xFFFF;
         }
 
     protected:

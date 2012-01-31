@@ -15,22 +15,18 @@ using namespace soci::details;
 ref_counted_statement_base::ref_counted_statement_base(session& s)
     : refCount_(1)
     , session_(s)
-{
-}
+{}
 
 void ref_counted_statement::final_action()
 {
-    try
-    {
+    try{
         st_.alloc();
         st_.prepare(session_.get_query_stream().str(), st_one_time_query);
         st_.define_and_bind();
 
         const bool gotData = st_.execute(true);
         session_.set_got_data(gotData);
-    }
-    catch (...)
-    {
+    }catch (...)  {
         st_.clean_up();
         throw;
     }

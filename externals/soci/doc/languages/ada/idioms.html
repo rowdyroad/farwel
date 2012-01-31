@@ -1,71 +1,72 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en'>
-	<head>
-		<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
-		<title>SOCI-Ada - documentation</title>
-		<link rel="stylesheet" type="text/css" href="style.css" />
-	</head>
-<body>
-<h1>SOCI-Ada - manual</h1>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd" >
+ < html xmlns = 'http://www.w3.org/1999/xhtml' xml : lang = 'en' >
+                                                            < head >
+                                                            < meta http - equiv = "Content-Type" content = "text/html; charset=ISO-8859-1" / >
+                                                                                                           < title > SOCI - Ada - documentation</ title>
+                                                                                                           < link rel = "stylesheet" type = "text/css" href = "style.css" / >
+                                                                                                                                                              < / head >
+                                                                                                                                                              < body >
+                                                                                                                                                              < h1 > SOCI - Ada - manual</ h1>
 
-<p class="section"><b>Common Idioms</b></p>
-<p>
-As any other library, SOCI-Ada has its set of idioms that ensure optimal work in terms of performance and resource usage. Still, the optimal use will depend on the concrete usage scenario - the places where programmer choices are needed will be described explicitly.
-</p>
-<p>
-The idioms below are provided as <i>complete programs</i> with the intent to make them more understandable and to give complete context of use for each idiom. The programs assume that the target database is PostgreSQL, but this can be changed by a different connection string in each place where the sessions are established. The programs use the Ada 2005 interface and some minor changes will be required to adapt them for Ada 95 compilers.
-</p>
+                                                                                                                                                              < p class = "section" > < b > Common Idioms</ b> < / p >
+                                                                                                                                                                          < p >
+                                                                                                                                                                          As any other library, SOCI - Ada has its set of idioms that ensure optimal work in terms of performance and resource usage.Still, the optimal use will depend on the concrete usage scenario - the places where programmer choices are needed will be described explicitly.
+ < / p >
+ < p >
+ The idioms below are provided as<i> complete programs</ i> with the intent to make them more understandable and to give complete context of use for each idiom.The programs assume that the target database is PostgreSQL, but this can be changed by a different connection string in each place where the sessions are established.The programs use the Ada 2005 interface and some minor changes will be required to adapt them for Ada 95 compilers.
+ < / p >
 
-<p class="section"><b>Single query without data transfer</b></p>
-<p>
-This type of query is useful for DDL commands and can be executed directly on the given session, without explicit statement management.
-</p>
-<pre class="example">
-with SOCI;
+ < p class = "section" > < b > Single query without data transfer</ b> < / p >
+             < p >
+             This type of query is useful for DDL commands and can be executed directly on the given session, without explicit statement management.
+ < / p >
+ < pre class = "example" >
+               with SOCI;
 
-procedure My_Program is
+ procedure My_Program is
 
-   SQL : SOCI.Session := SOCI.Make_Session ("postgresql://dbname=my_database");
+SQL: SOCI.Session : = SOCI.Make_Session("postgresql://dbname=my_database");
 
-begin
+ begin
 
-   SQL.Execute ("drop table some_table");
+ SQL.Execute("drop table some_table");
 
-end My_Program;
-</pre>
+ end My_Program;
+ < / pre >
 
-<div class="note">
-<p><span class="note">Note:</span></p>
-<p>
-The session object is initialized by a constructor function call. An alternative would be to declare it without initialization and later use the <code>Open</code> operation to establish a physical connection with the database.
-</p>
-</div>
+ < div class = "note" >
+               < p > < span class = "note" > Note : < / span > < / p >
+                                    < p >
+                                    The session object is initialized by a constructor function call.An alternative would be to declare it without initialization and later use the<code> Open</ code> operation to establish a physical connection with the database.
+                                    < / p >
+                                    < / div >
 
-<p class="section"><b>Simple query without parameters resulting in one row of data</b></p>
-<p>
-This type of query requires only single into elements, which together with the statement have to be manipulated explicitly.
-</p>
-<pre class="example">
-with SOCI;
-with Ada.Text_IO;
+                                    < p class = "section" > < b > Simple query without parameters resulting in one row of data</ b> < / p >
+                                                < p >
+                                                This type of query requires only single into elements, which together with the statement have to be manipulated explicitly.
+ < / p >
+ < pre class = "example" >
+               with SOCI;
+ with Ada.Text_IO;
 
-procedure My_Program is
+ procedure My_Program is
 
-   SQL : SOCI.Session := SOCI.Make_Session ("postgresql://dbname=my_database");
-   St : SOCI.Statement := SOCI.Make_Statement (SQL);
-   Pos : SOCI.Into_Position;
+SQL: SOCI.Session : = SOCI.Make_Session("postgresql://dbname=my_database");
+St: SOCI.Statement : = SOCI.Make_Statement(SQL);
+Pos: SOCI.Into_Position;
 
-   Num_Of_Persons : SOCI.DB_Integer;
+Num_Of_Persons: SOCI.DB_Integer;
 
-begin
+ begin
 
-   Pos := St.Into_Integer;
-   St.Prepare ("select count(*) from persons");
-   St.Execute (True);
+Pos: = St.Into_Integer;
+ St.Prepare("select count(*) from persons");
+ St.Execute(True);
 
-   Num_Of_Persons := St.Get_Into_Integer (Pos);
+Num_Of_Persons: = St.Get_Into_Integer(Pos);
 
-   Ada.Text_IO.Put_Line ("Number of persons: " &amp; SOCI.DB_Integer'Image (Num_Of_Persons));
+ Ada.Text_IO.Put_Line ("Number of persons: " & amp;
+                       SOCI.DB_Integer 'Image (Num_Of_Persons));
 
 end My_Program;
 </pre>
@@ -304,3 +305,4 @@ Follow good database usage principles and avoid constructing queries by concaten
 <p class="copyright">Copyright &copy; 2008-2011 Maciej Sobczak</p>
 </body>
 </html>
+

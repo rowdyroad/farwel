@@ -1,5 +1,5 @@
 name = farwel
-LIBS = -lboost_regex -lboost_filesystem -lsoci_core -lsoci_mysql
+LIBS = -lboost_regex -lboost_filesystem -lsoci_core -lsoci_mysql -lrt
 SRC  = main.cpp
 GCC  = g++
 INCLUDES = -I/usr/local/include -I./externals/include

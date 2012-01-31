@@ -17,39 +17,42 @@
 using namespace soci;
 using namespace soci::tests;
 
-std::string connectString;
-backend_factory const &backEnd = *soci::factory_odbc();
+std::string            connectString;
+backend_factory const& backEnd = *soci::factory_odbc();
 
 // DDL Creation objects for common tests
-struct table_creator_one : public table_creator_base
+struct table_creator_one
+    : public table_creator_base
 {
-    table_creator_one(session & sql)
+    table_creator_one(session& sql)
         : table_creator_base(sql)
     {
         sql << "create table soci_test(id integer, val integer, c char, "
-                 "str varchar(20), sh integer, ul number, d float, "
-                 "tm timestamp, i1 integer, i2 integer, i3 integer, "
-                 "name varchar(20))";
+               "str varchar(20), sh integer, ul number, d float, "
+               "tm timestamp, i1 integer, i2 integer, i3 integer, "
+               "name varchar(20))";
     }
 };
 
-struct table_creator_two : public table_creator_base
+struct table_creator_two
+    : public table_creator_base
 {
-    table_creator_two(session & sql)
+    table_creator_two(session& sql)
         : table_creator_base(sql)
     {
-        sql  << "create table soci_test(num_float float, num_int integer,"
-                     " name varchar(20), sometime datetime, chr char)";
+        sql << "create table soci_test(num_float float, num_int integer,"
+               " name varchar(20), sometime datetime, chr char)";
     }
 };
 
-struct table_creator_three : public table_creator_base
+struct table_creator_three
+    : public table_creator_base
 {
-    table_creator_three(session & sql)
+    table_creator_three(session& sql)
         : table_creator_base(sql)
     {
         sql << "create table soci_test(name varchar(100) not null, "
-            "phone varchar(15))";
+               "phone varchar(15))";
     }
 };
 
@@ -57,47 +60,47 @@ struct table_creator_three : public table_creator_base
 // Support for SOCI Common Tests
 //
 
-class test_context : public test_context_base
+class test_context
+    : public test_context_base
 {
-public:
-    
-test_context(backend_factory const &backEnd, std::string const &connectString)
-        : test_context_base(backEnd, connectString) {}
+    public:
 
-    table_creator_base * table_creator_1(session& s) const
-    {   
-        return new table_creator_one(s);
-    }
+        test_context(backend_factory const& backEnd, std::string const& connectString)
+            : test_context_base(backEnd, connectString) {}
 
-    table_creator_base * table_creator_2(session& s) const
-    {
-        return new table_creator_two(s);
-    }
+        table_creator_base *table_creator_1(session& s) const
+        {
+            return new table_creator_one(s);
+        }
 
-    table_creator_base * table_creator_3(session& s) const
-    {
-        return new table_creator_three(s);
-    }
+        table_creator_base *table_creator_2(session& s) const
+        {
+            return new table_creator_two(s);
+        }
 
-    std::string fromDual(std::string const &sql) const
-    {
-        return sql;
-    }
+        table_creator_base *table_creator_3(session& s) const
+        {
+            return new table_creator_three(s);
+        }
 
-    std::string toDate(std::string const &datdt_string) const
-    {
-        return "#" + datdt_string + "#";
-    }
+        std::string fromDual(std::string const& sql) const
+        {
+            return sql;
+        }
 
-    std::string to_date_time(std::string const &datdt_string) const
-    {
-        return "#" + datdt_string + "#";
-    }
+        std::string toDate(std::string const& datdt_string) const
+        {
+            return "#" + datdt_string + "#";
+        }
+
+        std::string to_date_time(std::string const& datdt_string) const
+        {
+            return "#" + datdt_string + "#";
+        }
 };
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
-
 #ifdef _MSC_VER
     // Redirect errors, unrecoverable problems, and assert() failures to STDERR,
     // instead of debug message window.
@@ -107,31 +110,23 @@ int main(int argc, char** argv)
     _CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDERR);
 #endif //_MSC_VER
 
-    if (argc == 2)
-    {
+    if (argc == 2) {
         connectString = argv[1];
-    }
-    else
-    {
+    }else  {
         connectString = "FILEDSN=./test-access.dsn";
     }
-    try
-    {
+    try{
         test_context tc(backEnd, connectString);
         common_tests tests(tc);
         tests.run();
 
         return EXIT_SUCCESS;
-    }
-    catch (soci::odbc_soci_error const & e)
-    {
+    }catch (soci::odbc_soci_error const& e)  {
         std::cout << "ODBC Error Code: " << e.odbc_error_code() << std::endl
                   << "Native Error Code: " << e.native_error_code() << std::endl
                   << "SOCI Message: " << e.what() << std::endl
                   << "ODBC Message: " << e.odbc_error_message() << std::endl;
-    }
-    catch (std::exception const & e)
-    {
+    }catch (std::exception const& e)  {
         std::cout << "STD::EXECEPTION " << e.what() << '\n';
     }
 

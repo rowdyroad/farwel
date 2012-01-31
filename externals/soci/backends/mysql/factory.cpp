@@ -20,26 +20,24 @@ using namespace soci::details;
 
 
 // concrete factory for MySQL concrete strategies
-mysql_session_backend * mysql_backend_factory::make_session(
-     std::string const &connectString) const
+mysql_session_backend *mysql_backend_factory::make_session(
+    std::string const& connectString) const
 {
-     return new mysql_session_backend(connectString);
+    return new mysql_session_backend(connectString);
 }
 
 mysql_backend_factory const soci::mysql;
 
 extern "C"
 {
-
 // for dynamic backend loading
-SOCI_MYSQL_DECL backend_factory const * factory_mysql()
-{
-    return &soci::mysql;
-}
+    SOCI_MYSQL_DECL backend_factory const *factory_mysql()
+    {
+        return &soci::mysql;
+    }
 
-SOCI_MYSQL_DECL void register_factory_mysql()
-{
-    soci::dynamic_backends::register_backend("mysql", soci::mysql);
-}
-
+    SOCI_MYSQL_DECL void register_factory_mysql()
+    {
+        soci::dynamic_backends::register_backend("mysql", soci::mysql);
+    }
 } // extern "C"

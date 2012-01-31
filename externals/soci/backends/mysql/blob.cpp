@@ -18,15 +18,14 @@
 using namespace soci;
 using namespace soci::details;
 
-mysql_blob_backend::mysql_blob_backend(mysql_session_backend &session)
+mysql_blob_backend::mysql_blob_backend(mysql_session_backend& session)
     : session_(session)
 {
     throw soci_error("BLOBs are not supported.");
 }
 
 mysql_blob_backend::~mysql_blob_backend()
-{
-}
+{}
 
 std::size_t mysql_blob_backend::get_len()
 {

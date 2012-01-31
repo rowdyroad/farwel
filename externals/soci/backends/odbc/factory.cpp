@@ -14,26 +14,24 @@ using namespace soci::details;
 
 
 // concrete factory for ODBC concrete strategies
-odbc_session_backend * odbc_backend_factory::make_session(
-     std::string const &connectString) const
+odbc_session_backend *odbc_backend_factory::make_session(
+    std::string const& connectString) const
 {
-     return new odbc_session_backend(connectString);
+    return new odbc_session_backend(connectString);
 }
 
 odbc_backend_factory const soci::odbc;
 
 extern "C"
 {
-
 // for dynamic backend loading
-SOCI_ODBC_DECL backend_factory const * factory_odbc()
-{
-    return &soci::odbc;
-}
+    SOCI_ODBC_DECL backend_factory const *factory_odbc()
+    {
+        return &soci::odbc;
+    }
 
-SOCI_ODBC_DECL void register_factory_odbc()
-{
-    soci::dynamic_backends::register_backend("odbc", soci::odbc);
-}
-
+    SOCI_ODBC_DECL void register_factory_odbc()
+    {
+        soci::dynamic_backends::register_backend("odbc", soci::odbc);
+    }
 } // extern "C"

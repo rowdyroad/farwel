@@ -10,24 +10,14 @@
 
 #include "soci-oracle.h"
 
-namespace soci
-{
+namespace soci {
+    namespace details {
+        namespace oracle {
+            void throw_oracle_soci_error(sword res, OCIError *errhp);
 
-namespace details
-{
-
-namespace oracle
-{
-
-void throw_oracle_soci_error(sword res, OCIError *errhp);
-
-void get_error_details(sword res, OCIError *errhp,
-    std::string &msg, int &errNum);
-
-} // namespace oracle
-
-} // namespace details
-
-} // namespace soci
+            void get_error_details(sword res, OCIError *errhp, std::string& msg, int& errNum);
+        } // namespace oracle
+    }     // namespace details
+}         // namespace soci
 
 #endif

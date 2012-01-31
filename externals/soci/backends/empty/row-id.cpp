@@ -16,7 +16,7 @@ using namespace soci;
 using namespace soci::details;
 
 
-empty_rowid_backend::empty_rowid_backend(empty_session_backend & /* session */)
+empty_rowid_backend::empty_rowid_backend(empty_session_backend& /* session */)
 {
     // ...
 }

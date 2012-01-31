@@ -19,21 +19,16 @@ transaction::transaction(session& sql)
 
 transaction::~transaction()
 {
-    if (handled_ == false)
-    {
-        try
-        {
+    if (handled_ == false) {
+        try{
             rollback();
-        }
-        catch (...)
-        {}
+        }catch (...)  {}
     }
 }
 
 void transaction::commit()
 {
-    if (handled_)
-    {
+    if (handled_) {
         throw soci_error("The transaction object cannot be handled twice.");
     }
 
@@ -43,8 +38,7 @@ void transaction::commit()
 
 void transaction::rollback()
 {
-    if (handled_)
-    {
+    if (handled_) {
         throw soci_error("The transaction object cannot be handled twice.");
     }
 

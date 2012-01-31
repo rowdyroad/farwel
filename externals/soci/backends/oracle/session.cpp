@@ -22,33 +22,30 @@ using namespace soci;
 using namespace soci::details;
 using namespace soci::details::oracle;
 
-oracle_session_backend::oracle_session_backend(std::string const & serviceName,
-    std::string const & userName, std::string const & password, int mode)
+oracle_session_backend::oracle_session_backend(std::string const& serviceName,
+                                               std::string const& userName, std::string const& password, int mode)
     : envhp_(NULL), srvhp_(NULL), errhp_(NULL), svchp_(NULL), usrhp_(NULL)
 {
     sword res;
 
     // create the environment
     res = OCIEnvCreate(&envhp_, OCI_DEFAULT, 0, 0, 0, 0, 0, 0);
-    if (res != OCI_SUCCESS)
-    {
+    if (res != OCI_SUCCESS) {
         throw soci_error("Cannot create environment");
     }
 
     // create the server handle
-    res = OCIHandleAlloc(envhp_, reinterpret_cast<dvoid**>(&srvhp_),
-        OCI_HTYPE_SERVER, 0, 0);
-    if (res != OCI_SUCCESS)
-    {
+    res = OCIHandleAlloc(envhp_, reinterpret_cast<dvoid **>(&srvhp_),
+                         OCI_HTYPE_SERVER, 0, 0);
+    if (res != OCI_SUCCESS) {
         clean_up();
         throw soci_error("Cannot create server handle");
     }
 
     // create the error handle
-    res = OCIHandleAlloc(envhp_, reinterpret_cast<dvoid**>(&errhp_),
-        OCI_HTYPE_ERROR, 0, 0);
-    if (res != OCI_SUCCESS)
-    {
+    res = OCIHandleAlloc(envhp_, reinterpret_cast<dvoid **>(&errhp_),
+                         OCI_HTYPE_ERROR, 0, 0);
+    if (res != OCI_SUCCESS) {
         clean_up();
         throw soci_error("Cannot create error handle");
     }
@@ -56,43 +53,39 @@ oracle_session_backend::oracle_session_backend(std::string const & serviceName,
     // create the server context
     sb4 serviceNameLen = static_cast<sb4>(serviceName.size());
     res = OCIServerAttach(srvhp_, errhp_,
-        reinterpret_cast<text*>(const_cast<char*>(serviceName.c_str())),
-        serviceNameLen, OCI_DEFAULT);
-    if (res != OCI_SUCCESS)
-    {
+                          reinterpret_cast<text *>(const_cast<char *>(serviceName.c_str())),
+                          serviceNameLen, OCI_DEFAULT);
+    if (res != OCI_SUCCESS) {
         std::string msg;
-        int errNum;
+        int         errNum;
         get_error_details(res, errhp_, msg, errNum);
         clean_up();
         throw oracle_soci_error(msg, errNum);
     }
 
     // create service context handle
-    res = OCIHandleAlloc(envhp_, reinterpret_cast<dvoid**>(&svchp_),
-        OCI_HTYPE_SVCCTX, 0, 0);
-    if (res != OCI_SUCCESS)
-    {
+    res = OCIHandleAlloc(envhp_, reinterpret_cast<dvoid **>(&svchp_),
+                         OCI_HTYPE_SVCCTX, 0, 0);
+    if (res != OCI_SUCCESS) {
         clean_up();
         throw soci_error("Cannot create service context");
     }
 
     // set the server attribute in the context handle
     res = OCIAttrSet(svchp_, OCI_HTYPE_SVCCTX, srvhp_, 0,
-        OCI_ATTR_SERVER, errhp_);
-    if (res != OCI_SUCCESS)
-    {
+                     OCI_ATTR_SERVER, errhp_);
+    if (res != OCI_SUCCESS) {
         std::string msg;
-        int errNum;
+        int         errNum;
         get_error_details(res, errhp_, msg, errNum);
         clean_up();
         throw oracle_soci_error(msg, errNum);
     }
 
     // allocate user session handle
-    res = OCIHandleAlloc(envhp_, reinterpret_cast<dvoid**>(&usrhp_),
-        OCI_HTYPE_SESSION, 0, 0);
-    if (res != OCI_SUCCESS)
-    {
+    res = OCIHandleAlloc(envhp_, reinterpret_cast<dvoid **>(&usrhp_),
+                         OCI_HTYPE_SESSION, 0, 0);
+    if (res != OCI_SUCCESS) {
         clean_up();
         throw soci_error("Cannot allocate user session handle");
     }
@@ -100,10 +93,9 @@ oracle_session_backend::oracle_session_backend(std::string const & serviceName,
     // set username attribute in the user session handle
     sb4 userNameLen = static_cast<sb4>(userName.size());
     res = OCIAttrSet(usrhp_, OCI_HTYPE_SESSION,
-        reinterpret_cast<dvoid*>(const_cast<char*>(userName.c_str())),
-        userNameLen, OCI_ATTR_USERNAME, errhp_);
-    if (res != OCI_SUCCESS)
-    {
+                     reinterpret_cast<dvoid *>(const_cast<char *>(userName.c_str())),
+                     userNameLen, OCI_ATTR_USERNAME, errhp_);
+    if (res != OCI_SUCCESS) {
         clean_up();
         throw soci_error("Cannot set username");
     }
@@ -111,21 +103,19 @@ oracle_session_backend::oracle_session_backend(std::string const & serviceName,
     // set password attribute
     sb4 passwordLen = static_cast<sb4>(password.size());
     res = OCIAttrSet(usrhp_, OCI_HTYPE_SESSION,
-        reinterpret_cast<dvoid*>(const_cast<char*>(password.c_str())),
-        passwordLen, OCI_ATTR_PASSWORD, errhp_);
-    if (res != OCI_SUCCESS)
-    {
+                     reinterpret_cast<dvoid *>(const_cast<char *>(password.c_str())),
+                     passwordLen, OCI_ATTR_PASSWORD, errhp_);
+    if (res != OCI_SUCCESS) {
         clean_up();
         throw soci_error("Cannot set password");
     }
 
     // begin the session
     res = OCISessionBegin(svchp_, errhp_, usrhp_,
-        OCI_CRED_RDBMS, mode);
-    if (res != OCI_SUCCESS)
-    {
+                          OCI_CRED_RDBMS, mode);
+    if (res != OCI_SUCCESS) {
         std::string msg;
-        int errNum;
+        int         errNum;
         get_error_details(res, errhp_, msg, errNum);
         clean_up();
         throw oracle_soci_error(msg, errNum);
@@ -133,11 +123,10 @@ oracle_session_backend::oracle_session_backend(std::string const & serviceName,
 
     // set the session in the context handle
     res = OCIAttrSet(svchp_, OCI_HTYPE_SVCCTX, usrhp_,
-        0, OCI_ATTR_SESSION, errhp_);
-    if (res != OCI_SUCCESS)
-    {
+                     0, OCI_ATTR_SESSION, errhp_);
+    if (res != OCI_SUCCESS) {
         std::string msg;
-        int errNum;
+        int         errNum;
         get_error_details(res, errhp_, msg, errNum);
         clean_up();
         throw oracle_soci_error(msg, errNum);
@@ -164,8 +153,8 @@ void oracle_session_backend::begin()
 void oracle_session_backend::commit()
 {
     sword res = OCITransCommit(svchp_, errhp_, OCI_DEFAULT);
-    if (res != OCI_SUCCESS)
-    {
+
+    if (res != OCI_SUCCESS) {
         throw_oracle_soci_error(res, errhp_);
     }
 }
@@ -173,23 +162,21 @@ void oracle_session_backend::commit()
 void oracle_session_backend::rollback()
 {
     sword res = OCITransRollback(svchp_, errhp_, OCI_DEFAULT);
-    if (res != OCI_SUCCESS)
-    {
+
+    if (res != OCI_SUCCESS) {
         throw_oracle_soci_error(res, errhp_);
     }
 }
 
 void oracle_session_backend::clean_up()
 {
-    if (svchp_ != NULL && errhp_ != NULL && usrhp_ != NULL)
-    {
+    if ((svchp_ != NULL) && (errhp_ != NULL) && (usrhp_ != NULL)) {
         OCISessionEnd(svchp_, errhp_, usrhp_, OCI_DEFAULT);
     }
 
     if (usrhp_) { OCIHandleFree(usrhp_, OCI_HTYPE_SESSION); }
     if (svchp_) { OCIHandleFree(svchp_, OCI_HTYPE_SVCCTX);  }
-    if (srvhp_)
-    {
+    if (srvhp_) {
         OCIServerDetach(srvhp_, errhp_, OCI_DEFAULT);
         OCIHandleFree(srvhp_, OCI_HTYPE_SERVER);
     }
@@ -197,17 +184,17 @@ void oracle_session_backend::clean_up()
     if (envhp_) { OCIHandleFree(envhp_, OCI_HTYPE_ENV);   }
 }
 
-oracle_statement_backend * oracle_session_backend::make_statement_backend()
+oracle_statement_backend *oracle_session_backend::make_statement_backend()
 {
     return new oracle_statement_backend(*this);
 }
 
-oracle_rowid_backend * oracle_session_backend::make_rowid_backend()
+oracle_rowid_backend *oracle_session_backend::make_rowid_backend()
 {
     return new oracle_rowid_backend(*this);
 }
 
-oracle_blob_backend * oracle_session_backend::make_blob_backend()
+oracle_blob_backend *oracle_session_backend::make_blob_backend()
 {
     return new oracle_blob_backend(*this);
 }

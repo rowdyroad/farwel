@@ -11,52 +11,45 @@
 #include "soci-backend.h"
 #include <sstream>
 
-namespace soci
-{
-
-inline void throw_odbc_error(SQLSMALLINT htype, SQLHANDLE hndl, char const * msg)
-{
-    SQLCHAR message[SQL_MAX_MESSAGE_LENGTH + 1];
-    SQLCHAR sqlstate[SQL_SQLSTATE_SIZE + 1];
-    SQLINTEGER sqlcode;
-    SQLSMALLINT length, i;
-
-    std::stringstream ss;
-
-    i = 1;
-
-    /* get multiple field settings of diagnostic record */
-    while (SQLGetDiagRec(htype,
-                         hndl,
-                         i,
-                         sqlstate,
-                         &sqlcode,
-                         message,
-                         SQL_MAX_MESSAGE_LENGTH + 1,
-                         &length) == SQL_SUCCESS)
+namespace soci {
+    inline void throw_odbc_error(SQLSMALLINT htype, SQLHANDLE hndl, char const *msg)
     {
-        ss << std::endl << "SOCI ODBC Error: " << msg << std::endl
-           << "SQLSTATE = " << sqlstate << std::endl
-           << "Native Error Code = " << sqlcode << std::endl
-           << message << std::endl;
-        ++i;
+        SQLCHAR     message[SQL_MAX_MESSAGE_LENGTH + 1];
+        SQLCHAR     sqlstate[SQL_SQLSTATE_SIZE + 1];
+        SQLINTEGER  sqlcode;
+        SQLSMALLINT length, i;
+
+        std::stringstream ss;
+
+        i = 1;
+
+        /* get multiple field settings of diagnostic record */
+        while (SQLGetDiagRec(htype,
+                             hndl,
+                             i,
+                             sqlstate,
+                             &sqlcode,
+                             message,
+                             SQL_MAX_MESSAGE_LENGTH + 1,
+                             &length) == SQL_SUCCESS) {
+            ss << std::endl << "SOCI ODBC Error: " << msg << std::endl
+               << "SQLSTATE = " << sqlstate << std::endl
+               << "Native Error Code = " << sqlcode << std::endl
+               << message << std::endl;
+            ++i;
+        }
+
+        throw soci_error(ss.str());
     }
 
-    throw soci_error(ss.str());
-}
-
-inline bool is_odbc_error(SQLRETURN rc)
-{
-    if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO)
+    inline bool is_odbc_error(SQLRETURN rc)
     {
-        return true;
+        if ((rc != SQL_SUCCESS) && (rc != SQL_SUCCESS_WITH_INFO)) {
+            return true;
+        }else  {
+            return false;
+        }
     }
-    else
-    {
-        return false;
-    }
-}
-
 }
 
 #endif // SOCI_UTILITY_H_INCLUDED

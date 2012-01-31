@@ -31,16 +31,14 @@ void row::uppercase_column_names(bool forceToUpper)
     uppercaseColumnNames_ = forceToUpper;
 }
 
-void row::add_properties(column_properties const &cp)
+void row::add_properties(column_properties const& cp)
 {
     columns_.push_back(cp);
 
-    std::string columnName;
-    std::string const & originalName = cp.get_name();
-    if (uppercaseColumnNames_)
-    {
-        for (std::size_t i = 0; i != originalName.size(); ++i)
-        {
+    std::string        columnName;
+    std::string const& originalName = cp.get_name();
+    if (uppercaseColumnNames_) {
+        for (std::size_t i = 0; i != originalName.size(); ++i) {
             columnName.push_back(static_cast<char>(std::toupper(originalName[i])));
         }
 
@@ -48,9 +46,7 @@ void row::add_properties(column_properties const &cp)
         // as well to retain consistent views
 
         columns_[columns_.size() - 1].set_name(columnName);
-    }
-    else
-    {
+    }else  {
         columnName = originalName;
     }
 
@@ -65,8 +61,8 @@ std::size_t row::size() const
 void row::clean_up()
 {
     std::size_t const hsize = holders_.size();
-    for (std::size_t i = 0; i != hsize; ++i)
-    {
+
+    for (std::size_t i = 0; i != hsize; ++i) {
         delete holders_[i];
         delete indicators_[i];
     }
@@ -83,27 +79,27 @@ indicator row::get_indicator(std::size_t pos) const
     return *indicators_[pos];
 }
 
-indicator row::get_indicator(std::string const &name) const
+indicator row::get_indicator(std::string const& name) const
 {
     return get_indicator(find_column(name));
 }
 
-column_properties const & row::get_properties(std::size_t pos) const
+column_properties const& row::get_properties(std::size_t pos) const
 {
     assert(columns_.size() >= pos + 1);
     return columns_[pos];
 }
 
-column_properties const & row::get_properties(std::string const &name) const
+column_properties const& row::get_properties(std::string const& name) const
 {
     return get_properties(find_column(name));
 }
 
-std::size_t row::find_column(std::string const &name) const
+std::size_t row::find_column(std::string const& name) const
 {
     std::map<std::string, std::size_t>::const_iterator it = index_.find(name);
-    if (it == index_.end())
-    {
+
+    if (it == index_.end()) {
         std::ostringstream msg;
         msg << "Column '" << name << "' not found";
         throw soci_error(msg.str());

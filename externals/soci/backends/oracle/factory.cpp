@@ -23,9 +23,9 @@ using namespace soci::details;
 
 // retrieves service name, user name and password from the
 // uniform connect string
-void chop_connect_string(std::string const & connectString,
-    std::string & serviceName, std::string & userName,
-    std::string & password, int & mode)
+void chop_connect_string(std::string const& connectString,
+                         std::string& serviceName, std::string& userName,
+                         std::string& password, int& mode)
 {
     // transform the connect string into a sequence of tokens
     // separated by spaces, this is done by replacing each first '='
@@ -35,21 +35,17 @@ void chop_connect_string(std::string const & connectString,
     // in the value part are left intact
 
     std::string tmp;
-    bool in_value = false;
+    bool        in_value = false;
+
     for (std::string::const_iterator i = connectString.begin(),
-             end = connectString.end(); i != end; ++i)
-    {
-        if (*i == '=' && in_value == false)
-        {
+         end = connectString.end(); i != end; ++i) {
+        if ((*i == '=') && (in_value == false)) {
             // this is the first '=' in the key=value pair
-            tmp += ' ';
+            tmp     += ' ';
             in_value = true;
-        }
-        else
-        {
+        }else  {
             tmp += *i;
-            if (*i == ' ' || *i == '\t')
-            {
+            if ((*i == ' ') || (*i == '\t')) {
                 // follow with the next key=value pair
                 in_value = false;
             }
@@ -62,37 +58,22 @@ void chop_connect_string(std::string const & connectString,
     mode = OCI_DEFAULT;
 
     std::istringstream iss(tmp);
-    std::string key, value;
-    while (iss >> key >> value)
-    {
-        if (key == "service")
-        {
+    std::string        key, value;
+    while (iss >> key >> value) {
+        if (key == "service") {
             serviceName = value;
-        }
-        else if (key == "user")
-        {
+        }else if (key == "user")  {
             userName = value;
-        }
-        else if (key == "password")
-        {
+        }else if (key == "password")  {
             password = value;
-        }
-        else if (key == "mode")
-        {
-            if (value == "sysdba")
-            {
+        }else if (key == "mode")  {
+            if (value == "sysdba") {
                 mode = OCI_SYSDBA;
-            }
-            else if (value == "sysoper")
-            {
+            }else if (value == "sysoper")  {
                 mode = OCI_SYSOPER;
-            }
-            else if (value == "default")
-            {
+            }else if (value == "default")  {
                 mode = OCI_DEFAULT;
-            }
-            else
-            {
+            }else  {
                 throw soci_error("Invalid connection mode.");
             }
         }
@@ -100,11 +81,11 @@ void chop_connect_string(std::string const & connectString,
 }
 
 // concrete factory for Empty concrete strategies
-oracle_session_backend * oracle_backend_factory::make_session(
-     std::string const &connectString) const
+oracle_session_backend *oracle_backend_factory::make_session(
+    std::string const& connectString) const
 {
     std::string serviceName, userName, password;
-    int mode;
+    int         mode;
 
     chop_connect_string(connectString, serviceName, userName, password, mode);
 
@@ -115,16 +96,14 @@ oracle_backend_factory const soci::oracle;
 
 extern "C"
 {
-
 // for dynamic backend loading
-SOCI_ORACLE_DECL backend_factory const * factory_oracle()
-{
-    return &soci::oracle;
-}
+    SOCI_ORACLE_DECL backend_factory const *factory_oracle()
+    {
+        return &soci::oracle;
+    }
 
-SOCI_ORACLE_DECL void register_factory_oracle()
-{
-    soci::dynamic_backends::register_backend("oracle", soci::oracle);
-}
-
+    SOCI_ORACLE_DECL void register_factory_oracle()
+    {
+        soci::dynamic_backends::register_backend("oracle", soci::oracle);
+    }
 } // extern "C"

@@ -18,14 +18,13 @@ using namespace soci;
 using namespace soci::details;
 
 mysql_rowid_backend::mysql_rowid_backend(
-    mysql_session_backend & /* session */)
+    mysql_session_backend& /* session */)
 {
     throw soci_error("RowIDs are not supported.");
 }
 
 mysql_rowid_backend::~mysql_rowid_backend()
-{
-}
+{}
 
 #ifdef _MSC_VER
 #pragma warning(pop)

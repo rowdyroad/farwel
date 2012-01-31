@@ -19,8 +19,8 @@
 using namespace soci;
 using namespace soci::tests;
 
-std::string connectString;
-backend_factory const &backEnd = *soci::factory_sqlite3();
+std::string            connectString;
+backend_factory const& backEnd = *soci::factory_sqlite3();
 
 // ROWID test
 // In sqlite3 the row id can be called ROWID, _ROWID_ or oid
@@ -29,8 +29,9 @@ void test1()
     {
         session sql(backEnd, connectString);
 
-        try { sql << "drop table test1"; }
-        catch (soci_error const &) {} // ignore if error
+        try {
+            sql << "drop table test1";
+        }catch (soci_error const&)                                   {} // ignore if error
 
         sql <<
         "create table test1 ("
@@ -43,7 +44,7 @@ void test1()
         rowid rid(sql);
         sql << "select oid from test1 where id = 7", into(rid);
 
-        int id;
+        int         id;
         std::string name;
 
         sql << "select id, name from test1 where oid = :rid",
@@ -59,16 +60,17 @@ void test1()
 }
 
 // BLOB test
-struct blob_table_creator : public table_creator_base
+struct blob_table_creator
+    : public table_creator_base
 {
-    blob_table_creator(session & sql)
+    blob_table_creator(session& sql)
         : table_creator_base(sql)
     {
         sql <<
-            "create table soci_test ("
-            "    id integer,"
-            "    img blob"
-            ")";
+        "create table soci_test ("
+        "    id integer,"
+        "    img blob"
+        ")";
     }
 };
 
@@ -107,7 +109,6 @@ void test2()
 
             sql << "select img from soci_test where id = 7", into(b);
             assert(b.get_len() == sizeof(buf));
-
         }
     }
 
@@ -118,9 +119,11 @@ void test2()
 // into and use elements in the same query and one of them (into) binds
 // to a vector object.
 
-struct test3_table_creator : table_creator_base
+struct test3_table_creator
+    : table_creator_base
 {
-    test3_table_creator(session & sql) : table_creator_base(sql)
+    test3_table_creator(session& sql)
+        : table_creator_base(sql)
     {
         sql << "create table soci_test( id integer, name varchar, subname varchar);";
     }
@@ -158,7 +161,6 @@ void test3()
     std::cout << "test 3 passed" << std::endl;
 }
 
-
 // Test case from Amnon David 11/1/2007
 // I've noticed that table schemas in SQLite3 can sometimes have typeless
 // columns. One (and only?) example is the sqlite_sequence that sqlite
@@ -166,9 +168,11 @@ void test3()
 // SOCI to crash. I've made the following code change in statement.cpp to
 // create a workaround:
 
-struct test4_table_creator : table_creator_base
+struct test4_table_creator
+    : table_creator_base
 {
-    test4_table_creator(session & sql) : table_creator_base(sql)
+    test4_table_creator(session& sql)
+        : table_creator_base(sql)
     {
         sql << "create table soci_test (col INTEGER PRIMARY KEY AUTOINCREMENT, name char)";
     }
@@ -186,12 +190,12 @@ void test4()
         sql << "insert into soci_test(name) values('james')";
 
         {
-            int key;
+            int         key;
             std::string name;
             sql << "select * from soci_test", into(key), into(name);
             assert(name == "john");
 
-            rowset<row> rs = (sql.prepare << "select * from sqlite_sequence");
+            rowset<row>                 rs = (sql.prepare << "select * from sqlite_sequence");
             rowset<row>::const_iterator it = rs.begin();
             row const& r1 = (*it);
             assert(r1.get<std::string>(0) == "soci_test");
@@ -201,9 +205,10 @@ void test4()
     std::cout << "test 4 passed" << std::endl;
 }
 
-struct longlong_table_creator : table_creator_base
+struct longlong_table_creator
+    : table_creator_base
 {
-    longlong_table_creator(session & sql)
+    longlong_table_creator(session& sql)
         : table_creator_base(sql)
     {
         sql << "create table soci_test(val number(20))";
@@ -259,35 +264,38 @@ void test5()
 }
 
 // DDL Creation objects for common tests
-struct table_creator_one : public table_creator_base
+struct table_creator_one
+    : public table_creator_base
 {
-    table_creator_one(session & sql)
+    table_creator_one(session& sql)
         : table_creator_base(sql)
     {
         sql << "create table soci_test(id integer, val integer, c char, "
-                 "str varchar(20), sh smallint, ul numeric(20), d float, "
-                 "tm datetime, i1 integer, i2 integer, i3 integer, "
-                 "name varchar(20))";
+               "str varchar(20), sh smallint, ul numeric(20), d float, "
+               "tm datetime, i1 integer, i2 integer, i3 integer, "
+               "name varchar(20))";
     }
 };
 
-struct table_creator_two : public table_creator_base
+struct table_creator_two
+    : public table_creator_base
 {
-    table_creator_two(session & sql)
+    table_creator_two(session& sql)
         : table_creator_base(sql)
     {
-        sql  << "create table soci_test(num_float float, num_int integer,"
-                     " name varchar(20), sometime datetime, chr char)";
+        sql << "create table soci_test(num_float float, num_int integer,"
+               " name varchar(20), sometime datetime, chr char)";
     }
 };
 
-struct table_creator_three : public table_creator_base
+struct table_creator_three
+    : public table_creator_base
 {
-    table_creator_three(session & sql)
+    table_creator_three(session& sql)
         : table_creator_base(sql)
     {
         sql << "create table soci_test(name varchar(100) not null, "
-            "phone varchar(15))";
+               "phone varchar(15))";
     }
 };
 
@@ -295,37 +303,37 @@ struct table_creator_three : public table_creator_base
 // Support for SOCI Common Tests
 //
 
-class test_context : public test_context_base
+class test_context
+    : public test_context_base
 {
-public:
-    test_context(backend_factory const &backEnd,
-                std::string const &connectString)
-        : test_context_base(backEnd, connectString) {}
+    public:
+        test_context(backend_factory const& backEnd,
+                     std::string const&     connectString)
+            : test_context_base(backEnd, connectString) {}
 
-    table_creator_base* table_creator_1(session& s) const
-    {
-        return new table_creator_one(s);
-    }
+        table_creator_base *table_creator_1(session& s) const
+        {
+            return new table_creator_one(s);
+        }
 
-    table_creator_base* table_creator_2(session& s) const
-    {
-        return new table_creator_two(s);
-    }
+        table_creator_base *table_creator_2(session& s) const
+        {
+            return new table_creator_two(s);
+        }
 
-    table_creator_base* table_creator_3(session& s) const
-    {
-        return new table_creator_three(s);
-    }
+        table_creator_base *table_creator_3(session& s) const
+        {
+            return new table_creator_three(s);
+        }
 
-    std::string to_date_time(std::string const &datdt_string) const
-    {
-        return "datetime(\'" + datdt_string + "\')";
-    }
+        std::string to_date_time(std::string const& datdt_string) const
+        {
+            return "datetime(\'" + datdt_string + "\')";
+        }
 };
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
-
 #ifdef _MSC_VER
     // Redirect errors, unrecoverable problems, and assert() failures to STDERR,
     // instead of debug message window.
@@ -335,19 +343,14 @@ int main(int argc, char** argv)
     _CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDERR);
 #endif //_MSC_VER
 
-    if (argc == 2)
-    {
+    if (argc == 2) {
         connectString = argv[1];
-    }
-    else
-    {
+    }else  {
         // If no file name is specfied then work in-memory
         connectString = ":memory:";
     }
 
-    try
-    {
-
+    try{
         test_context tc(backEnd, connectString);
         common_tests tests(tc);
         tests.run();
@@ -363,13 +366,9 @@ int main(int argc, char** argv)
         std::cout << "\nOK, all tests passed.\n\n";
 
         return EXIT_SUCCESS;
-    }
-    catch (soci::soci_error const & e)
-    {
+    }catch (soci::soci_error const& e)  {
         std::cout << "SOCIERROR: " << e.what() << '\n';
-    }
-    catch (std::exception const & e)
-    {
+    }catch (std::exception const& e)  {
         std::cout << "EXCEPTION: " << e.what() << '\n';
     }
 

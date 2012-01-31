@@ -11,92 +11,92 @@
 #include "ref-counted-statement.h"
 #include "prepare-temp-type.h"
 
-namespace soci
-{
+namespace soci {
+    class session;
 
-class session;
-
-namespace details
-{
-
-class ref_counted_statement;
+    namespace details {
+        class ref_counted_statement;
 
 // this needs to be lightweight and copyable
-class SOCI_DECL once_temp_type
-{
-public:
+        class SOCI_DECL once_temp_type
+        {
+            public:
 
-    once_temp_type(session & s);
-    once_temp_type(once_temp_type const & o);
-    once_temp_type & operator=(once_temp_type const & o);
+                once_temp_type(session& s);
+                once_temp_type(once_temp_type const& o);
+                once_temp_type& operator=(once_temp_type const& o);
 
-    ~once_temp_type();
+                ~once_temp_type();
 
-    template <typename T>
-    once_temp_type & operator<<(T const & t)
-    {
-        rcst_->accumulate(t);
-        return *this;
-    }
+                template<typename T>
+                once_temp_type& operator<<(T const& t)
+                {
+                    rcst_->accumulate(t);
+                    return *this;
+                }
 
-    once_temp_type & operator,(into_type_ptr const &);
-    once_temp_type & operator,(use_type_ptr const &);
+                once_temp_type& operator,(into_type_ptr const&);
+                once_temp_type& operator,(use_type_ptr const&);
 
-private:
-    ref_counted_statement * rcst_;
-};
-
-// this needs to be lightweight and copyable
-class once_type
-{
-public:
-    once_type() : session_(NULL) {}
-    once_type(session * s) : session_(s) {}
-
-    void set_session(session * s)
-    {
-        session_ = s;
-    }
-
-    template <typename T>
-    once_temp_type operator<<(T const & t)
-    {
-        once_temp_type o(*session_);
-        o << t;
-        return o;
-    }
-
-private:
-    session * session_;
-};
-
+            private:
+                ref_counted_statement *rcst_;
+        };
 
 // this needs to be lightweight and copyable
-class prepare_type
-{
-public:
-    prepare_type() : session_(NULL) {}
-    prepare_type(session * s) : session_(s) {}
+        class once_type
+        {
+            public:
+                once_type()
+                    : session_(NULL) {}
+                once_type(session *s)
+                    : session_(s) {}
 
-    void set_session(session * s)
-    {
-        session_ = s;
-    }
+                void set_session(session *s)
+                {
+                    session_ = s;
+                }
 
-    template <typename T>
-    prepare_temp_type operator<<(T const & t)
-    {
-        prepare_temp_type p(*session_);
-        p << t;
-        return p;
-    }
+                template<typename T>
+                once_temp_type operator<<(T const& t)
+                {
+                    once_temp_type o(*session_);
 
-private:
-    session * session_;
-};
+                    o << t;
+                    return o;
+                }
 
-} // namespace details
+            private:
+                session *session_;
+        };
 
-} // namespace soci
+
+// this needs to be lightweight and copyable
+        class prepare_type
+        {
+            public:
+                prepare_type()
+                    : session_(NULL) {}
+                prepare_type(session *s)
+                    : session_(s) {}
+
+                void set_session(session *s)
+                {
+                    session_ = s;
+                }
+
+                template<typename T>
+                prepare_temp_type operator<<(T const& t)
+                {
+                    prepare_temp_type p(*session_);
+
+                    p << t;
+                    return p;
+                }
+
+            private:
+                session *session_;
+        };
+    } // namespace details
+}     // namespace soci
 
 #endif

@@ -251,7 +251,7 @@ class Db
             return readdir(dir.Name(), dir.Files());
         }
 
-        int CloseFd(Directory& dir)
+        int CloseFd(int fd)
         {
             return 0;
         }

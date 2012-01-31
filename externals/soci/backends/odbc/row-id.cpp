@@ -12,7 +12,7 @@ using namespace soci;
 using namespace soci::details;
 
 
-odbc_rowid_backend::odbc_rowid_backend(odbc_session_backend & /* session */)
+odbc_rowid_backend::odbc_rowid_backend(odbc_session_backend& /* session */)
 {
     // ...
 }

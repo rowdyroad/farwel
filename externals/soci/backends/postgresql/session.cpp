@@ -30,12 +30,11 @@ using namespace soci::details::postgresql;
 postgresql_session_backend::postgresql_session_backend(std::string const& connectString)
     : statementCount_(0)
 {
-    PGconn* conn = PQconnectdb(connectString.c_str());
-    if (0 == conn || CONNECTION_OK != PQstatus(conn))
-    {
+    PGconn *conn = PQconnectdb(connectString.c_str());
+
+    if ((0 == conn) || (CONNECTION_OK != PQstatus(conn))) {
         std::string msg = "Cannot establish connection to the database.";
-        if (0 != conn)
-        {
+        if (0 != conn) {
             msg += '\n';
             msg += PQerrorMessage(conn);
             PQfinish(conn);
@@ -54,26 +53,22 @@ postgresql_session_backend::~postgresql_session_backend()
 
 namespace // unnamed
 {
-
 // helper function for hardoded queries
-void hard_exec(PGconn * conn, char const * query, char const * errMsg)
-{
-    PGresult* result = PQexec(conn, query);
-
-    if (0 == result)
+    void hard_exec(PGconn *conn, char const *query, char const *errMsg)
     {
-        throw soci_error(errMsg);
+        PGresult *result = PQexec(conn, query);
+
+        if (0 == result) {
+            throw soci_error(errMsg);
+        }
+
+        ExecStatusType const status = PQresultStatus(result);
+        if (PGRES_COMMAND_OK != status) {
+            throw_postgresql_soci_error(result);
+        }
+
+        PQclear(result);
     }
-
-    ExecStatusType const status = PQresultStatus(result);
-    if (PGRES_COMMAND_OK != status)
-    {
-        throw_postgresql_soci_error(result);
-    }
-
-    PQclear(result);
-}
-
 } // namespace unnamed
 
 void postgresql_session_backend::begin()
@@ -93,8 +88,7 @@ void postgresql_session_backend::rollback()
 
 void postgresql_session_backend::clean_up()
 {
-    if (0 != conn_)
-    {
+    if (0 != conn_) {
         PQfinish(conn_);
         conn_ = 0;
     }
@@ -103,21 +97,22 @@ void postgresql_session_backend::clean_up()
 std::string postgresql_session_backend::get_next_statement_name()
 {
     char nameBuf[20] = { 0 }; // arbitrary length
+
     sprintf(nameBuf, "st_%d", ++statementCount_);
     return nameBuf;
 }
 
-postgresql_statement_backend * postgresql_session_backend::make_statement_backend()
+postgresql_statement_backend *postgresql_session_backend::make_statement_backend()
 {
     return new postgresql_statement_backend(*this);
 }
 
-postgresql_rowid_backend * postgresql_session_backend::make_rowid_backend()
+postgresql_rowid_backend *postgresql_session_backend::make_rowid_backend()
 {
     return new postgresql_rowid_backend(*this);
 }
 
-postgresql_blob_backend * postgresql_session_backend::make_blob_backend()
+postgresql_blob_backend *postgresql_session_backend::make_blob_backend()
 {
     return new postgresql_blob_backend(*this);
 }

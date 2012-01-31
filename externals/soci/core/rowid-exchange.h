@@ -15,45 +15,42 @@
 // std
 #include <string>
 
-namespace soci
-{
+namespace soci {
+    namespace details {
+        template<>
+        class use_type<rowid>
+            : public standard_use_type
+        {
+            public:
+                use_type(rowid& rid, std::string const& name = std::string())
+                    : standard_use_type(&rid, x_rowid, false, name) {}
+                use_type(rowid const& rid, std::string const& name = std::string())
+                    : standard_use_type(const_cast<rowid *>(&rid), x_rowid, true, name) {}
+                use_type(rowid& rid, indicator& ind,
+                         std::string const& name = std::string())
+                    : standard_use_type(&rid, x_rowid, ind, false, name) {}
+                use_type(rowid const& rid, indicator& ind,
+                         std::string const& name = std::string())
+                    : standard_use_type(const_cast<rowid *>(&rid), x_rowid, ind, true, name) {}
+        };
 
-namespace details
-{
+        template<>
+        class into_type<rowid>
+            : public standard_into_type
+        {
+            public:
+                into_type(rowid& rid)
+                    : standard_into_type(&rid, x_rowid) {}
+                into_type(rowid& rid, indicator& ind)
+                    : standard_into_type(&rid, x_rowid, ind) {}
+        };
 
-template <>
-class use_type<rowid> : public standard_use_type
-{
-public:
-    use_type(rowid & rid, std::string const & name = std::string())
-        : standard_use_type(&rid, x_rowid, false, name) {}
-    use_type(rowid const & rid, std::string const & name = std::string())
-        : standard_use_type(const_cast<rowid *>(&rid), x_rowid, true, name) {}
-    use_type(rowid & rid, indicator & ind,
-        std::string const & name = std::string())
-        : standard_use_type(&rid, x_rowid, ind, false, name) {}
-    use_type(rowid const & rid, indicator & ind,
-        std::string const & name = std::string())
-        : standard_use_type(const_cast<rowid *>(&rid), x_rowid, ind, true, name) {}
-};
-
-template <>
-class into_type<rowid> : public standard_into_type
-{
-public:
-    into_type(rowid & rid) : standard_into_type(&rid, x_rowid) {}
-    into_type(rowid & rid, indicator & ind)
-        :standard_into_type(&rid, x_rowid, ind) {}
-};
-
-template <>
-struct exchange_traits<soci::rowid>
-{
-    typedef basic_type_tag type_family;
-};
-
-} // namespace details
-
-} // namespace soci
+        template<>
+        struct exchange_traits<soci::rowid>
+        {
+            typedef basic_type_tag   type_family;
+        };
+    } // namespace details
+}     // namespace soci
 
 #endif // SOCI_ROWID_EXCHANGE_H_INCLUDED

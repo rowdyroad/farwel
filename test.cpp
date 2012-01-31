@@ -41,7 +41,11 @@ inline bool dumpdir(const std::string& dirname)
     if (dir) {
         struct dirent *de = readdir(dir);
         while (de) {
+    	    #ifdef __linux__
+            printf("%lu: %lu %lu %s\n", (size_t)de->d_fileno, (size_t)de->d_reclen, (size_t)de->d_type, de->d_name);
+    	    #else
             printf("%d: %d %d %d %s\n", de->d_fileno, de->d_reclen, de->d_type, de->d_namlen, de->d_name);
+    	    #endif
             de = readdir(dir);
         }
         closedir(dir);
@@ -61,21 +65,15 @@ int main(int argc, char **argv)
 
 //    clear(dirname);
 
-    struct timespec tb, te;
-    ::memset(&tb, 0, sizeof(struct timespec));
-    ::memset(&te, 0, sizeof(struct timespec));
-    clock_gettime(CLOCK_MONOTONIC, &tb);
     mkdir(dirname.c_str(), 0777);
     for (int j = 0; j < count; ++j) {
         ::sprintf(&buf[0], "%s/t%d.txt", dirname.c_str(), j);
         int f = open(&buf[0], O_CREAT | O_WRONLY | O_TRUNC, 0666);
-        write(f, data, strlen(data));
+        if (write(f, data, strlen(data))) {
+        }
         close(f);
     }
 
     dumpdir(dirname);
-//    clear(dirname);
-    clock_gettime(CLOCK_MONOTONIC, &te);
-    fprintf(stderr, "%d/%s Time used: %.03f\n", count, dirname.c_str(), (double)(getns(te) - getns(tb)) / 1000000000);
     return 0;
 }

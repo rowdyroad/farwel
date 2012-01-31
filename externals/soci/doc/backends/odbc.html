@@ -1,161 +1,173 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html>
-<head>
-  <meta content="text/html; charset=ISO-8859-1"  http-equiv="content-type" />
-  <link rel="stylesheet" type="text/css" href="../style.css" />
-  <title>SOCI - ODBC Backend Reference</title>
-</head>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd" >
+ < html >
+ < head >
+ < meta content = "text/html; charset=ISO-8859-1"  http - equiv = "content-type" / >
+                                                                  < link rel = "stylesheet" type = "text/css" href = "../style.css" / >
+                                                                                                                     < title > SOCI - ODBC Backend Reference</ title>
+                                                                                                                     < / head >
 
-<body>
-<p class="banner">SOCI - The C++ Database Access Library</p>
+                                                                                                                     < body >
+                                                                                                                     < p class = "banner" > SOCI - The C++ Database Access Library</ p>
 
-<h2>ODBC Backend Reference</h2>
+                                                                                                                                 < h2 > ODBC Backend Reference</ h2>
 
-<div class="navigation">
-<a href="#prerequisites">Prerequisites</a><br />
-<div class="navigation-indented">
-  <a href="#versions">Supported Versions</a><br />
-  <a href="#tested">Tested Platforms</a><br />
-  <a href="#required">Required Client Libraries</a><br />
-</div>
-<a href="#connecting">Connecting to the Database</a><br />
-     
-<a href="#support">SOCI Feature Support</a><br />
-<div class="navigation-indented">
-    <a href="#dynamic">Dynamic Binding</a><br />
-    <a href="#bindingbyname">Binding by Name</a><br />
-    <a href="#bulk">Bulk Operations</a><br />
-    <a href="#transactions">Transactions</a><br />
-    <a href="#blob">BLOB Data Type</a><br />
-    <a href="#rowid">RowID Data Type</a><br />
-    <a href="#nested">Nested Statements</a><br />
-    <a href="#procedures">Stored Procedures</a><br />
-</div>
-  <a href="#native">Accessing the Native Database API</a><br />
-  <a href="#extensions">Backend-specific Extensions</a><br />
-<div class="navigation-indented">
-    <a href="#odbc_soci_error">ODBCSOCIError</a><br />
-</div>
-  <a href="#options">Configuration options</a><br />
-</div>
+                                                                                                                                 < div class                       = "navigation" >
+                                                                                                                                                          < a href = "#prerequisites" > Prerequisites</ a> < br / >
+                                                                                                                                                                     < div class                                                                                                    = "navigation-indented" >
+                                                                                                                                                                                                                    < a href                                                        = "#versions" > Supported Versions</ a> < br / >
+                                                                                                                                                                                                                                                     < a href                       = "#tested" > Tested Platforms</ a> < br / >
+                                                                                                                                                                                                                                                                           < a href = "#required" > Required Client Libraries</ a> < br / >
+                                                                                                                                                                                                                                                                                      < / div >
+                                                                                                                                                                                                                                                                                      < a href = "#connecting" > Connecting to the Database</ a> < br / >
 
-<h3 id="prerequisites">Prerequisites</h3>
-<h4 id="versions">Supported Versions</h4>
+                                                                                                                                                                                                                                                                                                 < a href = "#support" > SOCI Feature Support</ a> < br / >
+                                                                                                                                                                                                                                                                                                            < div class                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     = "navigation-indented" >
+                                                                                                                                                                                                                                                                                                                                                                                                                  < a href                                                                                                                                                                                                                                                                                                                                                                                                  = "#dynamic" > Dynamic Binding</ a> < br / >
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          < a href                                                                                                                                                                                                                                                                                                          = "#bindingbyname" > Binding by Name</ a> < br / >
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       < a href                                                                                                                                                                                                                             = "#bulk" > Bulk Operations</ a> < br / >
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         < a href                                                                                                                                                           = "#transactions" > Transactions</ a> < br / >
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                < a href                                                                                                    = "#blob" > BLOB Data Type</ a> < br / >
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            < a href                                                        = "#rowid" > RowID Data Type</ a> < br / >
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             < a href                       = "#nested" > Nested Statements</ a> < br / >
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   < a href = "#procedures" > Stored Procedures</ a> < br / >
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              < / div >
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              < a href                       = "#native" > Accessing the Native Database API</ a> < br / >
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    < a href = "#extensions" > Backend - specific Extensions</ a> < br / >
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               < div class                       = "navigation-indented" >
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        < a href = "#odbc_soci_error" > ODBCSOCIError</ a> < br / >
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   < / div >
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   < a href = "#options" > Configuration options</ a> < br / >
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              < / div >
 
-<p>The SOCI ODBC backend is supported for use with ODBC 3.</p>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              < h3 id                     = "prerequisites" > Prerequisites</ h3>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  < h4 id = "versions" > Supported Versions</ h4>
 
-<h4 id="tested">Tested Platforms</h4>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            < p > The SOCI ODBC backend is supported for use with ODBC 3. < / p >
 
-<table border="1" cellpadding="5" cellspacing="0">
-<tbody>
-<tr><th>ODBC version</th><th>Operating System</th><th>Compiler</th></tr>
-<tr><td>3</td><td>Windows XP</td><td>Visual Studio 2005 (express)</td></tr>
-<tr><td>3</td><td>Windows XP</td><td>Visual C++ 8.0 Professional</td></tr>
-<tr><td>3</td><td>Windows XP</td><td>(cygwin) g++ 3.3.4</td></tr>
-</tbody>
-</table>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            < h4 id = "tested" > Tested Platforms</ h4>
 
-<h4 id="required">Required Client Libraries</h4>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      < table border = "1" cellpadding = "5" cellspacing = "0" >
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           < tbody >
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           < tr > < th > ODBC version</ th> < th > Operating System</ th> < th > Compiler</ th> < / tr >
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           < tr > < td > 3 < / td > < td > Windows XP</ td> < td > Visual Studio 2005 (express) < / td > < / tr >
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           < tr > < td > 3 < / td > < td > Windows XP</ td> < td > Visual C++ 8.0 Professional</ td> < / tr >
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           < tr > < td > 3 < / td > < td > Windows XP</ td> < td > (cygwin)g++ 3.3 .4 < / td > < / tr >
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           < / tbody >
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           < / table >
 
-<p>The SOCI ODBC backend requires the ODBC client library.</p>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           < h4 id = "required" > Required Client Libraries</ h4>
 
-<h4 id="connecting">Connecting to the Database</h4>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     < p > The SOCI ODBC backend requires the ODBC client library.< / p >
 
-<p>To establish a connection to the ODBC database, create a Session object
-using the <code>ODBC</code> backend factory together with a connection string:</p>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     < h4 id = "connecting" > Connecting to the Database</ h4>
 
-<pre class="example">
-BackEndFactory const &amp;backEnd = odbc;
-Session sql(backEnd, "filedsn=c:\\my.dsn");
-</pre>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               < p > To establish a connection to the ODBC database, create a Session object
+ using the<code> ODBC</ code> backend factory together with a connection string : < / p >
 
-<p>or simply:</p>
+ < pre class = "example" >
+               BackEndFactory const & amp;
+ backEnd = odbc;
+ Session sql(backEnd, "filedsn=c:\\my.dsn");
+ < / pre >
 
-<pre class="example">
-Session sql(odbc, "filedsn=c:\\my.dsn");
-</pre>
+ < p > or simply : < / p >
 
-<p>The set of parameters used in the connection string for ODBC is the same as accepted by the <code><a href="http://msdn.microsoft.com/library/default.asp?url=/library/en-us/odbcsql/od_odbc_d_4x4k.asp">SQLDriverConnect</a></code> function from the ODBC library.</p>
+ < pre class = "example" >
+               Session sql(odbc, "filedsn=c:\\my.dsn");
+ < / pre >
 
-<p>Once you have created a <code>Session</code> object as shown above, you can use it to access the database, for example:</p>
-<pre class="example">
-int count;
-sql &lt;&lt; "select count(*) from invoices", into(count);
-</pre>
+ < p > The set of parameters used in the connection string for ODBC is the same as accepted by the<code> < a href = "http://msdn.microsoft.com/library/default.asp?url=/library/en-us/odbcsql/od_odbc_d_4x4k.asp" > SQLDriverConnect</ a> < / code > function from the ODBC library.< / p >
 
-<p>(See the <a href="../basics.html">SOCI basics</a> and <a href="../exchange.html">exchanging data</a> documentation for general information on using the <code>Session</code> class.)</p>
+                                                                                                                    < p > Once you have created a<code> Session</ code> object as shown above, you can use it to access the database, for example : < / p >
+ < pre class = "example" >
+               int count;
+ sql& lt;
+ &lt;
+ "select count(*) from invoices", into(count);
+ < / pre >
 
-<h3 id="support">SOCI Feature Support</h3>
-<h4 id="dynamic">Dynamic Binding</h4>
+ < p > (See the<a href = "../basics.html"> SOCI basics</ a> and<a href = "../exchange.html"> exchanging data</ a> documentation for general information on using the<code> Session</ code> class.) < / p >
 
-<p>The ODBC backend supports the use of the SOCI <code>Row</code> class, which facilitates retrieval of data whose type is not known at compile time.</p>
+ < h3 id                     = "support" > SOCI Feature Support</ h3>
+                     < h4 id = "dynamic" > Dynamic Binding</ h4>
 
-<p>When calling <code>Row::get&lt;T&gt;()</code>, the type you should pass as T depends upon the underlying database type.<br/>  For the ODBC backend, this type mapping is:</p>
+                               < p > The ODBC backend supports the use of the SOCI<code> Row</ code> class, which facilitates retrieval of data whose type is not known at compile time.< / p >
 
-<table border="1" cellpadding="5" cellspacing="0">
-  <tbody>
-    <tr>
-      <th>ODBC Data Type</th>
-      <th>SOCI Data Type</th>
-      <th><code>Row::get&lt;T&gt;</code> specializations</th>
-    </tr>
-    <tr>
-      <td>SQL_DOUBLE
-	    , SQL_DECIMAL
-	    , SQL_REAL
-	    , SQL_FLOAT
-	    , SQL_NUMERIC
-	  </td>
-      <td><code>eDouble</code></td>
-      <td><code>double</code></td>
-    </tr>
-    <tr>
-      <td>SQL_TINYINT
-	    , SQL_SMALLINT
-	    , SQL_INTEGER
-	    , SQL_BIGINT</td>
-      <td><code>eInteger</code></td>
-      <td><code>int</code></td>
-    </tr>
-    <tr>
-      <td>SQL_CHAR, SQL_VARCHAR</td>
-      <td><code>eString</code></td>
-      <td><code>std::string</code></td>
-    </tr>
-    <tr>
-      <td>SQL_TYPE_DATE
-	    , SQL_TYPE_TIME
-	    , SQL_TYPE_TIMESTAMP</td>
-      <td><code>eDate</code></td>
-      <td><code>std::tm</code><code></code></td>
-    </tr>
-  </tbody>
-</table>
+ < p > When calling<code> Row::get & lt;
+ T& gt;
+ () < / code >, the type you should pass as T depends upon the underlying database type.< br / > For the ODBC backend, this type mapping is : < / p >
 
-<p>Not all ODBC drivers support all datatypes</p>
+ < table border = "1" cellpadding = "5" cellspacing = "0" >
+                                                      < tbody >
+                                                      < tr >
+                                                      < th > ODBC Data Type</ th>
+                                                      < th > SOCI Data Type</ th>
+                                                      < th > < code > Row::get & lt;
+ T& gt;
+ < / code > specializations</ th>
+ < / tr >
+ < tr >
+ < td > SQL_DOUBLE
+ , SQL_DECIMAL
+ , SQL_REAL
+ , SQL_FLOAT
+ , SQL_NUMERIC
+ </ td>
+ < td > < code > eDouble</ code> < / td >
+ < td > < code > double</ code> < / td >
+ < / tr >
+ < tr >
+ < td > SQL_TINYINT
+ , SQL_SMALLINT
+ , SQL_INTEGER
+ , SQL_BIGINT</ td>
+ < td > < code > eInteger</ code> < / td >
+ < td > < code > int</ code> < / td >
+ < / tr >
+ < tr >
+ < td > SQL_CHAR, SQL_VARCHAR</ td>
+ < td > < code > eString</ code> < / td >
+ < td > < code > std::string</ code> < / td >
+ < / tr >
+ < tr >
+ < td > SQL_TYPE_DATE
+ , SQL_TYPE_TIME
+ , SQL_TYPE_TIMESTAMP</ td>
+ < td > < code > eDate</ code> < / td >
+ < td > < code > std::tm</ code> < code > < / code > < / td >
+ < / tr >
+ < / tbody >
+ < / table >
 
-<p>(See the <a href="../exchange.html#dynamic">dynamic resultset binding</a> documentation for general information on using the <code>Row</code> class.)</p>
+ < p > Not all ODBC drivers support all datatypes</ p>
 
-<h4 id="bindingbyname">Binding by Name</h4>
+ < p > (See the<a href = "../exchange.html#dynamic"> dynamic resultset binding</ a> documentation for general information on using the<code> Row</ code> class.) < / p >
 
-<p>In addition to <a href="../exchange.html#bind_position">binding by position</a>, the ODBC backend supports <a href="../exchange.html#bind_name">binding by name</a>, via an overload of the <code>use()</code> function:</p>
+ < h4 id = "bindingbyname" > Binding by Name</ h4>
 
-<pre class="example">
-int id = 7;
-sql &lt;&lt; "select name from person where id = :id", use(id, "id")
-</pre>
+           < p > In addition to<a href = "../exchange.html#bind_position"> binding by position</ a>, the ODBC backend supports<a href = "../exchange.html#bind_name"> binding by name</ a>, via an overload of the<code> use() < / code > function
+     : < / p >
 
-<p>Apart from the portable "colon-name" syntax above, which is achieved by rewriting the query string, the backend also supports the ODBC ? syntax:</p>
+     < pre class                   = "example" >
+                            int id = 7;
+ sql& lt;
+ &lt;
+ "select name from person where id = :id", use(id, "id")
+ < / pre >
 
-<pre class="example">
-int i = 7;
-int j = 8;
-sql &lt;&lt; "insert into t(x, y) values(?, ?)", use(i), use(j);
-</pre>
+ < p > Apart from the portable "colon-name" syntax above, which is achieved by rewriting the query string, the backend also supports the ODBC ? syntax : < / p >
 
-<h4 id="bulk">Bulk Operations</h4>
+ < pre class                 = "example" >
+                       int i = 7;
+ int j = 8;
+ sql& lt;
+ &lt;
+ "insert into t(x, y) values(?, ?)", use(i), use(j);
+ < / pre >
 
-<p>The ODBC backend has support for SOCI's <a href="../statements.html#bulk">bulk operations</a> interface.  Not all ODBC drivers support bulk operations, the following is a list of some tested backends:</p>
+ < h4 id = "bulk" > Bulk Operations</ h4>
+
+           < p > The ODBC backend has support for SOCI 's <a href="../statements.html#bulk">bulk operations</a> interface.  Not all ODBC drivers support bulk operations, the following is a list of some tested backends:</p>
 
 <table border="1" cellpadding="5" cellspacing="0">
   <tbody>
@@ -239,7 +251,7 @@ sql &lt;&lt; "insert into t(x, y) values(?, ?)", use(i), use(j);
 <h4 id="odbc_soci_error">ODBCSOCIError</h4>
 
 <p>The ODBC backend can throw instances of class <code>ODBCSOCIError</code>,
-which is publicly derived from <code>SOCIError</code> and has 
+which is publicly derived from <code>SOCIError</code> and has
 additional public members containing the ODBC error code, the Native database error code, and the message returned from ODBC:</p>
 
 <pre class="example">
@@ -269,3 +281,4 @@ int main()
 <p class="copyright">Copyright &copy; 2004-2006 Maciej Sobczak, Stephen Hutton, David Courtney</p>
 </body>
 </html>
+

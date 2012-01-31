@@ -22,13 +22,13 @@ using namespace soci;
 using namespace soci::details;
 using namespace soci::details::oracle;
 
-oracle_blob_backend::oracle_blob_backend(oracle_session_backend &session)
+oracle_blob_backend::oracle_blob_backend(oracle_session_backend& session)
     : session_(session)
 {
     sword res = OCIDescriptorAlloc(session.envhp_,
-        reinterpret_cast<dvoid**>(&lobp_), OCI_DTYPE_LOB, 0, 0);
-    if (res != OCI_SUCCESS)
-    {
+                                   reinterpret_cast<dvoid **>(&lobp_), OCI_DTYPE_LOB, 0, 0);
+
+    if (res != OCI_SUCCESS) {
         throw soci_error("Cannot allocate the LOB locator");
     }
 }
@@ -43,10 +43,9 @@ std::size_t oracle_blob_backend::get_len()
     ub4 len;
 
     sword res = OCILobGetLength(session_.svchp_, session_.errhp_,
-        lobp_, &len);
+                                lobp_, &len);
 
-    if (res != OCI_SUCCESS)
-    {
+    if (res != OCI_SUCCESS) {
         throw_oracle_soci_error(res, session_.errhp_);
     }
 
@@ -59,10 +58,10 @@ std::size_t oracle_blob_backend::read(
     ub4 amt = static_cast<ub4>(toRead);
 
     sword res = OCILobRead(session_.svchp_, session_.errhp_, lobp_, &amt,
-        static_cast<ub4>(offset), reinterpret_cast<dvoid*>(buf),
-        amt, 0, 0, 0, 0);
-    if (res != OCI_SUCCESS)
-    {
+                           static_cast<ub4>(offset), reinterpret_cast<dvoid *>(buf),
+                           amt, 0, 0, 0, 0);
+
+    if (res != OCI_SUCCESS) {
         throw_oracle_soci_error(res, session_.errhp_);
     }
 
@@ -75,11 +74,11 @@ std::size_t oracle_blob_backend::write(
     ub4 amt = static_cast<ub4>(toWrite);
 
     sword res = OCILobWrite(session_.svchp_, session_.errhp_, lobp_, &amt,
-        static_cast<ub4>(offset),
-        reinterpret_cast<dvoid*>(const_cast<char*>(buf)),
-        amt, OCI_ONE_PIECE, 0, 0, 0, 0);
-    if (res != OCI_SUCCESS)
-    {
+                            static_cast<ub4>(offset),
+                            reinterpret_cast<dvoid *>(const_cast<char *>(buf)),
+                            amt, OCI_ONE_PIECE, 0, 0, 0, 0);
+
+    if (res != OCI_SUCCESS) {
         throw_oracle_soci_error(res, session_.errhp_);
     }
 
@@ -91,10 +90,10 @@ std::size_t oracle_blob_backend::append(char const *buf, std::size_t toWrite)
     ub4 amt = static_cast<ub4>(toWrite);
 
     sword res = OCILobWriteAppend(session_.svchp_, session_.errhp_, lobp_,
-        &amt, reinterpret_cast<dvoid*>(const_cast<char*>(buf)),
-        amt, OCI_ONE_PIECE, 0, 0, 0, 0);
-    if (res != OCI_SUCCESS)
-    {
+                                  &amt, reinterpret_cast<dvoid *>(const_cast<char *>(buf)),
+                                  amt, OCI_ONE_PIECE, 0, 0, 0, 0);
+
+    if (res != OCI_SUCCESS) {
         throw_oracle_soci_error(res, session_.errhp_);
     }
 
@@ -104,9 +103,9 @@ std::size_t oracle_blob_backend::append(char const *buf, std::size_t toWrite)
 void oracle_blob_backend::trim(std::size_t newLen)
 {
     sword res = OCILobTrim(session_.svchp_, session_.errhp_, lobp_,
-        static_cast<ub4>(newLen));
-    if (res != OCI_SUCCESS)
-    {
+                           static_cast<ub4>(newLen));
+
+    if (res != OCI_SUCCESS) {
         throw_oracle_soci_error(res, session_.errhp_);
     }
 }

@@ -27,7 +27,7 @@ using namespace soci::details;
 
 
 postgresql_rowid_backend::postgresql_rowid_backend(
-    postgresql_session_backend & /* session */)
+    postgresql_session_backend& /* session */)
 {
     // nothing to do here
 }

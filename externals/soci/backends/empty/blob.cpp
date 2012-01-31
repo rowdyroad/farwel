@@ -16,7 +16,7 @@ using namespace soci;
 using namespace soci::details;
 
 
-empty_blob_backend::empty_blob_backend(empty_session_backend &session)
+empty_blob_backend::empty_blob_backend(empty_session_backend& session)
     : session_(session)
 {
     // ...

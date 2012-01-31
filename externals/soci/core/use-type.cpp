@@ -17,15 +17,12 @@ standard_use_type::~standard_use_type()
     delete backEnd_;
 }
 
-void standard_use_type::bind(statement_impl & st, int & position)
+void standard_use_type::bind(statement_impl& st, int& position)
 {
     backEnd_ = st.make_use_type_backend();
-    if (name_.empty())
-    {
+    if (name_.empty()) {
         backEnd_->bind_by_pos(position, data_, type_, readOnly_);
-    }
-    else
-    {
+    }else  {
         backEnd_->bind_by_name(name_, data_, type_, readOnly_);
     }
 }
@@ -44,8 +41,7 @@ void standard_use_type::post_use(bool gotData)
 
 void standard_use_type::clean_up()
 {
-    if (backEnd_ != NULL)
-    {
+    if (backEnd_ != NULL) {
         backEnd_->clean_up();
     }
 }
@@ -55,15 +51,12 @@ vector_use_type::~vector_use_type()
     delete backEnd_;
 }
 
-void vector_use_type::bind(statement_impl & st, int & position)
+void vector_use_type::bind(statement_impl& st, int& position)
 {
     backEnd_ = st.make_vector_use_type_backend();
-    if (name_.empty())
-    {
+    if (name_.empty()) {
         backEnd_->bind_by_pos(position, data_, type_);
-    }
-    else
-    {
+    }else  {
         backEnd_->bind_by_name(name_, data_, type_);
     }
 }
@@ -82,8 +75,7 @@ std::size_t vector_use_type::size() const
 
 void vector_use_type::clean_up()
 {
-    if (backEnd_ != NULL)
-    {
+    if (backEnd_ != NULL) {
         backEnd_->clean_up();
     }
 }

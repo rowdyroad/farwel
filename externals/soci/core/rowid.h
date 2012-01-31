@@ -10,32 +10,26 @@
 
 #include "soci-config.h"
 
-namespace soci
-{
+namespace soci {
+    class session;
 
-class session;
-
-namespace details
-{
-
-class rowid_backend;
-
-} // namespace details
+    namespace details {
+        class rowid_backend;
+    } // namespace details
 
 // ROWID support
 
-class SOCI_DECL rowid
-{
-public:
-    explicit rowid(session & s);
-    ~rowid();
+    class SOCI_DECL rowid
+    {
+        public:
+            explicit rowid(session& s);
+            ~rowid();
 
-    details::rowid_backend * get_backend() { return backEnd_; }
+            details::rowid_backend *get_backend() { return backEnd_; }
 
-private:
-    details::rowid_backend *backEnd_;
-};
-
+        private:
+            details::rowid_backend *backEnd_;
+    };
 } // namespace soci
 
 #endif

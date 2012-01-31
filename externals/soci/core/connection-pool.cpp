@@ -23,12 +23,10 @@ using namespace soci;
 
 struct connection_pool::connection_pool_impl
 {
-    bool find_free(std::size_t & pos)
+    bool find_free(std::size_t& pos)
     {
-        for (std::size_t i = 0; i != sessions_.size(); ++i)
-        {
-            if (sessions_[i].first)
-            {
+        for (std::size_t i = 0; i != sessions_.size(); ++i) {
+            if (sessions_[i].first) {
                 pos = i;
                 return true;
             }
@@ -39,41 +37,36 @@ struct connection_pool::connection_pool_impl
 
     // by convention, first == true means the entry is free (not used)
     std::vector<std::pair<bool, session *> > sessions_;
-    pthread_mutex_t mtx_;
-    pthread_cond_t cond_;
+    pthread_mutex_t                          mtx_;
+    pthread_cond_t                           cond_;
 };
 
 connection_pool::connection_pool(std::size_t size)
 {
-    if (size == 0)
-    {
+    if (size == 0) {
         throw soci_error("Invalid pool size");
     }
 
     pimpl_ = new connection_pool_impl();
     pimpl_->sessions_.resize(size);
-    for (std::size_t i = 0; i != size; ++i)
-    {
+    for (std::size_t i = 0; i != size; ++i) {
         pimpl_->sessions_[i] = std::make_pair(true, new session());
     }
 
     int cc = pthread_mutex_init(&(pimpl_->mtx_), NULL);
-    if (cc != 0)
-    {
+    if (cc != 0) {
         throw soci_error("Synchronization error");
     }
 
     cc = pthread_cond_init(&(pimpl_->cond_), NULL);
-    if (cc != 0)
-    {
+    if (cc != 0) {
         throw soci_error("Synchronization error");
     }
 }
 
 connection_pool::~connection_pool()
 {
-    for (std::size_t i = 0; i != pimpl_->sessions_.size(); ++i)
-    {
+    for (std::size_t i = 0; i != pimpl_->sessions_.size(); ++i) {
         delete pimpl_->sessions_[i].second;
     }
 
@@ -83,10 +76,9 @@ connection_pool::~connection_pool()
     delete pimpl_;
 }
 
-session & connection_pool::at(std::size_t pos)
+session& connection_pool::at(std::size_t pos)
 {
-    if (pos >= pimpl_->sessions_.size())
-    {
+    if (pos >= pimpl_->sessions_.size()) {
         throw soci_error("Invalid pool position");
     }
 
@@ -99,53 +91,47 @@ std::size_t connection_pool::lease()
 
     // no timeout
     bool const success = try_lease(pos, -1);
+
     assert(success);
 
     return pos;
 }
 
-bool connection_pool::try_lease(std::size_t & pos, int timeout)
+bool connection_pool::try_lease(std::size_t& pos, int timeout)
 {
     struct timespec tm;
-    if (timeout >= 0)
-    {
+
+    if (timeout >= 0) {
         // timeout is relative in milliseconds
 
         struct timeval tmv;
         gettimeofday(&tmv, NULL);
 
-        tm.tv_sec = tmv.tv_sec + timeout / 1000;
+        tm.tv_sec  = tmv.tv_sec + timeout / 1000;
         tm.tv_nsec = tmv.tv_usec * 1000 + (timeout % 1000) * 1000 * 1000;
     }
 
     int cc = pthread_mutex_lock(&(pimpl_->mtx_));
-    if (cc != 0)
-    {
+    if (cc != 0) {
         throw soci_error("Synchronization error");
     }
 
-    while (pimpl_->find_free(pos) == false)
-    {
-        if (timeout < 0)
-        {
+    while (pimpl_->find_free(pos) == false) {
+        if (timeout < 0) {
             // no timeout, allow unlimited blocking
             cc = pthread_cond_wait(&(pimpl_->cond_), &(pimpl_->mtx_));
-        }
-        else
-        {
+        }else  {
             // wait with timeout
             cc = pthread_cond_timedwait(
                 &(pimpl_->cond_), &(pimpl_->mtx_), &tm);
         }
 
-        if (cc == ETIMEDOUT)
-        {
+        if (cc == ETIMEDOUT) {
             break;
         }
     }
 
-    if (cc == 0)
-    {
+    if (cc == 0) {
         pimpl_->sessions_[pos].first = false;
     }
 
@@ -156,19 +142,16 @@ bool connection_pool::try_lease(std::size_t & pos, int timeout)
 
 void connection_pool::give_back(std::size_t pos)
 {
-    if (pos >= pimpl_->sessions_.size())
-    {
+    if (pos >= pimpl_->sessions_.size()) {
         throw soci_error("Invalid pool position");
     }
 
     int cc = pthread_mutex_lock(&(pimpl_->mtx_));
-    if (cc != 0)
-    {
+    if (cc != 0) {
         throw soci_error("Synchronization error");
     }
 
-    if (pimpl_->sessions_[pos].first)
-    {
+    if (pimpl_->sessions_[pos].first) {
         pthread_mutex_unlock(&(pimpl_->mtx_));
         throw soci_error("Cannot release pool entry (already free)");
     }
@@ -189,12 +172,10 @@ using namespace soci;
 
 struct connection_pool::connection_pool_impl
 {
-    bool find_free(std::size_t & pos)
+    bool find_free(std::size_t& pos)
     {
-        for (std::size_t i = 0; i != sessions_.size(); ++i)
-        {
-            if (sessions_[i].first)
-            {
+        for (std::size_t i = 0; i != sessions_.size(); ++i) {
+            if (sessions_[i].first) {
                 pos = i;
                 return true;
             }
@@ -206,21 +187,19 @@ struct connection_pool::connection_pool_impl
     // by convention, first == true means the entry is free (not used)
     std::vector<std::pair<bool, session *> > sessions_;
 
-    CRITICAL_SECTION mtx_;
-    HANDLE sem_;
+    CRITICAL_SECTION                         mtx_;
+    HANDLE                                   sem_;
 };
 
 connection_pool::connection_pool(std::size_t size)
 {
-    if (size == 0)
-    {
+    if (size == 0) {
         throw soci_error("Invalid pool size");
     }
 
     pimpl_ = new connection_pool_impl();
     pimpl_->sessions_.resize(size);
-    for (std::size_t i = 0; i != size; ++i)
-    {
+    for (std::size_t i = 0; i != size; ++i) {
         pimpl_->sessions_[i] = std::make_pair(true, new session());
     }
 
@@ -228,9 +207,8 @@ connection_pool::connection_pool(std::size_t size)
 
     // initially all entries are available
     HANDLE s = CreateSemaphore(NULL,
-        static_cast<LONG>(size), static_cast<LONG>(size), NULL);
-    if (s == NULL)
-    {
+                               static_cast<LONG>(size), static_cast<LONG>(size), NULL);
+    if (s == NULL) {
         throw soci_error("Synchronization error");
     }
 
@@ -239,8 +217,7 @@ connection_pool::connection_pool(std::size_t size)
 
 connection_pool::~connection_pool()
 {
-    for (std::size_t i = 0; i != pimpl_->sessions_.size(); ++i)
-    {
+    for (std::size_t i = 0; i != pimpl_->sessions_.size(); ++i) {
         delete pimpl_->sessions_[i].second;
     }
 
@@ -250,10 +227,9 @@ connection_pool::~connection_pool()
     delete pimpl_;
 }
 
-session & connection_pool::at(std::size_t pos)
+session& connection_pool::at(std::size_t pos)
 {
-    if (pos >= pimpl_->sessions_.size())
-    {
+    if (pos >= pimpl_->sessions_.size()) {
         throw soci_error("Invalid pool position");
     }
 
@@ -266,29 +242,28 @@ std::size_t connection_pool::lease()
 
     // no timeout
     bool const success = try_lease(pos, -1);
-    assert(success);    
-    if (!success)
-    {
+
+    assert(success);
+    if (!success) {
         // TODO: anything to report? --mloskot
     }
 
     return pos;
 }
 
-bool connection_pool::try_lease(std::size_t & pos, int timeout)
+bool connection_pool::try_lease(std::size_t& pos, int timeout)
 {
     DWORD cc = WaitForSingleObject(pimpl_->sem_,
-        timeout >= 0 ? static_cast<DWORD>(timeout) : INFINITE);
-    if (cc == WAIT_OBJECT_0)
-    {
+                                   timeout >= 0 ? static_cast<DWORD>(timeout) : INFINITE);
+
+    if (cc == WAIT_OBJECT_0) {
         // semaphore acquired, there is (at least) one free entry
 
         EnterCriticalSection(&(pimpl_->mtx_));
 
         bool const success = pimpl_->find_free(pos);
         assert(success);
-        if (!success)
-        {
+        if (!success) {
             // TODO: anything to report? --mloskot
         }
 
@@ -297,28 +272,22 @@ bool connection_pool::try_lease(std::size_t & pos, int timeout)
         LeaveCriticalSection(&(pimpl_->mtx_));
 
         return true;
-    }
-    else if (cc == WAIT_TIMEOUT)
-    {
+    }else if (cc == WAIT_TIMEOUT)  {
         return false;
-    }
-    else
-    {
+    }else  {
         throw soci_error("Synchronization error");
     }
 }
 
 void connection_pool::give_back(std::size_t pos)
 {
-    if (pos >= pimpl_->sessions_.size())
-    {
+    if (pos >= pimpl_->sessions_.size()) {
         throw soci_error("Invalid pool position");
     }
 
     EnterCriticalSection(&(pimpl_->mtx_));
 
-    if (pimpl_->sessions_[pos].first)
-    {
+    if (pimpl_->sessions_[pos].first) {
         LeaveCriticalSection(&(pimpl_->mtx_));
         throw soci_error("Cannot release pool entry (already free)");
     }

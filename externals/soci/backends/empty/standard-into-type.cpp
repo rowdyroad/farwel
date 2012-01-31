@@ -17,7 +17,7 @@ using namespace soci::details;
 
 
 void empty_standard_into_type_backend::define_by_pos(
-    int & /* position */, void * /* data */, exchange_type /* type */)
+    int& /* position */, void * /* data */, exchange_type /* type */)
 {
     // ...
 }

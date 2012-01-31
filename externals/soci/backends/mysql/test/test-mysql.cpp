@@ -24,8 +24,8 @@
 using namespace soci;
 using namespace soci::tests;
 
-std::string connectString;
-backend_factory const &backEnd = *soci::factory_mysql();
+std::string            connectString;
+backend_factory const& backEnd = *soci::factory_mysql();
 
 
 // procedure call test
@@ -36,31 +36,31 @@ void test1()
 
         mysql_session_backend *sessionBackEnd
             = static_cast<mysql_session_backend *>(sql.get_backend());
-        std::string version = mysql_get_server_info(sessionBackEnd->conn_);
-        int v;
+        std::string        version = mysql_get_server_info(sessionBackEnd->conn_);
+        int                v;
         std::istringstream iss(version);
-        if ((iss >> v) and v < 5)
-        {
+        if ((iss >> v) and v < 5) {
             std::cout << "skipping test 1 (MySQL server version ";
             std::cout << version << " does not support stored procedures)\n";
             return;
         }
 
-        try { sql << "drop function myecho"; }
-        catch (soci_error const &) {}
+        try {
+            sql << "drop function myecho";
+        }catch (soci_error const&)                                       {}
 
         sql <<
-            "create function myecho(msg text) "
-            "returns text deterministic "
-            "  return msg; ";
+        "create function myecho(msg text) "
+        "returns text deterministic "
+        "  return msg; ";
 
         std::string in("my message");
         std::string out;
 
         statement st = (sql.prepare <<
-            "select myecho(:input)",
-            into(out),
-            use(in, "input"));
+                        "select myecho(:input)",
+                        into(out),
+                        use(in, "input"));
 
         st.execute(1);
         assert(out == in);
@@ -71,8 +71,8 @@ void test1()
             std::string out;
 
             procedure proc = (sql.prepare <<
-                "myecho(:input)",
-                into(out), use(in, "input"));
+                              "myecho(:input)",
+                              into(out), use(in, "input"));
 
             proc.execute(1);
             assert(out == in);
@@ -88,12 +88,9 @@ void test1()
 void test2()
 {
     {
-        try
-        {
+        try{
             session sql(backEnd, "host=test.soci.invalid");
-        }
-        catch (mysql_soci_error const &e)
-        {
+        }catch (mysql_soci_error const& e)  {
             assert(e.err_num_ == CR_UNKNOWN_HOST ||
                    e.err_num_ == CR_CONN_HOST_ERROR);
         }
@@ -102,31 +99,22 @@ void test2()
     {
         session sql(backEnd, connectString);
         sql << "create table soci_test (id integer)";
-        try
-        {
+        try{
             int n;
             sql << "select id from soci_test_nosuchtable", into(n);
-        }
-        catch (mysql_soci_error const &e)
-        {
+        }catch (mysql_soci_error const& e)  {
             assert(e.err_num_ == ER_NO_SUCH_TABLE);
         }
-        try
-        {
+        try{
             sql << "insert into soci_test (invalid) values (256)";
-        }
-        catch (mysql_soci_error const &e)
-        {
+        }catch (mysql_soci_error const& e)  {
             assert(e.err_num_ == ER_BAD_FIELD_ERROR);
         }
         // A bulk operation.
-        try
-        {
+        try{
             std::vector<int> v(3, 5);
             sql << "insert into soci_test_nosuchtable values (:n)", use(v);
-        }
-        catch (mysql_soci_error const &e)
-        {
+        }catch (mysql_soci_error const& e)  {
             assert(e.err_num_ == ER_NO_SUCH_TABLE);
         }
         sql << "drop table soci_test";
@@ -135,9 +123,10 @@ void test2()
     std::cout << "test 2 passed" << std::endl;
 }
 
-struct longlong_table_creator : table_creator_base
+struct longlong_table_creator
+    : table_creator_base
 {
-    longlong_table_creator(session & sql)
+    longlong_table_creator(session& sql)
         : table_creator_base(sql)
     {
         sql << "create table soci_test(val bigint)";
@@ -192,39 +181,30 @@ void test3()
     std::cout << "test 3 passed" << std::endl;
 }
 
-template <typename T>
-void test_num(const char* s, bool valid, T value)
+template<typename T>
+void test_num(const char *s, bool valid, T value)
 {
-    try
-    {
+    try{
         session sql(backEnd, connectString);
-        T val;
+        T       val;
         sql << "select \'" << s << "\'", into(val);
-        if (valid)
-        {
-            double v1 = static_cast<double>(value);
-            double v2 = static_cast<double>(val);
-            double d = std::fabs(v1 - v2);
+        if (valid) {
+            double v1      = static_cast<double>(value);
+            double v2      = static_cast<double>(val);
+            double d       = std::fabs(v1 - v2);
             double epsilon = 0.001;
             assert(d < epsilon ||
                    d < epsilon * (std::fabs(v1) + std::fabs(v2)));
-        }
-        else
-        {
+        }else  {
             std::cout << "string \"" << s << "\" parsed as " << val
                       << " but should have failed.\n";
             assert(false);
         }
-    }
-    catch (soci_error const& e)
-    {
-        if (valid)
-        {
+    }catch (soci_error const& e)  {
+        if (valid) {
             std::cout << "couldn't parse number: \"" << s << "\"\n";
             assert(false);
-        }
-        else
-        {
+        }else  {
             assert(std::string(e.what()) == "Cannot convert data.");
         }
     }
@@ -240,23 +220,23 @@ void test4()
     test_num<double>("123", true, 123);
     test_num<double>("12345", true, 12345);
     test_num<double>("12341234123412341234123412341234123412341234123412341",
-        true, 1.23412e+52);
+                     true, 1.23412e+52);
     test_num<double>("99999999999999999999999912222222222222222222222222223"
-        "9999999999999999999999991222222222222222222222222222333333333333"
-        "9999999999999999999999991222222222222222222222222222333333333333"
-        "9999999999999999999999991222222222222222222222222222333333333333"
-        "9999999999999999999999991222222222222222222222222222333333333333"
-        "9999999999999999999999991222222222222222222222222222333333333333"
-        "9999999999999999999999991222222222222222222222222222333333333333"
-        "9999999999999999999999991222222222222222222222222222333333333333"
-        "9999999999999999999999991222222222222222222222222222333333333333"
-        "9999999999999999999999991222222222222222222222222222333333333333"
-        "9999999999999999999999991222222222222222222222222222333333333333"
-        "9999999999999999999999991222222222222222222222222222333333333333"
-        "9999999999999999999999991222222222222222222222222222333333333333"
-        "9999999999999999999999991222222222222222222222222222333333333333"
-        "9999999999999999999999991222222222222222222222222222333333333333",
-        false, 0);
+                     "9999999999999999999999991222222222222222222222222222333333333333"
+                     "9999999999999999999999991222222222222222222222222222333333333333"
+                     "9999999999999999999999991222222222222222222222222222333333333333"
+                     "9999999999999999999999991222222222222222222222222222333333333333"
+                     "9999999999999999999999991222222222222222222222222222333333333333"
+                     "9999999999999999999999991222222222222222222222222222333333333333"
+                     "9999999999999999999999991222222222222222222222222222333333333333"
+                     "9999999999999999999999991222222222222222222222222222333333333333"
+                     "9999999999999999999999991222222222222222222222222222333333333333"
+                     "9999999999999999999999991222222222222222222222222222333333333333"
+                     "9999999999999999999999991222222222222222222222222222333333333333"
+                     "9999999999999999999999991222222222222222222222222222333333333333"
+                     "9999999999999999999999991222222222222222222222222222333333333333"
+                     "9999999999999999999999991222222222222222222222222222333333333333",
+                     false, 0);
     test_num<double>("1e3", true, 1000);
     test_num<double>("1.2", true, 1.2);
     test_num<double>("1.2345e2", true, 123.45);
@@ -284,7 +264,7 @@ void test4()
     test_num<long long>("123", true, 123);
     test_num<long long>("9223372036854775807", true, 9223372036854775807LL);
     test_num<long long>("9223372036854775808", false, 0);
-    
+
     std::cout << "test 4 passed" << std::endl;
 }
 
@@ -292,6 +272,7 @@ void test5()
 {
     session sql(backEnd, connectString);
     std::tm t;
+
     sql << "select maketime(19, 54, 52)", into(t);
     assert(t.tm_year == 100);
     assert(t.tm_mon == 0);
@@ -306,7 +287,7 @@ void test5()
 // TEXT and BLOB types support test.
 void test6()
 {
-    session sql(backEnd, connectString);
+    session     sql(backEnd, connectString);
     std::string a("asdfg\0hjkl", 10);
     std::string b("lkjhg\0fd\0\0sa\0", 13);
     std::string c("\\0aa\\0bb\\0cc\\0", 10);
@@ -319,22 +300,22 @@ void test6()
     std::string z(800000, 'Z');
 
     sql << "create table soci_test (id int, text_value text, "
-        "blob_value blob, longblob_value longblob)";
+           "blob_value blob, longblob_value longblob)";
     sql << "insert into soci_test values (1, \'foo\', \'bar\', \'baz\')";
     sql << "insert into soci_test "
         << "values (2, \'qwerty\\0uiop\', \'zxcv\\0bnm\', "
         << "\'qwerty\\0uiop\\0zxcvbnm\\0\')";
     sql << "insert into soci_test values (3, :a, :b, :c)",
-           use(a), use(b), use(c);
+    use(a), use(b), use(c);
     sql << "insert into soci_test values (4, :x, :y, :z)",
-           use(x), use(y), use(z);
+    use(x), use(y), use(z);
 
     std::vector<std::string> text_vec(100);
     std::vector<std::string> blob_vec(100);
     std::vector<std::string> longblob_vec(100);
     sql << "select text_value, blob_value, longblob_value "
         << "from soci_test order by id",
-           into(text_vec), into(blob_vec), into(longblob_vec);
+    into(text_vec), into(blob_vec), into(longblob_vec);
     assert(text_vec.size() == 4);
     assert(blob_vec.size() == 4);
     assert(longblob_vec.size() == 4);
@@ -354,25 +335,25 @@ void test6()
     std::string text, blob, longblob;
     sql << "select text_value, blob_value, longblob_value "
         << "from soci_test where id = 1",
-           into(text), into(blob), into(longblob);
+    into(text), into(blob), into(longblob);
     assert(text == "foo");
     assert(blob == "bar");
     assert(longblob == "baz");
     sql << "select text_value, blob_value, longblob_value "
         << "from soci_test where id = 2",
-           into(text), into(blob), into(longblob);
+    into(text), into(blob), into(longblob);
     assert(text == std::string("qwerty\0uiop", 11));
     assert(blob == std::string("zxcv\0bnm", 8));
     assert(longblob == std::string("qwerty\0uiop\0zxcvbnm\0", 20));
     sql << "select text_value, blob_value, longblob_value "
         << "from soci_test where id = 3",
-           into(text), into(blob), into(longblob);
+    into(text), into(blob), into(longblob);
     assert(text == a);
     assert(blob == b);
     assert(longblob == c);
     sql << "select text_value, blob_value, longblob_value "
         << "from soci_test where id = 4",
-           into(text), into(blob), into(longblob);
+    into(text), into(blob), into(longblob);
     assert(text == x);
     assert(blob == y);
     assert(longblob == z);
@@ -419,9 +400,10 @@ void test6()
 
 // test for number of affected rows
 
-struct integer_value_table_creator : table_creator_base
+struct integer_value_table_creator
+    : table_creator_base
 {
-    integer_value_table_creator(session & sql)
+    integer_value_table_creator(session& sql)
         : table_creator_base(sql)
     {
         sql << "create table soci_test(val integer)";
@@ -435,19 +417,18 @@ void test7()
 
         integer_value_table_creator tableCreator(sql);
 
-        for (int i = 0; i != 10; i++)
-        {
+        for (int i = 0; i != 10; i++) {
             sql << "insert into soci_test(val) values(:val)", use(i);
         }
 
         statement st1 = (sql.prepare <<
-            "update soci_test set val = val + 1");
+                         "update soci_test set val = val + 1");
         st1.execute(false);
 
         assert(st1.get_affected_rows() == 10);
 
         statement st2 = (sql.prepare <<
-            "delete from soci_test where val <= 5");
+                         "delete from soci_test where val <= 5");
         st2.execute(false);
 
         assert(st2.get_affected_rows() == 5);
@@ -456,73 +437,75 @@ void test7()
     std::cout << "test 7 passed" << std::endl;
 }
 
-
 // The prepared statements should survive session::reconnect().
 void test8()
 {
-  {
-    session sql(backEnd, connectString);
+    {
+        session sql(backEnd, connectString);
 
-    integer_value_table_creator tableCreator(sql);
+        integer_value_table_creator tableCreator(sql);
 
-    int i;
-    statement st = (sql.prepare
-        << "insert into soci_test(val) values(:val)", use(i));
-    i = 5;
-    st.execute(true);
+        int       i;
+        statement st = (sql.prepare
+                        << "insert into soci_test(val) values(:val)", use(i));
+        i = 5;
+        st.execute(true);
 
-    sql.reconnect();
+        sql.reconnect();
 
-    i = 6;
-    st.execute(true);
+        i = 6;
+        st.execute(true);
 
-    sql.close();
-    sql.reconnect();
+        sql.close();
+        sql.reconnect();
 
-    i = 7;
-    st.execute(true);
+        i = 7;
+        st.execute(true);
 
-    std::vector<int> v(5);
-    sql << "select val from soci_test order by val", into(v);
-    assert(v.size() == 3);
-    assert(v[0] == 5);
-    assert(v[1] == 6);
-    assert(v[2] == 7);
-  }
+        std::vector<int> v(5);
+        sql << "select val from soci_test order by val", into(v);
+        assert(v.size() == 3);
+        assert(v[0] == 5);
+        assert(v[1] == 6);
+        assert(v[2] == 7);
+    }
 
-  std::cout << "test 8 passed" << std::endl;
+    std::cout << "test 8 passed" << std::endl;
 }
 
 // DDL Creation objects for common tests
-struct table_creator_one : public table_creator_base
+struct table_creator_one
+    : public table_creator_base
 {
-    table_creator_one(session & sql)
+    table_creator_one(session& sql)
         : table_creator_base(sql)
     {
         sql << "create table soci_test(id integer, val integer, c char, "
-                 "str varchar(20), sh int2, ul numeric(20), d float8, "
-                 "tm datetime, i1 integer, i2 integer, i3 integer, "
-                 "name varchar(20)) type=InnoDB";
+               "str varchar(20), sh int2, ul numeric(20), d float8, "
+               "tm datetime, i1 integer, i2 integer, i3 integer, "
+               "name varchar(20)) type=InnoDB";
     }
 };
 
-struct table_creator_two : public table_creator_base
+struct table_creator_two
+    : public table_creator_base
 {
-    table_creator_two(session & sql)
+    table_creator_two(session& sql)
         : table_creator_base(sql)
     {
-        sql  << "create table soci_test(num_float float8, num_int integer,"
-                     " name varchar(20), sometime datetime, chr char)";
+        sql << "create table soci_test(num_float float8, num_int integer,"
+               " name varchar(20), sometime datetime, chr char)";
     }
 };
 
-struct table_creator_three : public table_creator_base
+struct table_creator_three
+    : public table_creator_base
 {
-    table_creator_three(session & sql)
+    table_creator_three(session& sql)
         : table_creator_base(sql)
     {
         sql << "create table soci_test(name varchar(100) not null, "
-            "phone varchar(15))";
+               "phone varchar(15))";
     }
 };
 
@@ -530,38 +513,39 @@ struct table_creator_three : public table_creator_base
 // Support for SOCI Common Tests
 //
 
-class test_context : public test_context_base
+class test_context
+    : public test_context_base
 {
-public:
-    test_context(backend_factory const &backEnd,
-                std::string const &connectString)
-        : test_context_base(backEnd, connectString) {}
+    public:
+        test_context(backend_factory const& backEnd,
+                     std::string const&     connectString)
+            : test_context_base(backEnd, connectString) {}
 
-    table_creator_base* table_creator_1(session& s) const
-    {
-        return new table_creator_one(s);
-    }
+        table_creator_base *table_creator_1(session& s) const
+        {
+            return new table_creator_one(s);
+        }
 
-    table_creator_base* table_creator_2(session& s) const
-    {
-        return new table_creator_two(s);
-    }
+        table_creator_base *table_creator_2(session& s) const
+        {
+            return new table_creator_two(s);
+        }
 
-    table_creator_base* table_creator_3(session& s) const
-    {
-        return new table_creator_three(s);
-    }
+        table_creator_base *table_creator_3(session& s) const
+        {
+            return new table_creator_three(s);
+        }
 
-    std::string to_date_time(std::string const &datdt_string) const
-    {
-        return "\'" + datdt_string + "\'";
-    }
-
+        std::string to_date_time(std::string const& datdt_string) const
+        {
+            return "\'" + datdt_string + "\'";
+        }
 };
 
 bool are_transactions_supported()
 {
     session sql(backEnd, connectString);
+
     sql << "drop table if exists soci_test";
     sql << "create table soci_test (id int) type=InnoDB";
     row r;
@@ -571,26 +555,22 @@ bool are_transactions_supported()
     return retv;
 }
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
-    if (argc == 2)
-    {
+    if (argc == 2) {
         connectString = argv[1];
-    }
-    else
-    {
+    }else  {
         std::cout << "usage: " << argv[0]
-            << " connectstring\n"
-            << "example: " << argv[0]
-            << " \"dbname=test user=root password=\'Ala ma kota\'\"\n";
+                  << " connectstring\n"
+                  << "example: " << argv[0]
+                  << " \"dbname=test user=root password=\'Ala ma kota\'\"\n";
         std::exit(1);
     }
 
-    try
-    {
+    try{
         test_context tc(backEnd, connectString);
         common_tests tests(tc);
-        bool checkTransactions = are_transactions_supported();
+        bool         checkTransactions = are_transactions_supported();
         tests.run(checkTransactions);
 
         std::cout << "\nSOCI MySQL Tests:\n\n";
@@ -606,9 +586,7 @@ int main(int argc, char** argv)
 
         std::cout << "\nOK, all tests passed.\n\n";
         return EXIT_SUCCESS;
-    }
-    catch (std::exception const & e)
-    {
+    }catch (std::exception const& e)  {
         std::cout << e.what() << '\n';
     }
 

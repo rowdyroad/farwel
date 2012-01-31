@@ -15,113 +15,107 @@
 #include <string>
 #include <vector>
 
-namespace soci
-{
+namespace soci {
+    namespace details {
+        struct basic_type_tag {};
+        struct user_type_tag {};
 
-namespace details
-{
+        template<typename T>
+        struct exchange_traits
+        {
+            // this is used for tag-dispatch between implementations for basic types
+            // and user-defined types
+            typedef user_type_tag   type_family;
 
-struct basic_type_tag {};
-struct user_type_tag {};
+            enum // anonymous
+            {
+                x_type =
+                    exchange_traits
+                    <
+                        typename type_conversion<T>::base_type
+                    >::x_type
+            };
+        };
 
-template <typename T>
-struct exchange_traits
-{
-    // this is used for tag-dispatch between implementations for basic types
-    // and user-defined types
-    typedef user_type_tag type_family;
+        template<>
+        struct exchange_traits<short>
+        {
+            typedef basic_type_tag   type_family;
+            enum { x_type = x_short };
+        };
 
-    enum // anonymous
-    {
-        x_type =
-            exchange_traits
-            <
-                typename type_conversion<T>::base_type
-            >::x_type
-    };
-};
+        template<>
+        struct exchange_traits<int>
+        {
+            typedef basic_type_tag   type_family;
+            enum { x_type = x_integer };
+        };
 
-template <>
-struct exchange_traits<short>
-{
-    typedef basic_type_tag type_family;
-    enum { x_type = x_short };
-};
+        template<>
+        struct exchange_traits<char>
+        {
+            typedef basic_type_tag   type_family;
+            enum { x_type = x_char };
+        };
 
-template <>
-struct exchange_traits<int>
-{
-    typedef basic_type_tag type_family;
-    enum { x_type = x_integer };
-};
+        template<>
+        struct exchange_traits<unsigned long>
+        {
+            typedef basic_type_tag   type_family;
+            enum { x_type = x_unsigned_long };
+        };
 
-template <>
-struct exchange_traits<char>
-{
-    typedef basic_type_tag type_family;
-    enum { x_type = x_char };
-};
+        template<>
+        struct exchange_traits<long long>
+        {
+            typedef basic_type_tag   type_family;
+            enum { x_type = x_long_long };
+        };
 
-template <>
-struct exchange_traits<unsigned long>
-{
-    typedef basic_type_tag type_family;
-    enum { x_type = x_unsigned_long };
-};
+        template<>
+        struct exchange_traits<unsigned long long>
+        {
+            typedef basic_type_tag   type_family;
+            enum { x_type = x_unsigned_long_long };
+        };
 
-template <>
-struct exchange_traits<long long>
-{
-    typedef basic_type_tag type_family;
-    enum { x_type = x_long_long };
-};
+#if defined (__LP64__) || (__WORDSIZE == 64)
+        template<>
+        struct exchange_traits<long int>
+        {
+            typedef basic_type_tag   type_family;
+            enum { x_type = x_long_long };
+        };
+#endif  // #if defined (__LP64__) || ( __WORDSIZE == 64 )
 
-template <>
-struct exchange_traits<unsigned long long>
-{
-    typedef basic_type_tag type_family;
-    enum { x_type = x_unsigned_long_long };
-};
+        template<>
+        struct exchange_traits<double>
+        {
+            typedef basic_type_tag   type_family;
+            enum { x_type = x_double };
+        };
 
-#if defined (__LP64__) || ( __WORDSIZE == 64 )
-template <>
-struct exchange_traits<long int>
-{
-    typedef basic_type_tag type_family;
-    enum { x_type = x_long_long };
-};
-#endif // #if defined (__LP64__) || ( __WORDSIZE == 64 )
+        template<>
+        struct exchange_traits<std::string>
+        {
+            typedef basic_type_tag   type_family;
+            enum { x_type = x_stdstring };
+        };
 
-template <>
-struct exchange_traits<double>
-{
-    typedef basic_type_tag type_family;
-    enum { x_type = x_double };
-};
+        template<>
+        struct exchange_traits<std::tm>
+        {
+            typedef basic_type_tag   type_family;
+            enum { x_type = x_stdtm };
+        };
 
-template <>
-struct exchange_traits<std::string>
-{
-    typedef basic_type_tag type_family;
-    enum { x_type = x_stdstring };
-};
-
-template <>
-struct exchange_traits<std::tm>
-{
-    typedef basic_type_tag type_family;
-    enum { x_type = x_stdtm };
-};
-
-template <typename T>
-struct exchange_traits<std::vector<T> >
-{
-    typedef typename exchange_traits<T>::type_family type_family;
-    enum { x_type = exchange_traits<T>::x_type };
-};
-
-} // namespace details
-
-} // namespace soci
+        template<typename T>
+        struct exchange_traits<std::vector<T> >
+        {
+            typedef typename exchange_traits<T>::type_family   type_family;
+            enum { x_type = exchange_traits<T>::x_type };
+        };
+    } // namespace details
+}     // namespace soci
 
 #endif // SOCI_EXCHANGE_TRAITS_H_INCLUDED

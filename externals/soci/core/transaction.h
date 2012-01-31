@@ -11,28 +11,25 @@
 #include "session.h"
 #include "soci-config.h"
 
-namespace soci
-{
+namespace soci {
+    class SOCI_DECL transaction
+    {
+        public:
+            explicit transaction(session& sql);
 
-class SOCI_DECL transaction
-{
-public:
-    explicit transaction(session& sql);
+            ~transaction();
 
-    ~transaction();
+            void commit();
+            void rollback();
 
-    void commit();
-    void rollback();
+        private:
+            bool     handled_;
+            session& sql_;
 
-private:
-    bool handled_;
-    session& sql_;
-
-    // Disable copying
-    transaction(transaction const& other);
-    transaction& operator=(transaction const& other);
-};
-
+            // Disable copying
+            transaction(transaction const& other);
+            transaction& operator=(transaction const& other);
+    };
 } // namespace soci
 
 #endif // SOCI_TRANSACTION_H_INCLUDED

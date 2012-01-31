@@ -16,14 +16,14 @@ using namespace soci;
 using namespace soci::details;
 
 
-void empty_vector_use_type_backend::bind_by_pos(int & /* position */,
-        void * /* data */, exchange_type /* type */)
+void empty_vector_use_type_backend::bind_by_pos(int& /* position */,
+                                                void * /* data */, exchange_type /* type */)
 {
     // ...
 }
 
 void empty_vector_use_type_backend::bind_by_name(
-    std::string const & /* name */, void * /* data */,
+    std::string const& /* name */, void * /* data */,
     exchange_type /* type */)
 {
     // ...
