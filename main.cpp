@@ -117,7 +117,6 @@ extern "C" {
         Connector *cntr = main->GetConnector(fd);
         main->Logger().Inf("Write Connector(%p) %d - %s: ", cntr, fd, File(fd));
         if (!cntr) {
-            //! todo real write or something...think
             main->Logger().Inf("Call real function\n");
             return real.close(fd);
         }
@@ -251,7 +250,7 @@ extern "C" {
         if (!main.get()) {
             return real.readdir(dir);
         }
-        Connector *cntr = main->GetConnector(dir);
+        Connector *cntr = main->GetDirConnector(dir);
         main->Logger().Inf("ReadDir Connector(%p): ", cntr);
         if (!cntr) {
             main->Logger().Inf("Call real function\n");
@@ -266,7 +265,7 @@ extern "C" {
         if (!main.get()) {
             return real.closedir(dir);
         }
-        Connector *cntr = main->GetConnector(dir);
+        Connector *cntr = main->GetDirConnector(dir);
         main->Logger().Inf("CloseDir Connector(%p): ", cntr);
         if (!cntr) {
             main->Logger().Inf("Call real function\n");

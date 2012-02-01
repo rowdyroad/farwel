@@ -85,13 +85,11 @@ class Main
 
         Connector *GetConnector(void *dd)
         {
-            return fd_manager_.GetConnector(reinterpret_cast<struct _dirdesc *>(dd)->dd_fd);
+            return fd_manager_.GetConnector(dd);
         }
 
-        Connector *GetConnector(const std::string& str)
+        Connector *GetConnector(const std::string& path)
         {
-            std::string path = boost::filesystem::absolute(str).string();
-
             for (Locations::iterator it = locations_.begin(); it != locations_.end(); ++it) {
                 Connector *cntr = (*it)(path);
                 if (cntr) {

@@ -27,6 +27,11 @@ class FdManager
             }
             return NULL;
         }
+        
+        Connector* GetDirConnector(int* d)
+        {
+    	    return GetConnector(*d);
+        }
 
         int getBeginFd()
         {

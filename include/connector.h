@@ -10,91 +10,18 @@ extern "C" {
 #include "object.h"
 #include "fdmanager.h"
 #include "json.h"
+#include "directory.h"
 
 class Connector
     : public Object
 {
-    protected:
-        class DirFile
-        {
-            std::string name_;
-            enum FileType {
-                t_unknown,
-                t_fifo,
-                t_chr,
-                t_dir,
-                t_blk,
-                t_reg,
-                t_lnk,
-                t_sock,
-                t_wht
-            } type_;
-
-            public:
-                DirFile(const std::string& name, FileType type = t_reg)
-                    : name_(name)
-                    , type_(type)
-                {}
-
-                const std::string& Name() const
-                {
-                    return name_;
-                }
-
-                FileType Type() const
-                {
-                    return type_;
-                }
-        };
-        typedef std::vector<DirFile>   DirFiles;
     private:
-        class DirFd
-            : public Object
-        {
-            private:
-                struct _dirdesc dir_;
-                DirFiles        files_;
-                int             index_;
-                struct dirent   dirent_;
-            public:
-
-                DirFd(int fd)
-                    : index_(-1)
-                {
-                    dir_.dd_fd = fd;
-                }
-
-                DirFiles& Files()
-                {
-                    return files_;
-                }
-
-                struct dirent *Read()
-                {
-                    if (++index_ >= files_.size()) {
-                        return NULL;
-                    }
-
-                    DirFile& df = files_[index_];
-                    dirent_.d_fileno = index_;
-                    dirent_.d_type   = df.Type();
-                    dirent_.d_namlen = df.Name().size();
-                    ::memmove(&(dirent_.d_name), df.Name().c_str(), df.Name().size() + 1);
-                    return &dirent_;
-                }
-
-                struct _dirdesc *Dir()
-                {
-                    return &dir_;
-                }
-        };
-
         std::string name_;
         FdManager&  fd_manager_;
         typedef boost::unordered_map<int, std::string>                    Keys;
-        typedef boost::unordered_map<int, boost::intrusive_ptr<DirFd> >   Dirs;
+        typedef boost::unordered_map<int, boost::intrusive_ptr<Directory> >   Directories;
         Keys            keys_;
-        Dirs            dirs_;
+        Directories     dirs_;
         std::string     empty_key_;
         const JsonNode& config_;
         LogIntr         log_;
@@ -196,15 +123,14 @@ class Connector
             return it->second->Read();
         }
 
-        DIR *OpenDir(const std::string& name)
+        void* OpenDir(const std::string& name)
         {
-            boost::intrusive_ptr<DirFd> fd(new DirFd(fd_manager_.Get(this)), false);
-
-            if (!OpenDir(fd->Dir()->dd_fd, name, fd->Files())) {
-                fd_manager_.Release(fd->Dir()->dd_fd, this);
+    	    Directory dir(fd_manager_.Get(this),name);
+            if (!OpenDir(dir)) {
+                fd_manager_.Release(dir.Fd(), this);
                 return NULL;
             }
-            return dirs_.insert(std::make_pair(fd->Dir()->dd_fd, fd)).first->second->Dir();
+            return dirs_.insert(std::make_pair(dir.Fd(),dir)).first->first;
         }
 
         int CloseDir(DIR *fd)
@@ -243,8 +169,8 @@ class Connector
         virtual int Open(int fd, const std::string& path, int flags) = 0;
         virtual int CloseFd(int fd) = 0;
 
-        virtual bool OpenDir(int dd, const std::string& path, DirFiles& files)  { return false;  }
-        virtual bool CloseDir(int dd)  { return -1;  }
+        virtual bool OpenDir(Directory& dir)  { return false;  }
+        virtual bool CloseDir(Directory& dir)  { return -1;  }
 };
 
 typedef boost::intrusive_ptr<Connector>   ConnectorIntr;
