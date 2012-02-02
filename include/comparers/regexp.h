@@ -1,29 +1,22 @@
 #pragma once
 #include <boost/regex.hpp>
-#include "../comparer.h"
+#include "comparer.h"
 
-class Regexp
-    : public Comparer
-{
-    private:
-        boost::regex re_;
-    public:
-        Regexp(const std::string& pattern)
-            : re_(pattern, boost::regex_constants::perl)
-        {}
-
-        bool operator()(const std::string& target)
-        {
-            return boost::regex_search(target, re_);
-        }
-};
-
-
-class RegexpFactory
-    : public ComparerFactory
-{
-    Comparer *Create(const std::string& name)
+namespace FWL {
+    class Regexp
+        : public Comparer
     {
-        return new Regexp(name);
-    }
-};
+        private:
+            boost::regex re_;
+        public:
+            Regexp(const std::string& pattern);
+            bool operator()(const std::string& target);
+    };
+
+
+    class RegexpFactory
+        : public ComparerFactory
+    {
+        Comparer *Create(const std::string& name);
+    };
+}

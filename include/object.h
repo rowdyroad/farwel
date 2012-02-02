@@ -1,39 +1,21 @@
 #pragma once
 
 #include <boost/detail/atomic_count.hpp>
-
-class Object
-{
-    private:
-        boost::detail::atomic_count count_;
-    protected:
-        Object()
-            : count_(1)
-        {}
-    public:
-        void AddRef()
-        {
-            ++count_;
-        }
-
-        void Release()
-        {
-            if (--count_ <= 0) {
-                delete this;
-            }
-        }
-
-        virtual ~Object() {}
-};
+namespace FWL {
+    class Object
+    {
+        private:
+            boost::detail::atomic_count count_;
+        protected:
+            Object();
+        public:
+            void AddRef();
+            void Release();
+            virtual ~Object() {}
+    };
+}
 
 namespace boost {
-    void intrusive_ptr_add_ref(::Object *obj)
-    {
-        obj->AddRef();
-    }
-
-    void intrusive_ptr_release(::Object *obj)
-    {
-        obj->Release();
-    }
+    void intrusive_ptr_add_ref(FWL::Object *obj);
+    void intrusive_ptr_release(FWL::Object *obj);
 };

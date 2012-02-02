@@ -1,7 +1,7 @@
 #!/bin/sh
 
-find ./ | grep -v "\.git" | grep \\.h  > .un_files
-find ./ | grep -v "\.git" | grep \\.cpp  >> .un_files
+find ./ | grep -v "\.git" | grep \\.h  | grep -v "./externals" > .un_files 
+find ./ | grep -v "\.git" | grep \\.cpp | grep -v "./externals" >> .un_files
 
 uncrustify -c uncrustify.cfg --no-backup -F .un_files
 

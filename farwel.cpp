@@ -7,11 +7,11 @@ extern  "C" {
 #include "include/main.h"
 #include "include/path.h"
 
-static Real                real;
-static std::auto_ptr<Main> main;
-static Path                path_master;
-static uid_t               uid = ::getuid();
-static uid_t               gid = ::getgid();
+static FWL::Real                real;
+static std::auto_ptr<FWL::Main> main;
+static FWL::Path                path_master;
+static uid_t uid = ::getuid();
+static uid_t gid = ::getgid();
 
 #define VA_ARG(type, var, arg)     \
     va_list list;                  \
@@ -52,7 +52,7 @@ extern "C" {
             fprintf(stderr, "Config file is not set. Set env param FRWL_CONFIG_FILE\n");
             exit(-1);
         }
-        main.reset(new Main(config_file));
+        main.reset(new FWL::Main(config_file));
     }
 
     int open(const char *path, int flags, ...)
@@ -69,9 +69,9 @@ extern "C" {
             return (mode) ? real.open(path, flags, mode) : real.open(path, flags);
 #endif
         }
-        std::string realpath = path_master.Absolute(path);
-        Connector   *cntr    = main->GetConnector(realpath);
-        main->Logger().Inf("Open Connector(%p): %s", cntr, realpath.c_str());
+        std::string    realpath = path_master.Absolute(path);
+        FWL::Connector *cntr    = main->GetConnector(realpath);
+        main->Logger().Inf("Open FWL::Connector(%p): %s", cntr, realpath.c_str());
         if (!cntr) {
             main->Logger().Inf("Call real function\n");
             VA_ARG(int, mode, flags);
@@ -99,8 +99,8 @@ extern "C" {
         if (!main.get()) {
             return real.write(fd, data, size);
         }
-        Connector *cntr = main->GetConnector(fd);
-        main->Logger().Inf("Write Connector(%p): ", cntr);
+        FWL::Connector *cntr = main->GetConnector(fd);
+        main->Logger().Inf("Write FWL::Connector(%p): ", cntr);
         if (!cntr) {
             main->Logger().Inf("Call real function\n");
             return real.write(fd, data, size);
@@ -114,8 +114,8 @@ extern "C" {
         if (!main.get()) {
             return real.close(fd);
         }
-        Connector *cntr = main->GetConnector(fd);
-        main->Logger().Inf("Write Connector(%p) %d - %s: ", cntr, fd, File(fd));
+        FWL::Connector *cntr = main->GetConnector(fd);
+        main->Logger().Inf("Write FWL::Connector(%p) %d - %s: ", cntr, fd, File(fd));
         if (!cntr) {
             main->Logger().Inf("Call real function\n");
             return real.close(fd);
@@ -129,8 +129,8 @@ extern "C" {
         if (!main.get()) {
             return real.read(fd, data, size);
         }
-        Connector *cntr = main->GetConnector(fd);
-        main->Logger().Inf("Read Connector(%p) %d - %s: ", cntr, fd, File(fd));
+        FWL::Connector *cntr = main->GetConnector(fd);
+        main->Logger().Inf("Read FWL::Connector(%p) %d - %s: ", cntr, fd, File(fd));
         if (!cntr) {
             main->Logger().Inf("Call real function\n");
             return real.read(fd, data, size);
@@ -139,7 +139,7 @@ extern "C" {
         return cntr->Read(fd, data, size);
     }
 
-    void __setStat(Connector *cntr, struct stat *buf, size_t size)
+    void __setStat(FWL::Connector *cntr, struct stat *buf, size_t size)
     {
         ::memset(buf, 0, sizeof(struct stat));
         buf->st_mode    = S_IFREG | S_IFDIR | S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
@@ -155,8 +155,8 @@ extern "C" {
         if (!main.get()) {
             return real.stat(path, buf);
         }
-        std::string realpath = path_master.Absolute(path);
-        Connector   *cntr    = main->GetConnector(realpath);
+        std::string    realpath = path_master.Absolute(path);
+        FWL::Connector *cntr    = main->GetConnector(realpath);
         if (!cntr) {
             main->Logger().Inf("Call real function\n");
             return real.stat(path, buf);
@@ -176,7 +176,7 @@ extern "C" {
         if (!main.get()) {
             return real.fstat(fd, buf);
         }
-        Connector *cntr = main->GetConnector(fd);
+        FWL::Connector *cntr = main->GetConnector(fd);
         if (!cntr) {
             main->Logger().Inf("Call real function\n");
             return real.fstat(fd, buf);
@@ -200,9 +200,9 @@ extern "C" {
         if (!main.get()) {
             return real.rmdir(dir);
         }
-        std::string realpath = path_master.Absolute(dir);
-        Connector   *cntr    = main->GetConnector(realpath);
-        main->Logger().Inf("RmDir(%s) Connector(%p): ", dir, cntr);
+        std::string    realpath = path_master.Absolute(dir);
+        FWL::Connector *cntr    = main->GetConnector(realpath);
+        main->Logger().Inf("RmDir(%s) FWL::Connector(%p): ", dir, cntr);
         if (!cntr) {
             main->Logger().Inf("Call real function\n");
             return real.rmdir(dir);
@@ -216,9 +216,9 @@ extern "C" {
         if (!main.get()) {
             return real.mkdir(dir, mode);
         }
-        std::string realpath = path_master.Absolute(dir);
-        Connector   *cntr    = main->GetConnector(realpath);
-        main->Logger().Inf("MkDir(%s) Connector(%p): ", dir, cntr);
+        std::string    realpath = path_master.Absolute(dir);
+        FWL::Connector *cntr    = main->GetConnector(realpath);
+        main->Logger().Inf("MkDir(%s) FWL::Connector(%p): ", dir, cntr);
         if (!cntr) {
             main->Logger().Inf("Call real function\n");
             return real.mkdir(dir, mode);
@@ -233,9 +233,9 @@ extern "C" {
         if (!main.get()) {
             return real.opendir(dir);
         }
-        std::string realpath = path_master.Absolute(dir);
-        Connector   *cntr    = main->GetConnector(realpath);
-        main->Logger().Inf("OpenDir(%s) Connector(%p): ", dir, cntr);
+        std::string    realpath = path_master.Absolute(dir);
+        FWL::Connector *cntr    = main->GetConnector(realpath);
+        main->Logger().Inf("OpenDir(%s) FWL::Connector(%p): ", dir, cntr);
         if (!cntr) {
             //! todo real write or something...think
             main->Logger().Inf("Call real function\n");
@@ -250,8 +250,8 @@ extern "C" {
         if (!main.get()) {
             return real.readdir(dir);
         }
-        Connector *cntr = main->GetDirConnector(dir);
-        main->Logger().Inf("ReadDir Connector(%p): ", cntr);
+        FWL::Connector *cntr = main->GetDirConnector(dir);
+        main->Logger().Inf("ReadDir FWL::Connector(%p): ", cntr);
         if (!cntr) {
             main->Logger().Inf("Call real function\n");
             return real.readdir(dir);
@@ -265,8 +265,8 @@ extern "C" {
         if (!main.get()) {
             return real.closedir(dir);
         }
-        Connector *cntr = main->GetDirConnector(dir);
-        main->Logger().Inf("CloseDir Connector(%p): ", cntr);
+        FWL::Connector *cntr = main->GetDirConnector(dir);
+        main->Logger().Inf("CloseDir FWL::Connector(%p): ", cntr);
         if (!cntr) {
             main->Logger().Inf("Call real function\n");
             return real.closedir(dir);
@@ -280,9 +280,9 @@ extern "C" {
         if (!main.get()) {
             return real.unlink(path);
         }
-        std::string realpath = path_master.Absolute(path);
-        Connector   *cntr    = main->GetConnector(realpath);
-        main->Logger().Inf("Unlink Connector(%p): ", cntr);
+        std::string    realpath = path_master.Absolute(path);
+        FWL::Connector *cntr    = main->GetConnector(realpath);
+        main->Logger().Inf("Unlink FWL::Connector(%p): ", cntr);
         if (!cntr) {
             main->Logger().Inf("Call real function\n");
             return real.unlink(path);
@@ -297,8 +297,8 @@ extern "C" {
             VA_ARG(unsigned, p2, cmd);
             return (p2) ? real.fcntl(fd, cmd, p2) : real.fcntl(fd, cmd);
         }
-        Connector *cntr = main->GetConnector(fd);
-        main->Logger().Inf("Fcntl Connector(%p) %d - %s: ", cntr, fd, File(fd));
+        FWL::Connector *cntr = main->GetConnector(fd);
+        main->Logger().Inf("Fcntl FWL::Connector(%p) %d - %s: ", cntr, fd, File(fd));
         if (!cntr) {
             main->Logger().Inf("Call real function\n");
             VA_ARG(unsigned, p2, cmd);

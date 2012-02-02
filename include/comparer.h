@@ -1,41 +1,26 @@
 #pragma once
-#include <boost/regex.hpp>
+#include <boost/intrusive_ptr.hpp>
 #include "object.h"
-class Comparer
-    : public Object
-{
-    public:
-        static bool Parse(const std::string& str, std::pair<std::string, std::string>& ret)
-        {
-            static boost::regex re_("^(.*)://(.*)$", boost::regex::perl);
-            boost::match_results<std::string::const_iterator> what;
+namespace FWL {
+    class Comparer
+        : public Object
+    {
+        public:
+            static bool Parse(const std::string& str, std::pair<std::string, std::string>& ret);
+            virtual bool operator()(const std::string& target) = 0;
+    };
 
-            if (!boost::regex_match(str, what, re_) || (what.size() < 3)) {
-                return false;
-            }
+    typedef boost::intrusive_ptr<Comparer>   ComparerIntr;
 
-            if (!what[1].matched && !what[2].matched) {
-                return false;
-            }
-            ret.first  = std::string(what[1].first, what[1].second);
-            ret.second = std::string(what[2].first, what[2].second);
-            return true;
-        }
+    class ComparerFactory
+        : public Object
+    {
+        public:
+            virtual Comparer *Create(const std::string& str) = 0;
+    };
 
-        virtual bool operator()(const std::string& target) = 0;
-        virtual ~Comparer() {}
+    typedef boost::intrusive_ptr<ComparerFactory>   ComparerFactoryIntr;
 };
-
-typedef boost::intrusive_ptr<Comparer>   ComparerIntr;
-
-class ComparerFactory
-    : public Object
-{
-    public:
-        virtual Comparer *Create(const std::string& str) = 0;
-};
-
-typedef boost::intrusive_ptr<ComparerFactory>   ComparerFactoryIntr;
 
 #include "comparers/regexp.h"
 #include "comparers/always.h"

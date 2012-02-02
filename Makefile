@@ -1,19 +1,24 @@
 name = farwel
 LIBS = -lboost_regex -lsoci_core -lsoci_mysql -lrt
-SRC  = main.cpp
-GCC  = g++
-INCLUDES = -I/usr/local/include -I./externals/include
+CORE_SOURCES=$(wildcard src/*.cpp) $(wildcard src/connectors/*.cpp) $(wildcard src/comparers/*.cpp)
+SRC  = farwel.cpp ${CORE_SOURCES}
+CFLAGS=-O2 -fPIC -shared -Wall
+INCLUDES = -iquote ./include -I/usr/local/include -I./externals/include
 LINKS = -L/usr/lib -L/usr/local/lib -L./externals/lib -L./externals/lib64
+CC  = g++ ${INCLUDES}
 
 all:soci
-	${GCC} -I/usr/local/include -O2 -fPIC -shared -o ${name}.so ${SRC} ${INCLUDES} ${LINKS} ${LIBS} -DNDEBUG
-	${GCC} -O2 test.cpp -o test
+	${CC} -I/usr/local/include ${CFLAGS} -o ${name}.so ${SRC} ${LINKS} ${LIBS} -DNDEBUG
+	${CC} -O2 test.cpp -o test
 debug:
-	${GCC} -I/usr/local/include -fPIC -g -shared -o ${name}.so ${SRC} ${INCLUDES} ${LINKS} ${LIBS}
+	${CC} -I/usr/local/include ${CFLAGS} -g -o ${name}.so ${SRC} ${LINKS} ${LIBS}
 utest:
-	${GCC} -O2 test.cpp -o test -g
-	${GCC} -O2 fork.cpp -o fork -g
-
+	${CC} -O2 test.cpp -o test -g
+	${CC} -O2 fork.cpp -o fork -g
 soci:
 	mkdir -p externals/soci/b
 	cd externals/soci/b && cmake -DCMAKE_INSTALL_PREFIX=../../ ../ && make && make install
+
+clean:
+	rm -f build/*
+	rm -f lib/*

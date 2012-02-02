@@ -1,26 +1,20 @@
 #pragma once
 #include <boost/regex.hpp>
-#include "../comparer.h"
+#include "comparer.h"
 
-class Always
-    : public Comparer
-{
-    public:
-        Always(const std::string& pattern)
-        {}
-
-        bool operator()(const std::string& target)
-        {
-            return true;
-        }
-};
-
-
-class AlwaysFactory
-    : public ComparerFactory
-{
-    Comparer *Create(const std::string& name)
+namespace FWL {
+    class Always
+        : public Comparer
     {
-        return new Always(name);
-    }
-};
+        public:
+            Always(const std::string& pattern);
+            bool operator()(const std::string& target);
+    };
+
+
+    class AlwaysFactory
+        : public ComparerFactory
+    {
+        Comparer *Create(const std::string& name);
+    };
+}
