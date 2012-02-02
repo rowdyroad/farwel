@@ -35,14 +35,14 @@ class Path
         std::string Absolute(const std::string& file)
         {
             if (file[0] == '/') {
-                return file;
+                return std::string(file);
             }
             std::string res;
             const char  *cc = file.c_str();
             if (file[0] == '.') {
                 if (file[1] != '.') {
                     res.resize(current_path_.size() + file.size() - 1);
-                    ::sprintf((char *)res.data(), "%s/%s", current_path_.c_str(), cc + 1);
+                    ::sprintf((char *)res.data(), "%s%s", current_path_.c_str(), cc + 1);
                 } else {
                     int    k   = slashes_.size();
                     size_t pos = 0;
@@ -60,7 +60,6 @@ class Path
                 }
             } else {
                 res.resize(current_path_.size() + file.size() + 1);
-
                 ::sprintf((char *)res.data(), "%s/%s", current_path_.c_str(), cc);
             }
             return res;

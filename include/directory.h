@@ -57,11 +57,11 @@ class Directory
 
             dirent_.d_fileno = index_;
             dirent_.d_type   = DT_DIR | DT_REG;
-            #ifdef __linux__
-            dirent_.d_reclen = name_.size();
-            #else
+#ifdef __linux__
+            dirent_.d_reclen = name_.size() + sizeof(dirent_) - 1;
+#else
             dirent_.d_namlen = name_.size();
-            #endif
+#endif
             ::memmove(&(dirent_.d_name), name_.c_str(), name_.size() + 1);
             return &dirent_;
         }

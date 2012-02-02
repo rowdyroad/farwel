@@ -5,7 +5,6 @@
 #include <set>
 #include <deque>
 #include <boost/optional.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/foreach.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/unordered_set.hpp>
@@ -28,7 +27,7 @@ class Main
             Connector    *connector_;
         public:
 
-            Location(const ComparerIntr& comparer, Connector *connector)
+            Location(ComparerIntr comparer, Connector *connector)
                 : comparer_(comparer)
                 , connector_(connector)
             {}

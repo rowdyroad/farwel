@@ -10,7 +10,7 @@ class Entity
         int         fd_;
         std::string name_;
     public:
-        Entity(const std::string& name, int fd)
+        Entity(int fd, const std::string& name)
             : name_(name)
             , fd_(fd)
         {}
@@ -55,8 +55,8 @@ class File
     : public Enity
 {
     public:
-        File(const std::string& name, int fd)
-            : Entity(name, fd)
+        File(int fd, const std::string& name)
+            : Entity(fd, name)
         {}
         File(const std::string& name)
             : Entity(name)
@@ -91,8 +91,8 @@ class Directory
         off_t         index_;
         struct dirent dirent_;
     public:
-        Directory(const std::string& name, int fd)
-            : Entity(name, fd)
+        Directory(int fd, const std::string& name)
+            : Entity(fd, name, fd)
             , desc_(fd, this)
             , index_(0)
         {}

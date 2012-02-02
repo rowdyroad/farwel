@@ -1,9 +1,9 @@
 name = farwel
-LIBS = -lboost_regex -lboost_filesystem -lsoci_core -lsoci_mysql -lrt
+LIBS = -lboost_regex -lsoci_core -lsoci_mysql -lrt
 SRC  = main.cpp
 GCC  = g++
 INCLUDES = -I/usr/local/include -I./externals/include
-LINKS = -L/usr/local/lib -L./externals/lib -L./externals/lib64
+LINKS = -L/usr/lib -L/usr/local/lib -L./externals/lib -L./externals/lib64
 
 all:soci
 	${GCC} -I/usr/local/include -O2 -fPIC -shared -o ${name}.so ${SRC} ${INCLUDES} ${LINKS} ${LIBS} -DNDEBUG

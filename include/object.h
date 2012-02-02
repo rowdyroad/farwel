@@ -22,6 +22,8 @@ class Object
                 delete this;
             }
         }
+
+        virtual ~Object() {}
 };
 
 namespace boost {
