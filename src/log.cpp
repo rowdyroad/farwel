@@ -38,101 +38,102 @@ namespace FWL {
             ::fflush(*it);
         }
     }
-	Log::Log(Level level)
-            : level_(level)
-        {}
 
-        Log::Log(const std::string& name)
-        {
-            SetLogLevel(name);
+    Log::Log(Level level)
+        : level_(level)
+    {}
+
+    Log::Log(const std::string& name)
+    {
+        SetLogLevel(name);
+    }
+
+    Log::Level Log::GetLevel() const
+    {
+        return level_;
+    }
+
+    Log::Log(const Log& log)
+        : registered_sinks_(log.registered_sinks_)
+        , sinks_(log.sinks_)
+        , level_(log.level_)
+    {}
+
+    void Log::RegisterSink(const std::string& name, FILE *sink)
+    {
+        registered_sinks_.insert(std::make_pair(name, sink));
+    }
+
+    void Log::RegisterSink(const std::string& name, const std::string& filename)
+    {
+        FILE *f = ::fopen(filename.c_str(), "w+");
+
+        if (f) {
+            RegisterSink(name, f);
+            sink_files_.push_back(f);
         }
+    }
 
-        Log::Level Log::GetLevel() const
-        {
-            return level_;
+    void Log::SetLogLevel(Log::Level level)
+    {
+        level_ = level;
+    }
+
+    void Log::SetLogLevel(const std::string& name)
+    {
+        if (name == "none") {
+            level_ = None;
+        } else if (name == "error") {
+            level_ = Error;
+        } else if (name == "warn") {
+            level_ = Warn;
+        } else if (name == "debug") {
+            level_ = Debug;
+        } else if (name == "info") {
+            level_ = Info;
         }
+    }
 
-        Log::Log(const Log& log)
-            : registered_sinks_(log.registered_sinks_)
-            , sinks_(log.sinks_)
-            , level_(log.level_)
-        {}
+    void Log::ClearSinks()
+    {
+        sinks_.clear();
+    }
 
-        void Log::RegisterSink(const std::string& name, FILE *sink)
-        {
-            registered_sinks_.insert(std::make_pair(name, sink));
+    bool Log::UseSink(const std::string& name)
+    {
+        SinkList::const_iterator it = registered_sinks_.find(name);
+
+        if (it == registered_sinks_.end()) {
+            return false;
         }
+        sinks_.push_back(it->second);
+        return true;
+    }
 
-        void Log::RegisterSink(const std::string& name, const std::string& filename)
-        {
-            FILE *f = ::fopen(filename.c_str(), "w+");
-
-            if (f) {
-                RegisterSink(name, f);
-                sink_files_.push_back(f);
-            }
+    Log::~Log()
+    {
+        for (Sinks::iterator it = sink_files_.begin(); it != sink_files_.end(); ++it) {
+            ::fclose(*it);
         }
+    }
 
-        void Log::SetLogLevel(Log::Level level)
-        {
-            level_ = level;
-        }
+    void Log::Inf(const std::string& format, ...)
+    {
+        PRINT(Info, "INF");
+    }
 
-        void Log::SetLogLevel(const std::string& name)
-        {
-            if (name == "none") {
-                level_ = None;
-            } else if (name == "error") {
-                level_ = Error;
-            } else if (name == "warn") {
-                level_ = Warn;
-            } else if (name == "debug") {
-                level_ = Debug;
-            } else if (name == "info") {
-                level_ = Info;
-            }
-        }
+    void Log::Dbg(const std::string& format, ...)
+    {
+        PRINT(Debug, "DBG");
+    }
 
-        void Log::ClearSinks()
-        {
-            sinks_.clear();
-        }
+    void Log::Wrn(const std::string& format, ...)
+    {
+        PRINT(Warn, "WRN");
+    }
 
-        bool Log::UseSink(const std::string& name)
-        {
-            SinkList::const_iterator it = registered_sinks_.find(name);
-
-            if (it == registered_sinks_.end()) {
-                return false;
-            }
-            sinks_.push_back(it->second);
-            return true;
-        }
-
-        Log::~Log()
-        {
-            for (Sinks::iterator it = sink_files_.begin(); it != sink_files_.end(); ++it) {
-                ::fclose(*it);
-            }
-        }
-
-        void Log::Inf(const std::string& format, ...)
-        {
-            PRINT(Info, "INF");
-        }
-
-        void Log::Dbg(const std::string& format, ...)
-        {
-            PRINT(Debug, "DBG");
-        }
-
-        void Log::Wrn(const std::string& format, ...)
-        {
-            PRINT(Warn, "WRN");
-        }
-
-        void Log::Err(const std::string& format, ...)
-        {
-            PRINT(Error, "ERR");
-        }
+    void Log::Err(const std::string& format, ...)
+    {
+        PRINT(Error, "ERR");
+    }
 }

@@ -258,8 +258,9 @@ namespace FWL {
     {
         return Unlink(path);
     }
-Connector *DbFactory::Create(const std::string& name, const JsonNode& config, FdManager& fd_manager, LogIntr log)
-{
-    return new Db(name, config, fd_manager, log);
-}
+
+    Connector *DbFactory::Create(const std::string& name, const JsonNode& config, FdManager& fd_manager, LogIntr log)
+    {
+        return new Db(name, config, fd_manager, log);
+    }
 }

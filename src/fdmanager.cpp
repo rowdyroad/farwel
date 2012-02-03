@@ -6,7 +6,6 @@ extern "C" {
 #include "fdmanager.h"
 
 namespace FWL {
-
     int getBeginFd()
     {
 #ifdef __linux__
@@ -22,10 +21,9 @@ namespace FWL {
     }
 
     FdManager::FdManager()
-	: begin_(getBeginFd())
-	, fd_(begin_)
-    {
-    }
+        : begin_(getBeginFd())
+        , fd_(begin_)
+    {}
 
     Connector *FdManager::GetConnector(int fd)
     {
@@ -60,4 +58,3 @@ namespace FWL {
         return false;
     }
 }
-

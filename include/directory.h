@@ -12,7 +12,7 @@ namespace FWL {
     {
         private:
             int         fd_;
-            size_t         index_;
+            size_t      index_;
             std::string name_;
             typedef std::vector<std::string>   FileList;
             FileList      files_;

@@ -1,7 +1,8 @@
 #!/bin/sh
 
-find ./ | grep -v "\.git" | grep \\.h  | grep -v "./externals" > .un_files 
-find ./ | grep -v "\.git" | grep \\.cpp | grep -v "./externals" >> .un_files
+echo "farwel.cpp\ntest.cpp" > .un_files
+find ./include | grep \\.h >> .un_files
+find ./src | grep \\.cpp >> .un_files
 
 uncrustify -c uncrustify.cfg --no-backup -F .un_files
 
