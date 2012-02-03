@@ -14,6 +14,7 @@ namespace FWL {
             std::string table_name_;
             std::string key_column_;
             std::string value_column_;
+            std::string parent_column_;
             soci::session& Session();
             bool exists(const std::string& key);
             bool create(const std::string& key);

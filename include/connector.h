@@ -25,8 +25,8 @@ namespace FWL {
             std::string     empty_key_;
             const JsonNode& config_;
             LogIntr         log_;
-        protected:
 
+        protected:
             const std::string& GetKey(int fd) const;
             const JsonNode& Config() const { return config_; }
             Log& Logger() { return *log_; }
@@ -37,24 +37,24 @@ namespace FWL {
             int Open(const std::string& path, int flags);
             int Close(int fd);
             virtual int Write(int fd, const void *data, size_t size) = 0;
-            virtual int Read(int fd, void *data, size_t size)        = 0;
+            virtual int Read(int fd, void *data, size_t size) = 0;
             virtual int Unlink(const std::string& path) = 0;
-            virtual int Rename(const std::string& name, const std::string& path)  { return -1;  }
-            virtual int MkDir(const std::string& dir, int flags)  { return -1;  }
-            virtual int RmDir(const std::string& str) { return -1;  }
-            virtual struct dirent *ReadDir(DIR *dd);
-            void *OpenDir(const std::string& name);
-            int CloseDir(DIR *dd);
-            virtual bool GetFileSize(const std::string& name, size_t& size) { return false; }
-
+            virtual int Rename(const std::string& name, const std::string& path) = 0;
+            virtual int MkDir(const std::string& dir, int flags) = 0;
+            virtual int RmDir(const std::string& str) = 0;
+            virtual bool GetFileSize(const std::string& name, size_t& size) = 0;
             bool GetFileSize(int fd, size_t& size);
-
             virtual blksize_t GetBlockSize() const { return 0xFFFF; }
+
+            void *OpenDir(const std::string& name);
+            virtual struct dirent *ReadDir(DIR *dd);
+            int CloseDir(DIR *dd);
+
         protected:
             virtual int Open(int fd, const std::string& path, int flags) = 0;
             virtual int CloseFd(int fd) = 0;
-            virtual bool OpenDir(Directory& dir)  { return false;  }
-            virtual bool CloseDir(Directory& dir)  { return -1;  }
+            virtual bool OpenDir(Directory& dir) = 0;
+            virtual bool CloseDir(Directory& dir) = 0;
     };
 
     typedef boost::intrusive_ptr<Connector>   ConnectorIntr;

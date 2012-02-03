@@ -30,7 +30,7 @@ namespace FWL {
 
     bool Db::create(const std::string& key)
     {
-        static const std::string query = (boost::format("insert into `%1%` (`%2%`,`%3%`, `parent`) value(:key, '', :parent)") % table_name_ % key_column_ % value_column_).str();
+        static const std::string query = (boost::format("insert into `%1%` (`%2%`,`%3%`, `%4%`) value(:key, '', :parent)") % table_name_ % key_column_ % value_column_ % parent_column_).str();
 
         try {
             Logger().Dbg("Query:%s\n", query.c_str());
@@ -90,12 +90,16 @@ namespace FWL {
     bool Db::remove(const std::string& key)
     {
         static const std::string query = (boost::format("delete from `%1%` where `%2%` = :key ") % table_name_ % key_column_).str();
+	static const std::string clear_query = (boost::format("delete from `%1` where `%2` = :key ") % table_name_ % parent_column_).str();
 
         try {
             Logger().Dbg("Query:%s key:%s", query.c_str(), key.c_str());
             soci::statement st((Session().prepare << query, soci::use(key)));
             st.execute();
-            return st.get_affected_rows();
+            st.get_affected_rows();
+            soci::statement clst((Session().prepare << clear_query, soci::use(key)));
+            clst.execute();
+            return true;
         } catch (const soci::soci_error& e) {
             Logger().Err("Remove: %s", e.what());
             return false;
@@ -118,7 +122,7 @@ namespace FWL {
 
     bool Db::readdir(const std::string& key, std::vector<std::string>& files)
     {
-        static const std::string query = (boost::format("select `%2%` from `%1%` where `parent` = :parent ") % table_name_ % key_column_).str();
+        static const std::string query = (boost::format("select `%2%` from `%1%` where `%3` = :parent ") % table_name_ % key_column_ % parent_column_).str();
 
         try {
             soci::rowset<std::string> rs = (Session().prepare << query, soci::use(key));
@@ -153,6 +157,7 @@ namespace FWL {
         , table_name_(config.get<std::string>("table_name"))
         , key_column_(config.get<std::string>("key_column"))
         , value_column_(config.get<std::string>("value_column"))
+        , parent_column_(config.get<std::string>("parent_column"))
     {}
 
     int Db::Open(int fd, const std::string& path, int flags)

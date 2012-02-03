@@ -22,6 +22,7 @@ namespace FWL {
             friend class Main;
         public:
             FdManager();
+            int Begin() const;
             int Get(Connector *connector);
             bool Release(int fd, Connector *connector);
     };
