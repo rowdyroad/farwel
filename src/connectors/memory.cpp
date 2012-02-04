@@ -24,6 +24,37 @@ namespace FWL {
     {
         return 0;
     }
+    
+    int Memory::Rename(const std::string& name, const std::string& newname)
+    {
+	return 0;
+    }
+
+    int Memory::MkDir(const std::string& name, mode_t mode)
+    {
+	return 0;
+    }
+
+    int Memory::RmDir(const std::string& name)
+    {
+	return 0;
+    }
+
+    bool Memory::GetFileSize(const std::string& name, size_t& size)
+    {
+	return 0;
+    }
+
+    bool Memory::OpenDir(Directory& dir)
+    {
+	return true;
+    }
+
+    bool Memory::CloseDir(Directory& dir)
+    {
+	return true;
+    }
+
 
     int Memory::Unlink(const std::string& path)
     {

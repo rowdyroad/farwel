@@ -14,7 +14,6 @@ debug:
 	${CC} -I/usr/local/include ${CFLAGS} -g -o ${name}.so ${SRC} ${LINKS} ${LIBS}
 utest:
 	${CC} -O2 test.cpp -o test -g
-	${CC} -O2 fork.cpp -o fork -g
 soci:
 	mkdir -p externals/soci/b
 	cd externals/soci/b && cmake -DCMAKE_INSTALL_PREFIX=../../ ../ && make && make install

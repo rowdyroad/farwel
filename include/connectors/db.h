@@ -32,10 +32,12 @@ namespace FWL {
             int Write(int fd, const void *data, size_t size);
             int Read(int fd, void *data, size_t size);
             bool OpenDir(Directory& dir);
+            bool CloseDir(Directory& dir);
             int CloseFd(int fd);
             bool GetFileSize(const std::string& path, size_t& size);
             int Unlink(const std::string& path);
             int RmDir(const std::string& path);
+            int Rename(const std::string& name, const std::string& newname);
     };
 
     class DbFactory

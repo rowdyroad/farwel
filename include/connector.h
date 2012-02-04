@@ -40,7 +40,7 @@ namespace FWL {
             virtual int Read(int fd, void *data, size_t size) = 0;
             virtual int Unlink(const std::string& path) = 0;
             virtual int Rename(const std::string& name, const std::string& path) = 0;
-            virtual int MkDir(const std::string& dir, int flags) = 0;
+            virtual int MkDir(const std::string& dir, mode_t mode) = 0;
             virtual int RmDir(const std::string& str) = 0;
             virtual bool GetFileSize(const std::string& name, size_t& size) = 0;
             bool GetFileSize(int fd, size_t& size);
