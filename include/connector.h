@@ -10,7 +10,7 @@ extern "C" {
 #include "object.h"
 #include "fdmanager.h"
 #include "json.h"
-#include "directory.h"
+#include "filesystem.h"
 namespace FWL {
     class Connector
         : public Object
@@ -18,13 +18,17 @@ namespace FWL {
         private:
             std::string name_;
             FdManager&  fd_manager_;
-            typedef boost::unordered_map<int, std::string>   Keys;
+            typedef boost::unordered_map<int, File>   Files;
             typedef boost::unordered_map<int, Directory>     Directories;
-            Keys            keys_;
+            typedef boost::unordered_map<std::string, NodeIntr> Nodes;
+
+            Files           files_;
             Directories     dirs_;
+            Nodes 	    nodes_;
             std::string     empty_key_;
             const JsonNode& config_;
             LogIntr         log_;
+            int openFile(int fd, const std::string& name, int flags);
 
         protected:
             const std::string& GetKey(int fd) const;
@@ -32,12 +36,16 @@ namespace FWL {
             Log& Logger() { return *log_; }
 
         public:
-            Connector(const std::string& name, const JsonNode& config, FdManager& fd_manager, LogIntr log);
             const std::string& Name() const { return name_; }
+
+            Connector(const std::string& name, const JsonNode& config, FdManager& fd_manager, LogIntr log);
+
+            //! --- Files
             int Open(const std::string& path, int flags);
+            int Write(int fd, const void *data, size_t size);
+            int Read(int fd, void *data, size_t size);
             int Close(int fd);
-            virtual int Write(int fd, const void *data, size_t size) = 0;
-            virtual int Read(int fd, void *data, size_t size) = 0;
+
             virtual int Unlink(const std::string& path) = 0;
             virtual int Rename(const std::string& name, const std::string& path) = 0;
             virtual int MkDir(const std::string& dir, mode_t mode) = 0;
@@ -51,10 +59,14 @@ namespace FWL {
             int CloseDir(DIR *dd);
 
         protected:
-            virtual int Open(int fd, const std::string& path, int flags) = 0;
-            virtual int CloseFd(int fd) = 0;
-            virtual bool OpenDir(Directory& dir) = 0;
-            virtual bool CloseDir(Directory& dir) = 0;
+
+            virtual bool Open(DirectoryIntr& dir)  = 0;
+            virtual bool Close(DirectoryIntr&  dir) = 0;
+
+            virtual bool Exists(FileIntr& file)   = 0;
+            virtual bool Create(FileIntr& file)   = 0;
+            virtual bool Truncate(FileIntr& file) = 0;
+            virtual bool Close(FileIntr& file) = 0;
     };
 
     typedef boost::intrusive_ptr<Connector>   ConnectorIntr;
@@ -72,3 +84,4 @@ namespace FWL {
 #include "connectors/dummy.h"
 #include "connectors/memory.h"
 #include "connectors/db.h"
+#include "connectors/memcache.h"

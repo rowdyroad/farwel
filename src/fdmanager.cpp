@@ -24,10 +24,10 @@ namespace FWL {
         : begin_(getBeginFd())
         , fd_(begin_)
     {}
-    
+
     int FdManager::Begin() const
     {
-	return begin_;
+        return begin_;
     }
 
     Connector *FdManager::GetConnector(int fd)

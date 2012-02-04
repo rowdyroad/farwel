@@ -42,6 +42,7 @@ namespace FWL {
         connector_factories_.insert(std::make_pair("dummy", ConnectorFactoryIntr(new DummyFactory, false)));
         connector_factories_.insert(std::make_pair("memory", ConnectorFactoryIntr(new MemoryFactory, false)));
         connector_factories_.insert(std::make_pair("sqldb", ConnectorFactoryIntr(new DbFactory, false)));
+        connector_factories_.insert(std::make_pair("memcache", ConnectorFactoryIntr(new MemcacheFactory, false)));
         comparer_factories_.insert(std::make_pair("always", ComparerFactoryIntr(new AlwaysFactory, false)));
         comparer_factories_.insert(std::make_pair("regexp", ComparerFactoryIntr(new RegexpFactory, false)));
         Logger().RegisterSink("stderr", stderr);

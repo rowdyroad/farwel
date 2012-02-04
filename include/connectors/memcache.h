@@ -4,12 +4,19 @@
 #include "connector.h"
 #include "log.h"
 
+namespace memcache
+{
+    class Memcache;
+}
+
 namespace FWL {
-    class Memory
+    class Memcache
         : public Connector
     {
+        private:
+            std::auto_ptr<memcache::Memcache> client_;
         public:
-            Memory(const std::string& name, const JsonNode& config, FdManager& fd_manager, LogIntr log);
+            Memcache(const std::string& name, const JsonNode& config, FdManager& fd_manager, LogIntr log);
             int Write(int fd, const void *data, size_t size);
             int Read(int fd, void *data, size_t size);
             int Rename(const std::string& name, const std::string& newname);
@@ -26,7 +33,7 @@ namespace FWL {
             bool Truncate(int fd, const std::string& name) { return false; }
     };
 
-    class MemoryFactory
+    class MemcacheFactory
         : public ConnectorFactory
     {
         public:

@@ -27,7 +27,9 @@ namespace FWL {
             bool length(const std::string& key, size_t& size);
         public:
             Db(const std::string& name, const JsonNode& config, FdManager& fd_manager, LogIntr log);
-            int Open(int fd, const std::string& path, int flags);
+            bool Exists(int fd, const std::string& name);
+            bool Create(int fd, const std::string& name);
+            bool Truncate(int fd, const std::string& name);
             int MkDir(const std::string& path, mode_t mode);
             int Write(int fd, const void *data, size_t size);
             int Read(int fd, void *data, size_t size);

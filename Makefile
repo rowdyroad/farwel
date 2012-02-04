@@ -3,7 +3,7 @@ LIBS = -lboost_regex -lsoci_core -lsoci_mysql -lrt
 CORE_SOURCES=$(wildcard src/*.cpp) $(wildcard src/connectors/*.cpp) $(wildcard src/comparers/*.cpp)
 SRC  = farwel.cpp ${CORE_SOURCES}
 CFLAGS=-O2 -fPIC -shared -Wall
-INCLUDES = -iquote ./include -I/usr/local/include -I./externals/include
+INCLUDES = -iquote ./include -I/usr/local/include -I./externals/include -I/usr/include
 LINKS = -L/usr/lib -L/usr/local/lib -L./externals/lib -L./externals/lib64
 CC  = g++ ${INCLUDES}
 

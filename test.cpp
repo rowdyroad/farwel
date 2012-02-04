@@ -41,6 +41,7 @@ inline bool dumpdir(const std::string& dirname)
     if (dir) {
         struct dirent *de = readdir(dir);
         while (de) {
+            printf("de:%p\n", de);
 #ifdef __linux__
             printf("%lu: %lu %lu %s\n", (size_t)de->d_fileno, (size_t)de->d_reclen, (size_t)de->d_type, de->d_name);
 #else

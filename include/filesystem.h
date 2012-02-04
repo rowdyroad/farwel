@@ -1,136 +1,61 @@
 #pragma once
+
+extern "C" {
+#include <dirent.h>
+}
+
+#include <vector>
+#include <string>
 #include "object.h"
+namespace FWL {
+    class Node
+	: public Object
+    {
+	private:
+	    int fd_;
+	    std::string name_;
+	public:
+	    Node(int fd_, const std::string& name)
+		: fd(fd_)
+		, name_(name)
+	    {}
+	    const std::string& Name() const { return name_; }
+	    int Fd() const { return fd_; }
+    };
 
-class Connector;
+    typedef boost::intrusive_ptr<Node> NodeIntr;
 
-class Entity
-    : public Object
-{
-    private:
-        int         fd_;
-        std::string name_;
-    public:
-        Entity(int fd, const std::string& name)
-            : name_(name)
-            , fd_(fd)
-        {}
+    class File
+	: public Node
+    {
+        private:
+            off_t      offset_;
+            int flags_;
+        public:
+            File(int fd, const std::string& name, int flags);
+            off_t Offset() const { return offset_; }
+            int Flags() const { return flags_; }
+    };
 
-        Entity(const std::string& name)
-            : name_(name)
-            , fd_(-1)
-        {}
+    typedef boost::intrusive_ptr<File> FileIntr;
 
-        virtual ~Entity() {}
+    class Directory
+	: public Node
+    {
+        private:
+            size_t      index_;
+            typedef std::vector<std::string>   FileList;
+            FileList      files_;
+            struct dirent dirent_;
+        public:
+            Directory(int fd, const std::string& name);
+            const FileList& Files() const { return files_; }
+            FileList& Files() { return files_; }
+            void AddFile(const std::string& name);
+            struct dirent *Read();
+    };
 
-        int Fd() const
-        {
-            return fd_;
-        }
-
-        const std::string& Name() const
-        {
-            return name_;
-        }
-
-        virtual int Unlink() = 0;
-        virtual int Rename(const std::string& name) = 0;
-        virtual int CloseFd() = 0;
-
-        virtual int Stat() = 0;
-
-        int Close()
-        {
-            int ret = CloseFd();
-
-            if (!ret) {
-                connector_->Manager().Release(fd_);
-            }
-            return ret;
-        }
-};
-
-typedef boost::intrusive_ptr<Entity>   EntityIntr;
-
-class File
-    : public Enity
-{
-    public:
-        File(int fd, const std::string& name)
-            : Entity(fd, name)
-        {}
-        File(const std::string& name)
-            : Entity(name)
-        {}
-
-        virtual size_t Offset() const = 0;
-        virtual size_t Size() const   = 0;
-        virtual int Write(const void *data, size_t size) = 0;
-        virtual int Read(void *data, size_it size)       = 0;
-        virtual int Truncate(size_t length) = 0;
-};
-
-typedef boost::inrusive_ptr<File>   FileIntr;
-
-class Directory
-    : public Entity
-{
-    public:
-        struct Description
-        {
-            int       fd;
-            Directory *ptr;
-            Description(int fd, Directory *ptr)
-                : fd(fd)
-                , ptr(ptr)
-            {}
-        };
-
-    protected:
-        std::vector<std::string> files_;
-        DirDesc       desc_;
-        off_t         index_;
-        struct dirent dirent_;
-    public:
-        Directory(int fd, const std::string& name)
-            : Entity(fd, name, fd)
-            , desc_(fd, this)
-            , index_(0)
-        {}
-
-        struct dirent *ReadDir()
-        {
-            if (++index >= files_.end()) {
-                return NULL;
-            }
-        }
-
-        void Rewind()
-        {
-            LoadFiles(files_);
-            index_ = 0;
-        }
-
-        void Seek(off_t offset)
-        {
-            LoadFiles(files_);
-            index_ = offset;
-        }
-
-        off_t Tell()
-        {
-            return index_;
-        }
-
-        DIR *Dir() const
-        {
-            return (DIR *)&desc_;
-        }
-
-        virtual int LoadFiles(std::vector<std::string>& files)
-        {
-            return 0;
-        }
-};
+    typedef boost::intrusive_ptr<Directory> DirectoryIntr;
+}
 
 
-typedef boost::intrusive_ptr<Directory>   DirectoryIntr;

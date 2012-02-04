@@ -13,7 +13,7 @@ namespace FWL {
         return *session_;
     }
 
-    bool Db::exists(const std::string& key)
+    bool Db::Exists(int fd, const std::string& key)
     {
         static const std::string query = (boost::format("select count(*) from `%1%` where `%2%` = :key") % table_name_ % key_column_).str();
 
@@ -28,7 +28,7 @@ namespace FWL {
         }
     }
 
-    bool Db::create(const std::string& key)
+    bool Db::Create(int fd, const std::string& key)
     {
         static const std::string query = (boost::format("insert into `%1%` (`%2%`,`%3%`,`%4%`) value(:key,'',:parent)") % table_name_ % key_column_ % value_column_ % parent_column_).str();
 
@@ -42,7 +42,7 @@ namespace FWL {
         }
     }
 
-    bool Db::update(const std::string& key)
+    bool Db::Truncate(int fd, const std::string& key)
     {
         static const std::string query = (boost::format("update `%1%` set `%3%` = '' where `%2%` = :key ") % table_name_ % key_column_ % value_column_).str();
 
@@ -88,8 +88,8 @@ namespace FWL {
 
     bool Db::remove(const std::string& key)
     {
-        static const std::string query = (boost::format("delete from `%1%` where `%2%` = :key ") % table_name_ % key_column_).str();
-	static const std::string clear_query = (boost::format("delete from `%1%` where `%2%` = :key ") % table_name_ % parent_column_).str();
+        static const std::string query       = (boost::format("delete from `%1%` where `%2%` = :key ") % table_name_ % key_column_).str();
+        static const std::string clear_query = (boost::format("delete from `%1%` where `%2%` = :key ") % table_name_ % parent_column_).str();
 
         try {
             Logger().Dbg("Query:%s key:%s", query.c_str(), key.c_str());
@@ -160,73 +160,31 @@ namespace FWL {
         , parent_column_(config.get<std::string>("parent_column"))
     {}
 
-    int Db::Open(int fd, const std::string& path, int flags)
-    {
-        errno = 0;
-        bool creat = (bool)(flags & O_CREAT);
-        bool exist = exists(path);         //! \todo: optimize it
-        Logger().Dbg("%d %d - %d %d\n", fd, flags, creat, exist);
-        if (!creat && !exist) {
-            Logger().Dbg("Not for create and not exists");
-            errno = ENOENT;
-            return -1;
-        }
-        if (creat) {
-            if (!exist) {
-                Logger().Dbg("For create and not exists");
-                if (!create(path)) {
-                    Logger().Dbg("Couldn't create");
-                    errno = EACCES;
-                    return -1;
-                }
-                return fd;
-            } else {
-                Logger().Dbg("For create and exists");
-                if (flags & O_EXCL) {
-                    Logger().Dbg("Check for exists");
-                    errno = EEXIST;
-                    return -1;
-                }
-                if (flags & O_TRUNC) {
-                    Logger().Dbg("Need to trunc");
-                    if (!update(path)) {
-                        Logger().Dbg("Trunc error");
-                        errno = EACCES;
-                        return -1;
-                    }
-                    return fd;
-                }
-            }
-        }
-
-        Logger().Dbg("Only for read");
-
-        return fd;
-    }
-
     int Db::Rename(const std::string& name, const std::string& newname)
     {
-        static const std::string query = (boost::format("update `%1%` set `%2%` = :newkey where `%2%` = :key") % table_name_ % key_column_).str();
+        static const std::string query     = (boost::format("update `%1%` set `%2%` = :newkey where `%2%` = :key") % table_name_ % key_column_).str();
         static const std::string dir_query = (boost::format("update `%1%` set `%2%` = :newkey where `%2%` = :key") % table_name_ % parent_column_).str();
+
         errno = 0;
-        soci::statement st((Session().prepare << query, soci::use(name,":key"), soci::use(newname, ":newkey")));
+        soci::statement st((Session().prepare << query, soci::use(name, ":key"), soci::use(newname, ":newkey")));
         st.execute();
         if (!st.get_affected_rows()) {
-    	    errno = EEXIST;
-    	    return -1;
+            errno = EEXIST;
+            return -1;
         }
-        soci::statement dirst((Session().prepare << dir_query, soci::use(name,":key"), soci::use(newname, ":newkey")));
+        soci::statement dirst((Session().prepare << dir_query, soci::use(name, ":key"), soci::use(newname, ":newkey")));
         dirst.execute();
         return 0;
     }
 
     int Db::MkDir(const std::string& path, mode_t mode)
     {
-        return Open(0, path, O_CREAT);
+        return Open(path, O_CREAT);
     }
+
     bool Db::CloseDir(Directory& dir)
     {
-	return true;
+        return true;
     }
 
     int Db::Write(int fd, const void *data, size_t size)

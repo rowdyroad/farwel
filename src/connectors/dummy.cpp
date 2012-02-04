@@ -5,11 +5,6 @@ namespace FWL {
         : Connector(name, config, fd_manager, log)
     {}
 
-    int Dummy::Open(int fd, const std::string& path, int flags)
-    {
-        return fd;
-    }
-
     int Dummy::Write(int fd, const void *data, size_t size)
     {
         return size;
@@ -19,36 +14,36 @@ namespace FWL {
     {
         return size;
     }
-    
+
     int Dummy::Rename(const std::string& name, const std::string& newname)
     {
-	return 0;
+        return 0;
     }
-    
+
     int Dummy::MkDir(const std::string& name, mode_t mode)
     {
-	return 0;
+        return 0;
     }
-    
+
     int Dummy::RmDir(const std::string& name)
     {
-	return 0;
+        return 0;
     }
-    
+
     bool Dummy::GetFileSize(const std::string& name, size_t& size)
     {
-	size = 0;
-	return true;
+        size = 0;
+        return true;
     }
-    
+
     bool Dummy::OpenDir(Directory& dir)
     {
-	return true;
+        return true;
     }
-    
+
     bool Dummy::CloseDir(Directory& dir)
     {
-	return true;
+        return true;
     }
 
     int Dummy::CloseFd(int fd)

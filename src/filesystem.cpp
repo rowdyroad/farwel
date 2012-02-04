@@ -1,5 +1,6 @@
+#include <stdio.h>
 #include <string.h>
-#include "directory.h"
+#include "filesystem.h"
 
 namespace FWL {
     Directory::Directory(int fd, const std::string& name)
@@ -15,11 +16,10 @@ namespace FWL {
 
     struct dirent *Directory::Read()
     {
-        if (index_++ >= files_.size()) {
+        if (index_ >= files_.size()) {
             return NULL;
         }
         const std::string& name = files_[index_];
-
         dirent_.d_fileno = index_;
         dirent_.d_type   = DT_DIR | DT_REG;
 #ifdef __linux__
@@ -28,6 +28,14 @@ namespace FWL {
         dirent_.d_namlen = name.size();
 #endif
         ::memmove(&(dirent_.d_name), name.c_str(), name.size() + 1);
+        ++index_;
         return &dirent_;
     }
+    
+    File::File(int fd, const std::string& name, int flags)
+	: Node(fd, name)
+	, flags_(flags)
+    {}
 }
+
+
