@@ -4,9 +4,8 @@
 
 namespace FWL {
     Directory::Directory(int fd, const std::string& name)
-        : fd_(fd)
+	: Node(fd, name)
         , index_(0)
-        , name_(name)
     {}
 
     void Directory::AddFile(const std::string& name)

@@ -16,9 +16,6 @@ namespace FWL {
             std::string value_column_;
             std::string parent_column_;
             soci::session& Session();
-            bool exists(const std::string& key);
-            bool create(const std::string& key);
-            bool update(const std::string& key);
             bool update(const std::string& key, const std::string& value);
             bool append(const std::string& key, const std::string& value);
             bool remove(const std::string& key);
@@ -27,16 +24,16 @@ namespace FWL {
             bool length(const std::string& key, size_t& size);
         public:
             Db(const std::string& name, const JsonNode& config, FdManager& fd_manager, LogIntr log);
-            bool Exists(int fd, const std::string& name);
-            bool Create(int fd, const std::string& name);
-            bool Truncate(int fd, const std::string& name);
+            bool Exists(FileIntr& file);
+            bool Create(FileIntr& file);
+            bool Truncate(FileIntr& file);
             int MkDir(const std::string& path, mode_t mode);
-            int Write(int fd, const void *data, size_t size);
-            int Read(int fd, void *data, size_t size);
-            bool OpenDir(Directory& dir);
-            bool CloseDir(Directory& dir);
-            int CloseFd(int fd);
-            bool GetFileSize(const std::string& path, size_t& size);
+            int Write(FileIntr& file,  const void *data, size_t size);
+            int Read(FileIntr& file,  void *data, size_t size);
+            bool Open(DirectoryIntr& dir);
+            bool Close(DirectoryIntr& dir);
+            bool Close(FileIntr& file);
+            bool GetFileSize(FileIntr& file, size_t& size);
             int Unlink(const std::string& path);
             int RmDir(const std::string& path);
             int Rename(const std::string& name, const std::string& newname);

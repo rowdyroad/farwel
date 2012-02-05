@@ -18,8 +18,8 @@ namespace FWL {
         private:
             std::string name_;
             FdManager&  fd_manager_;
-            typedef boost::unordered_map<int, File>   Files;
-            typedef boost::unordered_map<int, Directory>     Directories;
+            typedef boost::unordered_map<int, FileIntr>   Files;
+            typedef boost::unordered_map<int, DirectoryIntr>     Directories;
             typedef boost::unordered_map<std::string, NodeIntr> Nodes;
 
             Files           files_;
@@ -28,45 +28,70 @@ namespace FWL {
             std::string     empty_key_;
             const JsonNode& config_;
             LogIntr         log_;
-            int openFile(int fd, const std::string& name, int flags);
+            int openFile(FileIntr& file);
 
         protected:
-            const std::string& GetKey(int fd) const;
             const JsonNode& Config() const { return config_; }
             Log& Logger() { return *log_; }
+            void remove(FileIntr& fd)
+            {
+        	files_.erase(fd->Fd());
+        	nodes_.erase(fd->Name());
+            }
+            
+            void remove(DirectoryIntr& fd)
+            {
+        	dirs_.erase(fd->Fd());
+        	nodes_.erase(fd->Name());
+            }
+            
+            void insert(DirectoryIntr& fd)
+            {
+        	dirs_.insert(std::make_pair(fd->Fd(), fd));
+        	nodes_.insert(std::make_pair(fd->Name(), fd));
+            }
+            
+            void insert(FileIntr& fd)
+            {
+        	files_.insert(std::make_pair(fd->Fd(), fd));
+        	nodes_.insert(std::make_pair(fd->Name(), fd));
+            }
 
         public:
             const std::string& Name() const { return name_; }
-
             Connector(const std::string& name, const JsonNode& config, FdManager& fd_manager, LogIntr log);
-
-            //! --- Files
+            //! -- file
             int Open(const std::string& path, int flags);
             int Write(int fd, const void *data, size_t size);
             int Read(int fd, void *data, size_t size);
             int Close(int fd);
-
-            virtual int Unlink(const std::string& path) = 0;
+            
+            bool GetFileSize(const std::string& name, size_t& size);
+            bool GetFileSize(int fd, size_t& size);
+            int CloseDir(DIR *d);
+            void *OpenDir(const std::string& name);
+    
+	    //! -- noded
+	    virtual int Unlink(const std::string& path) = 0;
             virtual int Rename(const std::string& name, const std::string& path) = 0;
             virtual int MkDir(const std::string& dir, mode_t mode) = 0;
             virtual int RmDir(const std::string& str) = 0;
-            virtual bool GetFileSize(const std::string& name, size_t& size) = 0;
-            bool GetFileSize(int fd, size_t& size);
             virtual blksize_t GetBlockSize() const { return 0xFFFF; }
-
-            void *OpenDir(const std::string& name);
-            virtual struct dirent *ReadDir(DIR *dd);
-            int CloseDir(DIR *dd);
+            virtual struct dirent *ReadDir(DIR *d);
 
         protected:
 
             virtual bool Open(DirectoryIntr& dir)  = 0;
-            virtual bool Close(DirectoryIntr&  dir) = 0;
+            virtual bool Close(DirectoryIntr& dir) = 0;
 
+            virtual int Write(FileIntr& file, const void* data, size_t size) = 0;
+            virtual int Read(FileIntr& file, void* data, size_t size) = 0;
             virtual bool Exists(FileIntr& file)   = 0;
             virtual bool Create(FileIntr& file)   = 0;
             virtual bool Truncate(FileIntr& file) = 0;
             virtual bool Close(FileIntr& file) = 0;
+            
+            virtual bool GetFileSize(FileIntr& file, size_t& size) = 0;
     };
 
     typedef boost::intrusive_ptr<Connector>   ConnectorIntr;
@@ -80,8 +105,3 @@ namespace FWL {
 
     typedef boost::intrusive_ptr<ConnectorFactory>   ConnectorFactoryIntr;
 }
-
-#include "connectors/dummy.h"
-#include "connectors/memory.h"
-#include "connectors/db.h"
-#include "connectors/memcache.h"

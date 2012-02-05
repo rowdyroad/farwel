@@ -39,12 +39,14 @@ namespace FWL {
         : config_file_(config_file)
         , log_(new Log(Log::Info))
     {
-        connector_factories_.insert(std::make_pair("dummy", ConnectorFactoryIntr(new DummyFactory, false)));
-        connector_factories_.insert(std::make_pair("memory", ConnectorFactoryIntr(new MemoryFactory, false)));
-        connector_factories_.insert(std::make_pair("sqldb", ConnectorFactoryIntr(new DbFactory, false)));
-        connector_factories_.insert(std::make_pair("memcache", ConnectorFactoryIntr(new MemcacheFactory, false)));
-        comparer_factories_.insert(std::make_pair("always", ComparerFactoryIntr(new AlwaysFactory, false)));
-        comparer_factories_.insert(std::make_pair("regexp", ComparerFactoryIntr(new RegexpFactory, false)));
+//        connector_factories_.insert(std::make_pair("dummy", ConnectorFactoryIntr(new DummyFactory, false)));
+//        connector_factories_.insert(std::make_pair("memory", ConnectorFactoryIntr(new MemoryFactory, false)));
+//        connector_factories_.insert(std::make_pair("sqldb", ConnectorFactoryIntr(new DbFactory, false)));
+//        connector_factories_.insert(std::make_pair("memcache", ConnectorFactoryIntr(new MemcacheFactory, false)));
+//        comparer_factories_.insert(std::make_pair("always", ComparerFactoryIntr(new AlwaysFactory, false)));
+//        comparer_factories_.insert(std::make_pair("regexp", ComparerFactoryIntr(new RegexpFactory, false)));
+	createComparers();
+	createConnectors();
         Logger().RegisterSink("stderr", stderr);
         Logger().RegisterSink("stdout", stdout);
         LoadConfig();

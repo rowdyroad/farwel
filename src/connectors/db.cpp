@@ -13,14 +13,14 @@ namespace FWL {
         return *session_;
     }
 
-    bool Db::Exists(int fd, const std::string& key)
+    bool Db::Exists(FileIntr& file)
     {
         static const std::string query = (boost::format("select count(*) from `%1%` where `%2%` = :key") % table_name_ % key_column_).str();
 
         try {
-            Logger().Dbg("Query: %s (key = %s)", query.c_str(), key.c_str());
+            Logger().Dbg("Query: %s (key = %s)", query.c_str(), file->Name().c_str());
             int count = 0;
-            Session() << query, soci::use(key), soci::into(count);
+            Session() << query, soci::use(file->Name()), soci::into(count);
             return count > 0;
         } catch (const std::exception& e) {
             Logger().Err("Exists:%s", e.what());
@@ -28,13 +28,13 @@ namespace FWL {
         }
     }
 
-    bool Db::Create(int fd, const std::string& key)
+    bool Db::Create(FileIntr& file)
     {
         static const std::string query = (boost::format("insert into `%1%` (`%2%`,`%3%`,`%4%`) value(:key,'',:parent)") % table_name_ % key_column_ % value_column_ % parent_column_).str();
 
         try {
-            Logger().Dbg("Query:%s - key:%s / parent: %s\n ", query.c_str(), key.c_str(), Path::Directory(key).c_str());
-            Session() << query, soci::use(key), soci::use(Path::Directory(key));
+            Logger().Dbg("Query:%s - key:%s / parent: %s\n ", query.c_str(), file->Name().c_str(), Path::Directory(file->Name()).c_str());
+            Session() << query, soci::use(file->Name()), soci::use(Path::Directory(file->Name()));
             return true;
         } catch (const soci::soci_error& e) {
             Logger().Err("Create: %s", e.what());
@@ -42,13 +42,13 @@ namespace FWL {
         }
     }
 
-    bool Db::Truncate(int fd, const std::string& key)
+    bool Db::Truncate(FileIntr& file)
     {
         static const std::string query = (boost::format("update `%1%` set `%3%` = '' where `%2%` = :key ") % table_name_ % key_column_ % value_column_).str();
 
         try {
             Logger().Dbg("Query:%s\n", query.c_str());
-            soci::statement st((Session().prepare << query, soci::use(key)));
+            soci::statement st((Session().prepare << query, soci::use(file->Name())));
             st.execute();
             return st.get_affected_rows();
         } catch (const soci::soci_error& e) {
@@ -179,37 +179,27 @@ namespace FWL {
 
     int Db::MkDir(const std::string& path, mode_t mode)
     {
-        return Open(path, O_CREAT);
+        return Connector::Open(path, O_CREAT);
     }
 
-    bool Db::CloseDir(Directory& dir)
+    bool Db::Close(DirectoryIntr& dir)
     {
         return true;
     }
-
-    int Db::Write(int fd, const void *data, size_t size)
+    
+    int Db::Write(FileIntr& file,const void *data, size_t size)
     {
-        Logger().Dbg("Write: %d\n", fd);
-        const std::string& key = GetKey(fd);
-        if (key.empty()) {
-            return -1;
-        }
-
-        if (!append(key, std::string((const char *)data, size))) {
+        Logger().Dbg("Write: %d\n", file->Fd());
+        if (!append(file->Name(), std::string((const char *)data, size))) {
             return -1;
         }
         return size;
     }
 
-    int Db::Read(int fd, void *data, size_t size)
+    int Db::Read(FileIntr& file,void *data, size_t size)
     {
-        const std::string& key = GetKey(fd);
-
-        if (key.empty()) {
-            return -1;
-        }
-        std::string str;
-        if (!read(key, str)) {
+	std::string str;
+        if (!read(file->Name(), str)) {
             return -1;
         }
         size_t msize = std::min(size, str.size());
@@ -217,19 +207,19 @@ namespace FWL {
         return msize;
     }
 
-    bool Db::OpenDir(Directory& dir)
+    bool Db::Open(DirectoryIntr& dir)
     {
-        return readdir(dir.Name(), dir.Files());
+        return readdir(dir->Name(), dir->Files());
     }
 
-    int Db::CloseFd(int fd)
+    bool Db::Close(FileIntr& file)
     {
         return 0;
     }
 
-    bool Db::GetFileSize(const std::string& path, size_t& size)
+    bool Db::GetFileSize(FileIntr& file, size_t& size)
     {
-        return length(path, size);
+        return length(file->Name(), size);
     }
 
     int Db::Unlink(const std::string& path)

@@ -4,16 +4,6 @@ extern "C" {
 #include <errno.h>
 }
 namespace FWL {
-    const std::string& Connector::GetKey(int fd) const
-    {
-        Keys::const_iterator it = keys_.find(fd);
-
-        if (it == keys_.end()) {
-            return empty_key_;
-        }
-        return it->second;
-    }
-
     Connector::Connector(const std::string& name, const JsonNode& config, FdManager& fd_manager, LogIntr log)
         : name_(name)
         , fd_manager_(fd_manager)
@@ -41,12 +31,12 @@ namespace FWL {
         }
     }
 
-    int Connector::openFile(FileIntr& file, int flags)
+    int Connector::openFile(FileIntr& file)
     {
-        bool creat = (bool)(flags & O_CREAT);
+        bool creat = (bool)(file->Flags() & O_CREAT);
         bool exist = Exists(file);         //! \todo: optimize it
 
-        Logger().Dbg("%d %d - %d %d\n", fd, flags, creat, exist);
+        Logger().Dbg("%d %d - %d %d\n", file->Fd(), file->Flags(), creat, exist);
         if (!creat && !exist) {
             Logger().Dbg("Not for create and not exists");
             errno = ENOENT;
@@ -60,38 +50,37 @@ namespace FWL {
                     errno = EACCES;
                     return -1;
                 }
-                return fd;
+                return file->Fd();
             } else {
                 Logger().Dbg("For create and exists");
-                if (flags & O_EXCL) {
+                if (file->Flags() & O_EXCL) {
                     Logger().Dbg("Check for exists");
                     errno = EEXIST;
                     return -1;
                 }
-                if (flags & O_TRUNC) {
+                if (file->Flags() & O_TRUNC) {
                     Logger().Dbg("Need to trunc");
                     if (!Truncate(file)) {
                         Logger().Dbg("Trunc error");
                         errno = EACCES;
                         return -1;
                     }
-                    return fd;
+                    return file->Fd();
                 }
             }
         }
-        return fd;
+        return file->Fd();
     }
 
     int Connector::Open(const std::string& path, int flags)
     {
-        FileIntr file(new File(fd_manager_.Get(this), path));
-        int ret = openFile(file, flags);
+        FileIntr file(new File(fd_manager_.Get(this), path, flags));
+        int ret = openFile(file);
         if (ret < 0) {
-            fd_manager_.Release(fd, this);
+            fd_manager_.Release(file->Fd(), this);
         }
-
-        files_.insert(std::make_pair(fd, file));
-        nodes_.insert(std::make_pair(path, file));
+        
+        insert(file);
         return ret;
     }
 
@@ -102,14 +91,12 @@ namespace FWL {
 	    return -1;
 	}
 	
-        int r = Close(it->second);
-        if (r < 0) {
-            return -1;
+        if (!Close(it->second)) {
+    	    return -1;
         }
         fd_manager_.Release(fd, this);
-        nodes_.erase(it->second.Name());
-        files_.erase(it);
-        return r;
+        remove(it->second);
+        return 0;
     }
 
     struct dirent *Connector::ReadDir(DIR *dd)
@@ -118,7 +105,7 @@ namespace FWL {
         if (it == dirs_.end()) {
             return NULL;
         }
-        return it->second.Read();
+        return it->second->Read();
     }
 
     void *Connector::OpenDir(const std::string& name)
@@ -128,7 +115,27 @@ namespace FWL {
             fd_manager_.Release(dir->Fd(), this);
             return NULL;
         }
-        return (void *)&(dirs_.insert(std::make_pair(dir.Fd(), dir)).first->first);
+        insert(dir);
+        return (void*)dir.get();
+    }
+    
+    int Connector::Write(int fd, const void* data, size_t size)
+    {
+	Files::iterator it = files_.find(fd);
+	if (it == files_.end()) {
+	    return -1;
+	}
+	
+	return Write(it->second, data, size);
+    }
+    
+    int Connector::Read(int fd, void* data, size_t size)
+    {
+	Files::iterator it = files_.find(fd);
+	if (it == files_.end()) {
+	    return -1;
+	}
+	return Read(it->second, data, size);
     }
 
     int Connector::CloseDir(DIR *dd)
@@ -139,9 +146,9 @@ namespace FWL {
             return -1;
         }
 
-        if (CloseDir(it->second)) {
+        if (Close(it->second)) {
             fd_manager_.Release(it->first, this);
-            dirs_.erase(it);
+            remove(it->second);
             return 0;
         }
         return -1;
@@ -149,9 +156,9 @@ namespace FWL {
 
     bool Connector::GetFileSize(int fd, size_t& size)
     {
-        Keys::const_iterator it = keys_.find(fd);
+        Files::iterator it = files_.find(fd);
 
-        if (it == keys_.end()) {
+        if (it == files_.end()) {
             return false;
         }
         return GetFileSize(it->second, size);

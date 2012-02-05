@@ -7,7 +7,10 @@
 #include "connector.h"
 #include "fdmanager.h"
 #include "log.h"
-
+#include "connectors.h"
+extern "C" {
+#include <ctype.h>
+}
 namespace FWL {
     class Main
     {
@@ -34,6 +37,28 @@ namespace FWL {
         FdManager   fd_manager_;
         Locations   locations_;
         LogIntr     log_;
+        
+        std::string toLower(const std::string& src)
+        {
+    	    std::string str;
+    	    str.resize(src.size());
+    	    for (size_t i = 0;i < src.size(); ++i) {
+    		str[i] = ::tolower(src[i]);
+    	    }
+    	    return str;
+        }
+        void addConnector(const std::string& name, ConnectorFactoryIntr factory)
+        {
+    	    connector_factories_.insert(std::make_pair(toLower(name),factory));
+        }
+        void addComparer(const std::string& name, ComparerFactoryIntr factory)
+        {
+    	    comparer_factories_.insert(std::make_pair(toLower(name),factory));
+        }
+        
+        void createConnectors();
+        void createComparers();
+        
         public:
             Log& Logger() const;
             Main(const std::string& config_file);

@@ -1,5 +1,5 @@
 #pragma once
-
+#include <boost/intrusive_ptr.hpp>
 extern "C" {
 #include <dirent.h>
 }
@@ -15,8 +15,8 @@ namespace FWL {
 	    int fd_;
 	    std::string name_;
 	public:
-	    Node(int fd_, const std::string& name)
-		: fd(fd_)
+	    Node(int fd, const std::string& name)
+		: fd_(fd)
 		, name_(name)
 	    {}
 	    const std::string& Name() const { return name_; }
